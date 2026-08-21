@@ -34,9 +34,18 @@ jobs:
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
         run: python main.py
 
+      - name: Check generated video
+        run: |
+          if [ ! -f "short.mp4" ]; then
+            echo "ERROR: short.mp4 was not created."
+            exit 1
+          fi
+          ls -lh short.mp4
+          file short.mp4
+
       - name: Save generated Short
         uses: actions/upload-artifact@v4
         with:
           name: generated-short
           path: short.mp4
-          if-no-files-found: ignore
+          if-no-files-found: error
