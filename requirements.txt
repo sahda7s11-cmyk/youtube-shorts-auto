@@ -1,3 +1,7 @@
 google-api-python-client
 google-auth-oauthlib
 google-auth-httplib2
+edge-tts
+Pillow
+arabic-reshaper
+python-bidi
