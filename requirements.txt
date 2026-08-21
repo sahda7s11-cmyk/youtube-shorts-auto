@@ -6,3 +6,4 @@ Pillow
 arabic-reshaper
 python-bidi
 moviepy
+requests
