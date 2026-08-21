@@ -9,9 +9,6 @@ import edge_tts
 
 PEXELS_API_KEY = os.getenv("PEXELS_API_KEY")
 
-VIDEO_WIDTH = 1080
-VIDEO_HEIGHT = 1920
-
 OUTPUT_VIDEO = Path("short.mp4")
 VOICE_FILE = Path("voice.mp3")
 WORK_DIR = Path("clips")
@@ -121,7 +118,11 @@ def create_voice(text):
         communicate = edge_tts.Communicate(
             text,
             "ar-SA-HamedNeural",
+            rate="-8%",
+            volume="+0%",
+            pitch="+2Hz",
         )
+
         await communicate.save(str(VOICE_FILE))
 
     asyncio.run(generate())
@@ -133,10 +134,11 @@ def create_video_with_ffmpeg(clips):
     with open(concat_file, "w", encoding="utf-8") as file:
         for clip in clips:
             absolute_path = clip.resolve()
+
             file.write(
-                "file '" +
-                str(absolute_path).replace("'", "'\\''") +
-                "'\n"
+                "file '"
+                + str(absolute_path).replace("'", "'\\''")
+                + "'\n"
             )
 
     silent_video = WORK_DIR / "silent.mp4"
@@ -225,7 +227,9 @@ def main():
     for index, url in enumerate(selected):
         destination = WORK_DIR / f"clip_{index}.mp4"
 
-        print(f"Downloading clip {index + 1}/{len(selected)}")
+        print(
+            f"Downloading clip {index + 1}/{len(selected)}"
+        )
 
         download_video(url, destination)
 
