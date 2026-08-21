@@ -32,3 +32,9 @@ jobs:
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
         run: python main.py
+
+      - name: Save generated Short
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-short
+          path: short.mp4
