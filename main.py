@@ -1,104 +1,38 @@
-import asyncio
-from pathlib import Path
+import os
+import requests
 
-import edge_tts
-from PIL import Image, ImageDraw, ImageFont
-from moviepy import AudioFileClip, ImageClip
+api_key = os.getenv("PEXELS_API_KEY")
 
-TEXT = (
-    "هل تعلم أن بعض السيارات الحديثة تستطيع تحديث أنظمتها "
-    "وبرامجها عن بُعد دون الحاجة إلى زيارة مركز الصيانة؟ "
-    "هذه التقنية أصبحت جزءًا مهمًا من تطور السيارات الذكية."
+if not api_key:
+    raise RuntimeError("PEXELS_API_KEY is missing")
+
+url = "https://api.pexels.com/v1/videos/search"
+
+params = {
+    "query": "cars",
+    "orientation": "portrait",
+    "per_page": 3,
+}
+
+headers = {
+    "Authorization": api_key
+}
+
+response = requests.get(
+    url,
+    headers=headers,
+    params=params,
+    timeout=30
 )
 
-VOICE = "ar-SA-HamedNeural"
+response.raise_for_status()
 
-AUDIO_FILE = Path("voice.mp3")
-IMAGE_FILE = Path("short.png")
-VIDEO_FILE = Path("short.mp4")
+data = response.json()
 
+videos = data.get("videos", [])
 
-async def create_voice():
-    communicate = edge_tts.Communicate(TEXT, VOICE)
-    await communicate.save(str(AUDIO_FILE))
+print(f"Pexels connection: OK")
+print(f"Videos found: {len(videos)}")
 
-
-def create_image():
-    width, height = 1080, 1920
-
-    image = Image.new("RGB", (width, height), "black")
-    draw = ImageDraw.Draw(image)
-
-    try:
-        font = ImageFont.truetype(
-            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-            58,
-        )
-    except Exception:
-        font = ImageFont.load_default()
-
-    lines = [
-        "هل تعلم؟",
-        "",
-        "بعض السيارات الحديثة",
-        "تستطيع تحديث أنظمتها",
-        "وبرامجها عن بُعد!",
-        "",
-        "هذه التقنية أصبحت",
-        "جزءًا من تطور",
-        "السيارات الذكية."
-    ]
-
-    y = 500
-
-    for line in lines:
-        bbox = draw.textbbox((0, 0), line, font=font)
-        text_width = bbox[2] - bbox[0]
-
-        x = (width - text_width) // 2
-
-        draw.text(
-            (x, y),
-            line,
-            font=font,
-            fill="white",
-        )
-
-        y += 100
-
-    image.save(IMAGE_FILE)
-
-
-def create_video():
-    audio = AudioFileClip(str(AUDIO_FILE))
-
-    video = ImageClip(str(IMAGE_FILE)).with_duration(
-        audio.duration
-    ).with_audio(audio)
-
-    video.write_videofile(
-        str(VIDEO_FILE),
-        fps=30,
-        codec="libx264",
-        audio_codec="aac",
-    )
-
-    audio.close()
-    video.close()
-
-
-async def main():
-    print("Creating Arabic voice...")
-    await create_voice()
-
-    print("Creating vertical image...")
-    create_image()
-
-    print("Creating Short video...")
-    create_video()
-
-    print(f"Video created successfully: {VIDEO_FILE}")
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
+for video in videos:
+    print(video["url"])
