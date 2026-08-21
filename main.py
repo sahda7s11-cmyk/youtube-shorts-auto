@@ -1,28 +1,22 @@
-import os
+import asyncio
+from pathlib import Path
+import edge_tts
 
-print("=== YouTube Shorts Automation ===")
+TEXT = """
+هل تعلم أن بعض السيارات الحديثة تستطيع تحديث أنظمتها وبرامجها
+عن بُعد دون الحاجة إلى زيارة مركز الصيانة؟
+هذه التقنية أصبحت جزءًا مهمًا من تطور السيارات الذكية.
+"""
 
-required = [
-    "GOOGLE_CLIENT_ID",
-    "GOOGLE_CLIENT_SECRET",
-    "YOUTUBE_CLIENT_ID",
-    "YOUTUBE_CLIENT_SECRET",
-    "YOUTUBE_REFRESH_TOKEN",
-]
+OUTPUT = Path("voice.mp3")
 
-missing = []
 
-for name in required:
-    if os.getenv(name):
-        print(f"{name}: OK")
-    else:
-        print(f"{name}: MISSING")
-        missing.append(name)
+async def create_voice():
+    voice = "ar-SA-HamedNeural"
+    communicate = edge_tts.Communicate(TEXT, voice)
+    await communicate.save(str(OUTPUT))
 
-if missing:
-    raise RuntimeError(
-        "Missing GitHub Secrets: " + ", ".join(missing)
-    )
 
-print("All YouTube credentials are available.")
-print("Next step: video generation and upload.")
+asyncio.run(create_voice())
+
+print(f"Voice created: {OUTPUT}")
