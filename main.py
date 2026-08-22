@@ -19,6 +19,9 @@ OUTPUT_VIDEO = Path("short.mp4")
 VOICE_FILE = Path("voice.mp3")
 WORK_DIR = Path("clips")
 
+# ملف الترجمة
+SUBTITLE_FILE = Path("subtitles.ass")
+
 VIDEO_WIDTH = 1080
 VIDEO_HEIGHT = 1920
 
@@ -27,6 +30,7 @@ NUMBER_OF_CLIPS = 8
 
 # مدة كل لقطة تقريبية
 CLIP_DURATION = 6
+
 
 # =========================================================
 # TOPICS
@@ -118,6 +122,9 @@ def clean_previous_files():
 
     if VOICE_FILE.exists():
         VOICE_FILE.unlink()
+
+    if SUBTITLE_FILE.exists():
+        SUBTITLE_FILE.unlink()
 
     if WORK_DIR.exists():
         shutil.rmtree(WORK_DIR)
@@ -249,6 +256,218 @@ def create_voice(text):
     asyncio.run(
         generate()
     )
+
+
+# =========================================================
+# AUDIO DURATION
+# =========================================================
+
+def get_audio_duration():
+
+    command = [
+        "ffprobe",
+        "-v",
+        "error",
+        "-show_entries",
+        "format=duration",
+        "-of",
+        "default=noprint_wrappers=1:nokey=1",
+        str(VOICE_FILE),
+    ]
+
+    result = subprocess.run(
+        command,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        check=True,
+    )
+
+    return float(
+        result.stdout.strip()
+    )
+
+
+# =========================================================
+# SUBTITLE FUNCTIONS
+# =========================================================
+
+def split_text_for_subtitles(text):
+    """
+    يقسم النص إلى أجزاء قصيرة مناسبة للعرض على الشاشة.
+    """
+
+    # تقسيم أولي حسب الجمل
+    sentences = []
+
+    current = ""
+
+    for word in text.split():
+
+        if not current:
+            current = word
+            continue
+
+        # الحد الأقصى لعدد الأحرف في السطر
+        if len(current) + len(word) + 1 <= 34:
+            current += " " + word
+
+        else:
+            sentences.append(current)
+            current = word
+
+    if current:
+        sentences.append(current)
+
+    return sentences
+
+
+def ass_time(seconds):
+    """
+    تحويل الثواني إلى صيغة ASS:
+    H:MM:SS.cc
+    """
+
+    hours = int(seconds // 3600)
+
+    minutes = int(
+        (seconds % 3600) // 60
+    )
+
+    secs = seconds % 60
+
+    whole_seconds = int(secs)
+
+    centiseconds = int(
+        round(
+            (secs - whole_seconds) * 100
+        )
+    )
+
+    if centiseconds >= 100:
+        whole_seconds += 1
+        centiseconds = 0
+
+    if whole_seconds >= 60:
+        minutes += 1
+        whole_seconds = 0
+
+    if minutes >= 60:
+        hours += 1
+        minutes = 0
+
+    return (
+        f"{hours}:"
+        f"{minutes:02d}:"
+        f"{whole_seconds:02d}."
+        f"{centiseconds:02d}"
+    )
+
+
+def create_subtitle_file(text, duration):
+    """
+    إنشاء ترجمة عربية متزامنة تقريبياً مع الصوت.
+    """
+
+    parts = split_text_for_subtitles(text)
+
+    if not parts:
+        return
+
+    total_characters = sum(
+        len(part)
+        for part in parts
+    )
+
+    current_time = 0.0
+
+    # -----------------------------------------------------
+    # شكل الترجمة
+    # -----------------------------------------------------
+
+    ass_header = """[Script Info]
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Arabic,Arial,58,&H00FFFFFF,&H00FFFFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,4,2,2,70,70,300,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+"""
+
+    with open(
+        SUBTITLE_FILE,
+        "w",
+        encoding="utf-8-sig",
+    ) as file:
+
+        file.write(
+            ass_header
+        )
+
+        for index, part in enumerate(parts):
+
+            # مدة هذا الجزء حسب عدد الأحرف
+            if total_characters > 0:
+                part_duration = (
+                    len(part)
+                    /
+                    total_characters
+                ) * duration
+            else:
+                part_duration = (
+                    duration / len(parts)
+                )
+
+            start = current_time
+
+            end = (
+                current_time
+                +
+                part_duration
+            )
+
+            # منع تجاوز مدة الصوت
+            end = min(
+                end,
+                duration
+            )
+
+            # تنظيف بعض الرموز التي قد تسبب مشكلة في ASS
+            subtitle_text = (
+                part
+                .replace(
+                    "\n",
+                    " "
+                )
+                .replace(
+                    "{",
+                    "\\{"
+                )
+                .replace(
+                    "}",
+                    "\\}"
+                )
+            )
+
+            line = (
+                "Dialogue: 0,"
+                f"{ass_time(start)},"
+                f"{ass_time(end)},"
+                "Arabic,,"
+                "0,0,0,,"
+                f"{subtitle_text}\n"
+            )
+
+            file.write(
+                line
+            )
+
+            current_time = end
 
 
 # =========================================================
@@ -398,17 +617,46 @@ def create_silent_video(clips):
 
 
 # =========================================================
-# AUDIO + VIDEO
+# AUDIO + VIDEO + SUBTITLES
 # =========================================================
 
 def create_final_video(
-    silent_video
+    silent_video,
+    text,
 ):
+    """
+    يضيف الصوت والترجمة إلى الفيديو.
 
+    الصوت هو المرجع النهائي للمدة.
     """
-    نستخدم مدة الصوت كمرجع نهائي.
-    بهذا لا ينتهي الصوت قبل الفيديو.
-    """
+
+    # -----------------------------------------------------
+    # معرفة مدة الصوت
+    # -----------------------------------------------------
+
+    audio_duration = get_audio_duration()
+
+    print(
+        f"Audio duration: "
+        f"{audio_duration:.2f} seconds"
+    )
+
+    # -----------------------------------------------------
+    # إنشاء ملف الترجمة
+    # -----------------------------------------------------
+
+    print(
+        "Creating Arabic subtitles..."
+    )
+
+    create_subtitle_file(
+        text,
+        audio_duration
+    )
+
+    # -----------------------------------------------------
+    # إضافة الترجمة والصوت
+    # -----------------------------------------------------
 
     final_command = [
         "ffmpeg",
@@ -426,8 +674,21 @@ def create_final_video(
         "-map",
         "1:a:0",
 
+        # حرق الترجمة داخل الفيديو
+        "-vf",
+        f"ass={SUBTITLE_FILE.as_posix()}",
+
         "-c:v",
-        "copy",
+        "libx264",
+
+        "-preset",
+        "veryfast",
+
+        "-crf",
+        "21",
+
+        "-pix_fmt",
+        "yuv420p",
 
         "-c:a",
         "aac",
@@ -622,15 +883,16 @@ def main():
     )
 
     # -----------------------------------------------------
-    # ADD VOICE
+    # ADD VOICE + SUBTITLES
     # -----------------------------------------------------
 
     print(
-        "Adding synchronized narration..."
+        "Adding narration and subtitles..."
     )
 
     create_final_video(
-        silent_video
+        silent_video,
+        topic["text"]
     )
 
     # -----------------------------------------------------
@@ -660,6 +922,9 @@ def main():
     )
     print(
         f"Size: {file_size:.2f} MB"
+    )
+    print(
+        "Arabic subtitles added"
     )
     print(
         "================================"
