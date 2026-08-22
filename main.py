@@ -8,12 +8,20 @@ from pathlib import Path
 import requests
 import edge_tts
 
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaFileUpload
+
 
 # =========================================================
 # SETTINGS
 # =========================================================
 
 PEXELS_API_KEY = os.getenv("PEXELS_API_KEY")
+
+YOUTUBE_CLIENT_ID = os.getenv("YOUTUBE_CLIENT_ID")
+YOUTUBE_CLIENT_SECRET = os.getenv("YOUTUBE_CLIENT_SECRET")
+YOUTUBE_REFRESH_TOKEN = os.getenv("YOUTUBE_REFRESH_TOKEN")
 
 OUTPUT_VIDEO = Path("short.mp4")
 VOICE_FILE = Path("voice.mp3")
@@ -39,6 +47,7 @@ CLIP_DURATION = 6
 TOPICS = [
     {
         "search": "technology artificial intelligence",
+        "title": "هل تعلم كيف أصبح الذكاء الاصطناعي جزءًا من حياتنا؟",
         "text": (
             "هل تعلم أن الذكاء الاصطناعي أصبح جزءًا من حياتنا اليومية أكثر مما نتوقع؟ "
             "فهو يستخدم اليوم في تحليل كميات ضخمة من المعلومات، ومساعدة الشركات على اتخاذ القرارات، "
@@ -50,6 +59,7 @@ TOPICS = [
     },
     {
         "search": "football stadium players",
+        "title": "هل تعلم كيف أصبحت البيانات جزءًا من كرة القدم؟",
         "text": (
             "هل تعلم أن كرة القدم الحديثة أصبحت تعتمد على البيانات بشكل كبير؟ "
             "فالفرق المحترفة لا تكتفي بمشاهدة المباراة فقط، "
@@ -61,6 +71,7 @@ TOPICS = [
     },
     {
         "search": "modern cars driving road",
+        "title": "هل تعلم أن السيارة الحديثة أصبحت جهازًا ذكيًا؟",
         "text": (
             "هل تعلم أن السيارة الحديثة أصبحت أقرب إلى جهاز ذكي متحرك؟ "
             "فالعديد من السيارات الجديدة تحتوي على أنظمة تستطيع مراقبة الطريق، "
@@ -71,6 +82,7 @@ TOPICS = [
     },
     {
         "search": "science laboratory technology",
+        "title": "لماذا تبدأ الاكتشافات العلمية بسؤال بسيط؟",
         "text": (
             "من المثير للاهتمام أن كثيرًا من الاكتشافات العلمية بدأت بملاحظة بسيطة جدًا. "
             "فالعلماء لا يبحثون دائمًا عن إجابة جاهزة، بل يبدأون غالبًا بسؤال: لماذا يحدث هذا؟ "
@@ -81,6 +93,7 @@ TOPICS = [
     },
     {
         "search": "modern city night people",
+        "title": "كم نظامًا يعمل خلف المدن الحديثة؟",
         "text": (
             "هل فكرت يومًا في كمية الأنظمة التي تعمل خلف المدن الحديثة؟ "
             "إشارات المرور، وشبكات الاتصال، وأنظمة المواصلات، والخدمات الرقمية، "
@@ -106,8 +119,26 @@ def run_command(command):
 
 
 def check_environment():
+
     if not PEXELS_API_KEY:
-        raise RuntimeError("PEXELS_API_KEY is missing")
+        raise RuntimeError(
+            "PEXELS_API_KEY is missing"
+        )
+
+    if not YOUTUBE_CLIENT_ID:
+        raise RuntimeError(
+            "YOUTUBE_CLIENT_ID is missing"
+        )
+
+    if not YOUTUBE_CLIENT_SECRET:
+        raise RuntimeError(
+            "YOUTUBE_CLIENT_SECRET is missing"
+        )
+
+    if not YOUTUBE_REFRESH_TOKEN:
+        raise RuntimeError(
+            "YOUTUBE_REFRESH_TOKEN is missing"
+        )
 
     WORK_DIR.mkdir(
         exist_ok=True
@@ -115,7 +146,10 @@ def check_environment():
 
 
 def clean_previous_files():
-    print("Cleaning previous files...")
+
+    print(
+        "Cleaning previous files..."
+    )
 
     if OUTPUT_VIDEO.exists():
         OUTPUT_VIDEO.unlink()
@@ -139,7 +173,10 @@ def clean_previous_files():
 # =========================================================
 
 def search_pexels(query):
-    url = "https://api.pexels.com/v1/videos/search"
+
+    url = (
+        "https://api.pexels.com/v1/videos/search"
+    )
 
     headers = {
         "Authorization": PEXELS_API_KEY
@@ -169,6 +206,7 @@ def search_pexels(query):
 
 
 def choose_video_file(video):
+
     files = video.get(
         "video_files",
         []
@@ -177,6 +215,7 @@ def choose_video_file(video):
     usable = []
 
     for file in files:
+
         width = file.get("width") or 0
         height = file.get("height") or 0
         link = file.get("link")
@@ -184,11 +223,11 @@ def choose_video_file(video):
         if not link:
             continue
 
-        # نفضل الفيديو العمودي
         if height >= width and width >= 500:
             usable.append(file)
 
     if usable:
+
         return max(
             usable,
             key=lambda x:
@@ -197,8 +236,8 @@ def choose_video_file(video):
                 (x.get("height") or 0)
         )
 
-    # إذا لم نجد عموديًا نستخدم أفضل ملف متاح
     if files:
+
         return max(
             files,
             key=lambda x:
@@ -210,8 +249,14 @@ def choose_video_file(video):
     return None
 
 
-def download_video(url, destination):
-    print(f"Downloading: {destination}")
+def download_video(
+    url,
+    destination
+):
+
+    print(
+        f"Downloading: {destination}"
+    )
 
     response = requests.get(
         url,
@@ -229,6 +274,7 @@ def download_video(url, destination):
         for chunk in response.iter_content(
             chunk_size=1024 * 1024
         ):
+
             if chunk:
                 file.write(chunk)
 
@@ -293,11 +339,7 @@ def get_audio_duration():
 # =========================================================
 
 def split_text_for_subtitles(text):
-    """
-    يقسم النص إلى أجزاء قصيرة مناسبة للعرض على الشاشة.
-    """
 
-    # تقسيم أولي حسب الجمل
     sentences = []
 
     current = ""
@@ -305,30 +347,44 @@ def split_text_for_subtitles(text):
     for word in text.split():
 
         if not current:
+
             current = word
+
             continue
 
-        # الحد الأقصى لعدد الأحرف في السطر
-        if len(current) + len(word) + 1 <= 34:
+        if (
+            len(current)
+            +
+            len(word)
+            +
+            1
+            <= 34
+        ):
+
             current += " " + word
 
         else:
-            sentences.append(current)
+
+            sentences.append(
+                current
+            )
+
             current = word
 
     if current:
-        sentences.append(current)
+
+        sentences.append(
+            current
+        )
 
     return sentences
 
 
 def ass_time(seconds):
-    """
-    تحويل الثواني إلى صيغة ASS:
-    H:MM:SS.cc
-    """
 
-    hours = int(seconds // 3600)
+    hours = int(
+        seconds // 3600
+    )
 
     minutes = int(
         (seconds % 3600) // 60
@@ -336,23 +392,30 @@ def ass_time(seconds):
 
     secs = seconds % 60
 
-    whole_seconds = int(secs)
+    whole_seconds = int(
+        secs
+    )
 
     centiseconds = int(
         round(
-            (secs - whole_seconds) * 100
+            (secs - whole_seconds)
+            *
+            100
         )
     )
 
     if centiseconds >= 100:
+
         whole_seconds += 1
         centiseconds = 0
 
     if whole_seconds >= 60:
+
         minutes += 1
         whole_seconds = 0
 
     if minutes >= 60:
+
         hours += 1
         minutes = 0
 
@@ -364,12 +427,14 @@ def ass_time(seconds):
     )
 
 
-def create_subtitle_file(text, duration):
-    """
-    إنشاء ترجمة عربية متزامنة تقريبياً مع الصوت.
-    """
+def create_subtitle_file(
+    text,
+    duration
+):
 
-    parts = split_text_for_subtitles(text)
+    parts = split_text_for_subtitles(
+        text
+    )
 
     if not parts:
         return
@@ -380,10 +445,6 @@ def create_subtitle_file(text, duration):
     )
 
     current_time = 0.0
-
-    # -----------------------------------------------------
-    # شكل الترجمة
-    # -----------------------------------------------------
 
     ass_header = """[Script Info]
 ScriptType: v4.00+
@@ -409,18 +470,22 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             ass_header
         )
 
-        for index, part in enumerate(parts):
+        for part in parts:
 
-            # مدة هذا الجزء حسب عدد الأحرف
             if total_characters > 0:
+
                 part_duration = (
                     len(part)
                     /
                     total_characters
                 ) * duration
+
             else:
+
                 part_duration = (
-                    duration / len(parts)
+                    duration
+                    /
+                    len(parts)
                 )
 
             start = current_time
@@ -431,13 +496,11 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                 part_duration
             )
 
-            # منع تجاوز مدة الصوت
             end = min(
                 end,
                 duration
             )
 
-            # تنظيف بعض الرموز التي قد تسبب مشكلة في ASS
             subtitle_text = (
                 part
                 .replace(
@@ -479,12 +542,7 @@ def prepare_clip(
     output_file,
     duration,
 ):
-    """
-    يحول كل لقطة إلى فيديو عمودي موحد.
-    يتم استخدام crop بدل تمديد الصورة حتى لا يبدو الفيديو مشوهًا.
-    """
 
-    # بداية عشوائية بسيطة للقطعة
     start_time = random.uniform(
         0,
         1.5
@@ -539,7 +597,10 @@ def prepare_clip(
 
 def create_concat_file(clips):
 
-    concat_file = WORK_DIR / "concat.txt"
+    concat_file = (
+        WORK_DIR /
+        "concat.txt"
+    )
 
     with open(
         concat_file,
@@ -549,7 +610,9 @@ def create_concat_file(clips):
 
         for clip in clips:
 
-            absolute_path = clip.resolve()
+            absolute_path = (
+                clip.resolve()
+            )
 
             safe_path = str(
                 absolute_path
@@ -567,8 +630,10 @@ def create_concat_file(clips):
 
 def create_silent_video(clips):
 
-    concat_file = create_concat_file(
-        clips
+    concat_file = (
+        create_concat_file(
+            clips
+        )
     )
 
     silent_video = (
@@ -624,26 +689,15 @@ def create_final_video(
     silent_video,
     text,
 ):
-    """
-    يضيف الصوت والترجمة إلى الفيديو.
 
-    الصوت هو المرجع النهائي للمدة.
-    """
-
-    # -----------------------------------------------------
-    # معرفة مدة الصوت
-    # -----------------------------------------------------
-
-    audio_duration = get_audio_duration()
+    audio_duration = (
+        get_audio_duration()
+    )
 
     print(
         f"Audio duration: "
         f"{audio_duration:.2f} seconds"
     )
-
-    # -----------------------------------------------------
-    # إنشاء ملف الترجمة
-    # -----------------------------------------------------
 
     print(
         "Creating Arabic subtitles..."
@@ -653,10 +707,6 @@ def create_final_video(
         text,
         audio_duration
     )
-
-    # -----------------------------------------------------
-    # إضافة الترجمة والصوت
-    # -----------------------------------------------------
 
     final_command = [
         "ffmpeg",
@@ -674,7 +724,6 @@ def create_final_video(
         "-map",
         "1:a:0",
 
-        # حرق الترجمة داخل الفيديو
         "-vf",
         f"ass={SUBTITLE_FILE.as_posix()}",
 
@@ -721,6 +770,126 @@ def create_final_video(
 
 
 # =========================================================
+# YOUTUBE UPLOAD
+# =========================================================
+
+def upload_to_youtube(
+    title,
+    description,
+):
+
+    print()
+    print(
+        "================================"
+    )
+    print(
+        "Uploading Short to YouTube..."
+    )
+    print(
+        "================================"
+    )
+
+    scopes = [
+        "https://www.googleapis.com/auth/youtube.upload"
+    ]
+
+    credentials = Credentials(
+        token=None,
+        refresh_token=YOUTUBE_REFRESH_TOKEN,
+        token_uri="https://oauth2.googleapis.com/token",
+        client_id=YOUTUBE_CLIENT_ID,
+        client_secret=YOUTUBE_CLIENT_SECRET,
+        scopes=scopes,
+    )
+
+    youtube = build(
+        "youtube",
+        "v3",
+        credentials=credentials
+    )
+
+    body = {
+        "snippet": {
+            "title": title,
+            "description": description,
+            "categoryId": "22",
+        },
+        "status": {
+            # أول تجربة: خاص
+            "privacyStatus": "private",
+
+            # نحدد أنه محتوى عادي وليس مخصصًا للأطفال
+            "selfDeclaredMadeForKids": False,
+        },
+    }
+
+    media = MediaFileUpload(
+        str(OUTPUT_VIDEO),
+        mimetype="video/mp4",
+        resumable=True,
+    )
+
+    request = youtube.videos().insert(
+        part="snippet,status",
+        body=body,
+        media_body=media,
+    )
+
+    response = None
+
+    while response is None:
+
+        status, response = (
+            request.next_chunk()
+        )
+
+        if status:
+
+            progress = int(
+                status.progress()
+                * 100
+            )
+
+            print(
+                f"Upload progress: "
+                f"{progress}%"
+            )
+
+    video_id = response.get(
+        "id"
+    )
+
+    if not video_id:
+
+        raise RuntimeError(
+            "YouTube upload completed "
+            "but no video ID was returned."
+        )
+
+    print()
+    print(
+        "================================"
+    )
+    print(
+        "YOUTUBE UPLOAD SUCCESS"
+    )
+    print(
+        f"Video ID: {video_id}"
+    )
+    print(
+        "Privacy: PRIVATE"
+    )
+    print(
+        f"https://www.youtube.com/watch?v={video_id}"
+    )
+    print(
+        "================================"
+    )
+
+    return video_id
+
+
+# =========================================================
 # MAIN
 # =========================================================
 
@@ -730,7 +899,10 @@ def main():
 
     clean_previous_files()
 
+    # -----------------------------------------------------
     # اختيار موضوع
+    # -----------------------------------------------------
+
     topic = random.choice(
         TOPICS
     )
@@ -753,6 +925,7 @@ def main():
     )
 
     if not videos:
+
         raise RuntimeError(
             "No Pexels videos found"
         )
@@ -778,8 +951,10 @@ def main():
         if video_id in used_ids:
             continue
 
-        video_file = choose_video_file(
-            video
+        video_file = (
+            choose_video_file(
+                video
+            )
         )
 
         if not video_file:
@@ -793,12 +968,18 @@ def main():
             video_id
         )
 
-        if len(selected) >= NUMBER_OF_CLIPS:
+        if (
+            len(selected)
+            >=
+            NUMBER_OF_CLIPS
+        ):
             break
 
     if len(selected) < 4:
+
         raise RuntimeError(
-            "Not enough usable video files found"
+            "Not enough usable "
+            "video files found"
         )
 
     print(
@@ -878,8 +1059,10 @@ def main():
         "Joining clips..."
     )
 
-    silent_video = create_silent_video(
-        prepared_clips
+    silent_video = (
+        create_silent_video(
+            prepared_clips
+        )
     )
 
     # -----------------------------------------------------
@@ -896,10 +1079,11 @@ def main():
     )
 
     # -----------------------------------------------------
-    # RESULT
+    # CHECK VIDEO
     # -----------------------------------------------------
 
     if not OUTPUT_VIDEO.exists():
+
         raise RuntimeError(
             "Video was not created"
         )
@@ -915,7 +1099,7 @@ def main():
         "================================"
     )
     print(
-        "SUCCESS"
+        "VIDEO CREATED SUCCESSFULLY"
     )
     print(
         f"Video: {OUTPUT_VIDEO}"
@@ -930,6 +1114,26 @@ def main():
         "================================"
     )
 
+    # -----------------------------------------------------
+    # YOUTUBE UPLOAD
+    # -----------------------------------------------------
+
+    description = (
+        topic["text"]
+        +
+        "\n\n"
+        "#Shorts #معلومات #هل_تعلم"
+    )
+
+    upload_to_youtube(
+        topic["title"],
+        description
+    )
+
+
+# =========================================================
+# START
+# =========================================================
 
 if __name__ == "__main__":
     main()
