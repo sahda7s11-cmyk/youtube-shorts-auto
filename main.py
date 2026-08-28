@@ -27,16 +27,12 @@ OUTPUT_VIDEO = Path("short.mp4")
 VOICE_FILE = Path("voice.mp3")
 WORK_DIR = Path("clips")
 
-# ملف الترجمة
 SUBTITLE_FILE = Path("subtitles.ass")
 
 VIDEO_WIDTH = 1080
 VIDEO_HEIGHT = 1920
 
-# عدد اللقطات
 NUMBER_OF_CLIPS = 8
-
-# مدة كل لقطة تقريبية
 CLIP_DURATION = 6
 
 
@@ -815,10 +811,10 @@ def upload_to_youtube(
             "categoryId": "22",
         },
         "status": {
-            # أول تجربة: خاص
-            "privacyStatus": "private",
+            # النشر العام
+            "privacyStatus": "public",
 
-            # نحدد أنه محتوى عادي وليس مخصصًا للأطفال
+            # ليس مخصصًا للأطفال
             "selfDeclaredMadeForKids": False,
         },
     }
@@ -877,7 +873,7 @@ def upload_to_youtube(
         f"Video ID: {video_id}"
     )
     print(
-        "Privacy: PRIVATE"
+        "Privacy: PUBLIC"
     )
     print(
         f"https://www.youtube.com/watch?v={video_id}"
