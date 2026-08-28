@@ -26,14 +26,14 @@ YOUTUBE_REFRESH_TOKEN = os.getenv("YOUTUBE_REFRESH_TOKEN")
 OUTPUT_VIDEO = Path("short.mp4")
 VOICE_FILE = Path("voice.mp3")
 WORK_DIR = Path("clips")
-
 SUBTITLE_FILE = Path("subtitles.ass")
 
 VIDEO_WIDTH = 1080
 VIDEO_HEIGHT = 1920
 
-NUMBER_OF_CLIPS = 8
-CLIP_DURATION = 6
+# أسرع وأكثر حيوية
+NUMBER_OF_CLIPS = 12
+CLIP_DURATION = 2.5
 
 
 # =========================================================
@@ -43,59 +43,52 @@ CLIP_DURATION = 6
 TOPICS = [
     {
         "search": "technology artificial intelligence",
-        "title": "هل تعلم كيف أصبح الذكاء الاصطناعي جزءًا من حياتنا؟",
+        "title": "هل تعلم ماذا يفعل الذكاء الاصطناعي كل يوم؟",
         "text": (
-            "هل تعلم أن الذكاء الاصطناعي أصبح جزءًا من حياتنا اليومية أكثر مما نتوقع؟ "
-            "فهو يستخدم اليوم في تحليل كميات ضخمة من المعلومات، ومساعدة الشركات على اتخاذ القرارات، "
-            "وتطوير التطبيقات والخدمات التي نستخدمها كل يوم. "
-            "والأمر المثير للاهتمام أن تطور هذه التقنية لا يعتمد فقط على سرعة أجهزة الكمبيوتر، "
-            "بل يعتمد أيضًا على قدرتها على فهم الأنماط الموجودة في البيانات. "
-            "ولهذا السبب أصبح الذكاء الاصطناعي من أكثر التقنيات تأثيرًا في العالم."
+            "هل تعلم أن الذكاء الاصطناعي أصبح موجودًا في حياتنا أكثر مما تتوقع؟ "
+            "فهو يستطيع تحليل كميات ضخمة من البيانات، ويساعد في تطوير التطبيقات والخدمات التي نستخدمها يوميًا. "
+            "والأغرب أن كثيرًا من هذه الأنظمة تعمل في الخلفية دون أن نلاحظها. "
+            "ومع تطور التقنية، أصبح الذكاء الاصطناعي واحدًا من أكثر التقنيات تأثيرًا في العالم."
         ),
     },
     {
         "search": "football stadium players",
-        "title": "هل تعلم كيف أصبحت البيانات جزءًا من كرة القدم؟",
+        "title": "كرة القدم لم تعد تعتمد على المهارة فقط!",
         "text": (
             "هل تعلم أن كرة القدم الحديثة أصبحت تعتمد على البيانات بشكل كبير؟ "
-            "فالفرق المحترفة لا تكتفي بمشاهدة المباراة فقط، "
-            "بل تستخدم أنظمة تحليل متقدمة لدراسة حركة اللاعبين وسرعة الجري ودقة التمرير. "
-            "ويمكن للمدربين استخدام هذه المعلومات لمعرفة نقاط القوة والضعف، "
-            "وتحسين طريقة اللعب قبل المباريات القادمة. "
-            "ولهذا أصبحت البيانات عنصرًا مهمًا في كرة القدم الحديثة إلى جانب المهارة والخبرة."
+            "فالفرق المحترفة تراقب حركة اللاعبين وسرعة الجري ودقة التمرير. "
+            "ثم يستخدم المدربون هذه المعلومات لمعرفة نقاط القوة والضعف. "
+            "ولهذا أصبحت البيانات جزءًا مهمًا من كرة القدم الحديثة."
         ),
     },
     {
         "search": "modern cars driving road",
-        "title": "هل تعلم أن السيارة الحديثة أصبحت جهازًا ذكيًا؟",
+        "title": "سيارتك أصبحت أذكى مما تتخيل!",
         "text": (
             "هل تعلم أن السيارة الحديثة أصبحت أقرب إلى جهاز ذكي متحرك؟ "
-            "فالعديد من السيارات الجديدة تحتوي على أنظمة تستطيع مراقبة الطريق، "
-            "وتنبيه السائق عند وجود خطر، ومساعدته في مواقف مختلفة أثناء القيادة. "
-            "وتستخدم هذه الأنظمة مجموعة من الكاميرات والمستشعرات لمعرفة ما يحدث حول السيارة. "
-            "ومع استمرار تطور التقنية، أصبحت أنظمة مساعدة السائق أكثر انتشارًا في السيارات الجديدة."
+            "فبعض السيارات تستطيع مراقبة الطريق وتنبيه السائق عند وجود خطر. "
+            "وتستخدم هذه الأنظمة الكاميرات والمستشعرات لمعرفة ما يحدث حول السيارة. "
+            "ومع تطور التقنية أصبحت أنظمة مساعدة السائق أكثر انتشارًا."
         ),
     },
     {
         "search": "science laboratory technology",
-        "title": "لماذا تبدأ الاكتشافات العلمية بسؤال بسيط؟",
+        "title": "لماذا تبدأ الاكتشافات بسؤال بسيط؟",
         "text": (
-            "من المثير للاهتمام أن كثيرًا من الاكتشافات العلمية بدأت بملاحظة بسيطة جدًا. "
-            "فالعلماء لا يبحثون دائمًا عن إجابة جاهزة، بل يبدأون غالبًا بسؤال: لماذا يحدث هذا؟ "
-            "ثم تأتي مرحلة التجارب وجمع البيانات ومقارنة النتائج. "
-            "ومع تطور الأجهزة والتقنيات، أصبح بإمكان العلماء دراسة أشياء كانت مستحيلة المراقبة في الماضي. "
-            "ولهذا فإن الفضول وطرح الأسئلة ما زالا من أهم أسباب التقدم العلمي."
+            "هل تعلم أن كثيرًا من الاكتشافات العلمية بدأت بسؤال بسيط؟ "
+            "العلماء يلاحظون شيئًا غريبًا ثم يسألون: لماذا يحدث هذا؟ "
+            "بعدها تبدأ التجارب وجمع البيانات ومقارنة النتائج. "
+            "ولهذا ما زال الفضول وطرح الأسئلة من أهم أسباب التقدم العلمي."
         ),
     },
     {
         "search": "modern city night people",
-        "title": "كم نظامًا يعمل خلف المدن الحديثة؟",
+        "title": "ماذا يحدث خلف المدن الحديثة؟",
         "text": (
-            "هل فكرت يومًا في كمية الأنظمة التي تعمل خلف المدن الحديثة؟ "
-            "إشارات المرور، وشبكات الاتصال، وأنظمة المواصلات، والخدمات الرقمية، "
-            "كلها تعمل معًا بشكل مستمر حتى تبدو الحياة اليومية طبيعية وسلسة. "
+            "هل فكرت يومًا في عدد الأنظمة التي تعمل خلف المدن الحديثة؟ "
+            "إشارات المرور وشبكات الاتصال والمواصلات والخدمات الرقمية تعمل باستمرار. "
             "والأغرب أن معظم هذه الأنظمة تعمل في الخلفية دون أن نلاحظها. "
-            "ومع زيادة عدد السكان وتطور المدن، أصبحت التقنية عنصرًا أساسيًا في إدارة الحياة اليومية."
+            "ولهذا أصبحت التقنية عنصرًا أساسيًا في إدارة المدن الحديثة."
         ),
     },
 ]
@@ -116,25 +109,19 @@ def run_command(command):
 
 def check_environment():
 
-    if not PEXELS_API_KEY:
-        raise RuntimeError(
-            "PEXELS_API_KEY is missing"
-        )
+    required = {
+        "PEXELS_API_KEY": PEXELS_API_KEY,
+        "YOUTUBE_CLIENT_ID": YOUTUBE_CLIENT_ID,
+        "YOUTUBE_CLIENT_SECRET": YOUTUBE_CLIENT_SECRET,
+        "YOUTUBE_REFRESH_TOKEN": YOUTUBE_REFRESH_TOKEN,
+    }
 
-    if not YOUTUBE_CLIENT_ID:
-        raise RuntimeError(
-            "YOUTUBE_CLIENT_ID is missing"
-        )
+    for name, value in required.items():
 
-    if not YOUTUBE_CLIENT_SECRET:
-        raise RuntimeError(
-            "YOUTUBE_CLIENT_SECRET is missing"
-        )
-
-    if not YOUTUBE_REFRESH_TOKEN:
-        raise RuntimeError(
-            "YOUTUBE_REFRESH_TOKEN is missing"
-        )
+        if not value:
+            raise RuntimeError(
+                f"{name} is missing"
+            )
 
     WORK_DIR.mkdir(
         exist_ok=True
@@ -143,18 +130,16 @@ def check_environment():
 
 def clean_previous_files():
 
-    print(
-        "Cleaning previous files..."
-    )
+    print("Cleaning previous files...")
 
-    if OUTPUT_VIDEO.exists():
-        OUTPUT_VIDEO.unlink()
+    for file in [
+        OUTPUT_VIDEO,
+        VOICE_FILE,
+        SUBTITLE_FILE,
+    ]:
 
-    if VOICE_FILE.exists():
-        VOICE_FILE.unlink()
-
-    if SUBTITLE_FILE.exists():
-        SUBTITLE_FILE.unlink()
+        if file.exists():
+            file.unlink()
 
     if WORK_DIR.exists():
         shutil.rmtree(WORK_DIR)
@@ -170,9 +155,7 @@ def clean_previous_files():
 
 def search_pexels(query):
 
-    url = (
-        "https://api.pexels.com/v1/videos/search"
-    )
+    url = "https://api.pexels.com/v1/videos/search"
 
     headers = {
         "Authorization": PEXELS_API_KEY
@@ -182,7 +165,7 @@ def search_pexels(query):
         "query": query,
         "orientation": "portrait",
         "size": "medium",
-        "per_page": 20,
+        "per_page": 30,
         "locale": "en-US",
     }
 
@@ -286,7 +269,7 @@ def create_voice(text):
         communicate = edge_tts.Communicate(
             text,
             "ar-SA-HamedNeural",
-            rate="-6%",
+            rate="-4%",
             volume="+0%",
             pitch="+0Hz",
         )
@@ -331,13 +314,12 @@ def get_audio_duration():
 
 
 # =========================================================
-# SUBTITLE FUNCTIONS
+# SUBTITLES
 # =========================================================
 
 def split_text_for_subtitles(text):
 
     sentences = []
-
     current = ""
 
     for word in text.split():
@@ -345,17 +327,9 @@ def split_text_for_subtitles(text):
         if not current:
 
             current = word
-
             continue
 
-        if (
-            len(current)
-            +
-            len(word)
-            +
-            1
-            <= 34
-        ):
+        if len(current) + len(word) + 1 <= 30:
 
             current += " " + word
 
@@ -368,7 +342,6 @@ def split_text_for_subtitles(text):
             current = word
 
     if current:
-
         sentences.append(
             current
         )
@@ -378,9 +351,7 @@ def split_text_for_subtitles(text):
 
 def ass_time(seconds):
 
-    hours = int(
-        seconds // 3600
-    )
+    hours = int(seconds // 3600)
 
     minutes = int(
         (seconds % 3600) // 60
@@ -388,15 +359,11 @@ def ass_time(seconds):
 
     secs = seconds % 60
 
-    whole_seconds = int(
-        secs
-    )
+    whole_seconds = int(secs)
 
     centiseconds = int(
         round(
-            (secs - whole_seconds)
-            *
-            100
+            (secs - whole_seconds) * 100
         )
     )
 
@@ -428,9 +395,7 @@ def create_subtitle_file(
     duration
 ):
 
-    parts = split_text_for_subtitles(
-        text
-    )
+    parts = split_text_for_subtitles(text)
 
     if not parts:
         return
@@ -468,32 +433,16 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 
         for part in parts:
 
-            if total_characters > 0:
-
-                part_duration = (
-                    len(part)
-                    /
-                    total_characters
-                ) * duration
-
-            else:
-
-                part_duration = (
-                    duration
-                    /
-                    len(parts)
-                )
+            part_duration = (
+                len(part)
+                /
+                total_characters
+            ) * duration
 
             start = current_time
 
-            end = (
-                current_time
-                +
-                part_duration
-            )
-
             end = min(
-                end,
+                current_time + part_duration,
                 duration
             )
 
@@ -544,6 +493,13 @@ def prepare_clip(
         1.5
     )
 
+    # حركة Zoom بسيطة تعطي اللقطة حياة أكثر
+    zoom = random.choice([
+        "1.03",
+        "1.05",
+        "1.07",
+    ])
+
     command = [
         "ffmpeg",
         "-y",
@@ -560,9 +516,13 @@ def prepare_clip(
         "-vf",
         (
             "scale="
-            f"{VIDEO_WIDTH}:{VIDEO_HEIGHT}:"
+            "1215:2160:"
             "force_original_aspect_ratio=increase,"
-            f"crop={VIDEO_WIDTH}:{VIDEO_HEIGHT},"
+            "crop=1080:1920,"
+            f"zoompan=z='{zoom}':"
+            "x='iw/2-(iw/zoom/2)':"
+            "y='ih/2-(ih/zoom/2)':"
+            "d=1,"
             "setsar=1"
         ),
 
@@ -578,7 +538,7 @@ def prepare_clip(
         "veryfast",
 
         "-crf",
-        "21",
+        "20",
 
         "-pix_fmt",
         "yuv420p",
@@ -606,9 +566,7 @@ def create_concat_file(clips):
 
         for clip in clips:
 
-            absolute_path = (
-                clip.resolve()
-            )
+            absolute_path = clip.resolve()
 
             safe_path = str(
                 absolute_path
@@ -657,7 +615,7 @@ def create_silent_video(clips):
         "veryfast",
 
         "-crf",
-        "21",
+        "20",
 
         "-pix_fmt",
         "yuv420p",
@@ -678,7 +636,7 @@ def create_silent_video(clips):
 
 
 # =========================================================
-# AUDIO + VIDEO + SUBTITLES
+# FINAL VIDEO
 # =========================================================
 
 def create_final_video(
@@ -730,7 +688,7 @@ def create_final_video(
         "veryfast",
 
         "-crf",
-        "21",
+        "20",
 
         "-pix_fmt",
         "yuv420p",
@@ -811,7 +769,7 @@ def upload_to_youtube(
             "categoryId": "22",
         },
         "status": {
-            # النشر العام
+            # نشر عام
             "privacyStatus": "public",
 
             # ليس مخصصًا للأطفال
@@ -842,8 +800,7 @@ def upload_to_youtube(
         if status:
 
             progress = int(
-                status.progress()
-                * 100
+                status.progress() * 100
             )
 
             print(
@@ -896,7 +853,7 @@ def main():
     clean_previous_files()
 
     # -----------------------------------------------------
-    # اختيار موضوع
+    # اختيار الموضوع
     # -----------------------------------------------------
 
     topic = random.choice(
@@ -909,7 +866,7 @@ def main():
     )
 
     # -----------------------------------------------------
-    # SEARCH
+    # PEXELS SEARCH
     # -----------------------------------------------------
 
     print(
@@ -931,7 +888,7 @@ def main():
     )
 
     # -----------------------------------------------------
-    # SELECT
+    # SELECT CLIPS
     # -----------------------------------------------------
 
     selected = []
@@ -964,14 +921,10 @@ def main():
             video_id
         )
 
-        if (
-            len(selected)
-            >=
-            NUMBER_OF_CLIPS
-        ):
+        if len(selected) >= NUMBER_OF_CLIPS:
             break
 
-    if len(selected) < 4:
+    if len(selected) < 6:
 
         raise RuntimeError(
             "Not enough usable "
@@ -1023,7 +976,7 @@ def main():
     # -----------------------------------------------------
 
     print(
-        "Preparing realistic Short clips..."
+        "Preparing fast realistic clips..."
     )
 
     prepared_clips = []
@@ -1062,7 +1015,7 @@ def main():
     )
 
     # -----------------------------------------------------
-    # ADD VOICE + SUBTITLES
+    # ADD AUDIO + SUBTITLES
     # -----------------------------------------------------
 
     print(
@@ -1075,7 +1028,7 @@ def main():
     )
 
     # -----------------------------------------------------
-    # CHECK VIDEO
+    # CHECK
     # -----------------------------------------------------
 
     if not OUTPUT_VIDEO.exists():
@@ -1111,7 +1064,7 @@ def main():
     )
 
     # -----------------------------------------------------
-    # YOUTUBE UPLOAD
+    # YOUTUBE
     # -----------------------------------------------------
 
     description = (
