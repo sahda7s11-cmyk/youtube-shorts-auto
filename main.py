@@ -28,77 +28,162 @@ VOICE_FILE = Path("voice.mp3")
 WORK_DIR = Path("clips")
 SUBTITLE_FILE = Path("subtitles.ass")
 
-# Shorts الحقيقي
 VIDEO_WIDTH = 1080
 VIDEO_HEIGHT = 1920
 
-# عدد اللقطات
 NUMBER_OF_CLIPS = 8
-
-# مدة كل لقطة
 CLIP_DURATION = 6
+
+FPS = 30
 
 
 # =========================================================
 # TOPICS
 # =========================================================
+# كرة القدم هي المحتوى الغالب
+# والباقي معلومات عامة متنوعة
+# =========================================================
 
 TOPICS = [
+
+    # -----------------------------------------------------
+    # FOOTBALL 1
+    # -----------------------------------------------------
+
     {
-        "search": "technology artificial intelligence",
-        "title": "هل تعلم كيف أصبح الذكاء الاصطناعي جزءًا من حياتنا؟",
-        "text": (
-            "هل تعلم أن الذكاء الاصطناعي أصبح جزءًا من حياتنا اليومية أكثر مما نتوقع؟ "
-            "فهو يستخدم اليوم في تحليل كميات ضخمة من المعلومات، ومساعدة الشركات على اتخاذ القرارات، "
-            "وتطوير التطبيقات والخدمات التي نستخدمها كل يوم. "
-            "والأمر المثير للاهتمام أن تطور هذه التقنية لا يعتمد فقط على سرعة أجهزة الكمبيوتر، "
-            "بل يعتمد أيضًا على قدرتها على فهم الأنماط الموجودة في البيانات. "
-            "ولهذا السبب أصبح الذكاء الاصطناعي من أكثر التقنيات تأثيرًا في العالم."
-        ),
-    },
-    {
-        "search": "football stadium players",
-        "title": "هل تعلم كيف أصبحت البيانات جزءًا من كرة القدم؟",
+        "search": "football stadium match players",
+        "title": "هل تعلم لماذا أصبحت البيانات مهمة في كرة القدم؟",
         "text": (
             "هل تعلم أن كرة القدم الحديثة أصبحت تعتمد على البيانات بشكل كبير؟ "
-            "فالفرق المحترفة لا تكتفي بمشاهدة المباراة فقط، "
-            "بل تستخدم أنظمة تحليل متقدمة لدراسة حركة اللاعبين وسرعة الجري ودقة التمرير. "
-            "ويمكن للمدربين استخدام هذه المعلومات لمعرفة نقاط القوة والضعف، "
-            "وتحسين طريقة اللعب قبل المباريات القادمة. "
-            "ولهذا أصبحت البيانات عنصرًا مهمًا في كرة القدم الحديثة إلى جانب المهارة والخبرة."
+            "فالفرق المحترفة تتابع حركة اللاعبين، وسرعة الجري، ودقة التمرير، "
+            "وعدد التسديدات، وحتى المساحات التي يتحرك فيها كل لاعب. "
+            "هذه المعلومات تساعد المدربين على معرفة نقاط القوة والضعف، "
+            "ووضع خطط أفضل للمباريات. "
+            "ولهذا أصبحت البيانات اليوم جزءًا مهمًا من كرة القدم الحديثة."
         ),
     },
+
+    # -----------------------------------------------------
+    # FOOTBALL 2
+    # -----------------------------------------------------
+
     {
-        "search": "modern cars driving road",
-        "title": "هل تعلم أن السيارة الحديثة أصبحت جهازًا ذكيًا؟",
+        "search": "football player training stadium",
+        "title": "ماذا يحدث قبل بداية مباراة كرة القدم؟",
         "text": (
-            "هل تعلم أن السيارة الحديثة أصبحت أقرب إلى جهاز ذكي متحرك؟ "
-            "فالعديد من السيارات الجديدة تحتوي على أنظمة تستطيع مراقبة الطريق، "
-            "وتنبيه السائق عند وجود خطر، ومساعدته في مواقف مختلفة أثناء القيادة. "
-            "وتستخدم هذه الأنظمة مجموعة من الكاميرات والمستشعرات لمعرفة ما يحدث حول السيارة. "
-            "ومع استمرار تطور التقنية، أصبحت أنظمة مساعدة السائق أكثر انتشارًا في السيارات الجديدة."
+            "قبل بداية أي مباراة كرة قدم مهمة، لا يقتصر الأمر على دخول اللاعبين إلى الملعب فقط. "
+            "فاللاعبون يستعدون بدنيًا، ويجرون عمليات الإحماء، "
+            "ويستمعون إلى تعليمات المدرب، بينما يقوم الجهاز الفني بمراجعة الخطة. "
+            "وفي المباريات الكبيرة قد يتم تحليل المنافس قبل المباراة بساعات وأيام. "
+            "لهذا فإن ما نراه خلال التسعين دقيقة هو نتيجة استعداد طويل خلف الكواليس."
         ),
     },
+
+    # -----------------------------------------------------
+    # FOOTBALL 3
+    # -----------------------------------------------------
+
     {
-        "search": "science laboratory technology",
-        "title": "لماذا تبدأ الاكتشافات العلمية بسؤال بسيط؟",
+        "search": "football goal goalkeeper save",
+        "title": "لماذا يتحرك حارس المرمى بهذه السرعة؟",
         "text": (
-            "من المثير للاهتمام أن كثيرًا من الاكتشافات العلمية بدأت بملاحظة بسيطة جدًا. "
-            "فالعلماء لا يبحثون دائمًا عن إجابة جاهزة، بل يبدأون غالبًا بسؤال: لماذا يحدث هذا؟ "
-            "ثم تأتي مرحلة التجارب وجمع البيانات ومقارنة النتائج. "
-            "ومع تطور الأجهزة والتقنيات، أصبح بإمكان العلماء دراسة أشياء كانت مستحيلة المراقبة في الماضي. "
-            "ولهذا فإن الفضول وطرح الأسئلة ما زالا من أهم أسباب التقدم العلمي."
+            "هل تساءلت يومًا كيف يستطيع حارس المرمى الاستجابة لتسديدة قوية خلال لحظات؟ "
+            "الحراس يتدربون باستمرار على سرعة رد الفعل، "
+            "وتوقع اتجاه الكرة، والتحرك الصحيح قبل التسديدة. "
+            "كما تساعدهم الخبرة على قراءة وضعية جسم اللاعب المهاجم. "
+            "ولهذا فإن حراسة المرمى ليست مجرد قوة بدنية، بل تعتمد أيضًا على التركيز وسرعة اتخاذ القرار."
         ),
     },
+
+    # -----------------------------------------------------
+    # FOOTBALL 4
+    # -----------------------------------------------------
+
     {
-        "search": "modern city night people",
+        "search": "football fans stadium crowd",
+        "title": "لماذا تبدو ملاعب كرة القدم مختلفة تحت الأضواء؟",
+        "text": (
+            "هل لاحظت كيف تبدو ملاعب كرة القدم مختلفة تمامًا أثناء المباريات الليلية؟ "
+            "الإضاءة القوية لا تساعد اللاعبين والحكام فقط، "
+            "بل تجعل الكاميرات قادرة على تصوير التفاصيل بوضوح من زوايا مختلفة. "
+            "ولهذا تستخدم الملاعب الحديثة أنظمة إضاءة متطورة وموزعة بعناية. "
+            "والنتيجة صورة أوضح للمشاهد وتجربة أفضل داخل الملعب وخارجه."
+        ),
+    },
+
+    # -----------------------------------------------------
+    # FOOTBALL 5
+    # -----------------------------------------------------
+
+    {
+        "search": "football training players running",
+        "title": "كم يركض لاعب كرة القدم أثناء المباراة؟",
+        "text": (
+            "هل تعلم أن لاعب كرة القدم المحترف قد يقطع مسافة كبيرة خلال المباراة؟ "
+            "لكن الجري لا يكون بنفس السرعة طوال الوقت. "
+            "فاللاعب ينتقل بين المشي والجري والركض السريع، "
+            "ويغيّر سرعته حسب مكان الكرة وخطة الفريق. "
+            "ولهذا أصبحت أجهزة التتبع والبيانات مهمة جدًا لمعرفة مستوى المجهود الذي يبذله اللاعب."
+        ),
+    },
+
+    # -----------------------------------------------------
+    # GENERAL 1
+    # -----------------------------------------------------
+
+    {
+        "search": "modern technology city",
         "title": "كم نظامًا يعمل خلف المدن الحديثة؟",
         "text": (
             "هل فكرت يومًا في كمية الأنظمة التي تعمل خلف المدن الحديثة؟ "
             "إشارات المرور، وشبكات الاتصال، وأنظمة المواصلات، والخدمات الرقمية، "
             "كلها تعمل معًا بشكل مستمر حتى تبدو الحياة اليومية طبيعية وسلسة. "
-            "والأغرب أن معظم هذه الأنظمة تعمل في الخلفية دون أن نلاحظها. "
-            "ومع زيادة عدد السكان وتطور المدن، أصبحت التقنية عنصرًا أساسيًا في إدارة الحياة اليومية."
+            "والأغرب أن معظم هذه الأنظمة تعمل في الخلفية دون أن نلاحظها."
+        ),
+    },
+
+    # -----------------------------------------------------
+    # GENERAL 2
+    # -----------------------------------------------------
+
+    {
+        "search": "science laboratory experiment",
+        "title": "لماذا تبدأ الاكتشافات العلمية بسؤال؟",
+        "text": (
+            "الكثير من الاكتشافات العلمية تبدأ بسؤال بسيط جدًا. "
+            "العالم يلاحظ شيئًا غير معتاد، ثم يبدأ في البحث والتجربة وجمع البيانات. "
+            "وبعد ذلك تتم مقارنة النتائج لمعرفة ما إذا كانت الفكرة صحيحة أم لا. "
+            "ولهذا فإن الفضول وطرح الأسئلة من أهم أسباب التقدم العلمي."
+        ),
+    },
+
+    # -----------------------------------------------------
+    # GENERAL 3
+    # -----------------------------------------------------
+
+    {
+        "search": "modern car driving road",
+        "title": "لماذا تحتوي السيارات الحديثة على مستشعرات كثيرة؟",
+        "text": (
+            "السيارات الحديثة تحتوي على عدد كبير من الكاميرات والمستشعرات. "
+            "هذه الأجهزة تساعد السيارة على معرفة ما يحدث حولها، "
+            "مثل وجود سيارة قريبة أو جسم في الطريق. "
+            "وتستخدم بعض السيارات هذه المعلومات لتقديم تنبيهات ومساعدات للسائق أثناء القيادة."
+        ),
+    },
+
+    # -----------------------------------------------------
+    # GENERAL 4
+    # -----------------------------------------------------
+
+    {
+        "search": "ocean underwater nature",
+        "title": "ماذا يوجد في أعماق المحيطات؟",
+        "text": (
+            "رغم أن المحيطات تغطي جزءًا كبيرًا من سطح الأرض، "
+            "فإن العلماء ما زالوا يكتشفون أشياء جديدة في أعماقها. "
+            "الضغط والظلام والظروف الصعبة تجعل استكشاف الأعماق تحديًا كبيرًا. "
+            "ولهذا تعتمد الأبحاث على الغواصات والأجهزة المتخصصة للوصول إلى أماكن يصعب على الإنسان الوصول إليها."
         ),
     },
 ]
@@ -109,11 +194,15 @@ TOPICS = [
 # =========================================================
 
 def run_command(command):
-    print("Running:", " ".join(str(x) for x in command))
+
+    print(
+        "Running:",
+        " ".join(str(x) for x in command)
+    )
 
     subprocess.run(
         command,
-        check=True,
+        check=True
     )
 
 
@@ -129,6 +218,7 @@ def check_environment():
     for name, value in required.items():
 
         if not value:
+
             raise RuntimeError(
                 f"{name} is missing"
             )
@@ -140,7 +230,9 @@ def check_environment():
 
 def clean_previous_files():
 
-    print("Cleaning previous files...")
+    print(
+        "Cleaning previous files..."
+    )
 
     for file in [
         OUTPUT_VIDEO,
@@ -149,10 +241,14 @@ def clean_previous_files():
     ]:
 
         if file.exists():
+
             file.unlink()
 
     if WORK_DIR.exists():
-        shutil.rmtree(WORK_DIR)
+
+        shutil.rmtree(
+            WORK_DIR
+        )
 
     WORK_DIR.mkdir(
         exist_ok=True
@@ -165,7 +261,9 @@ def clean_previous_files():
 
 def search_pexels(query):
 
-    url = "https://api.pexels.com/v1/videos/search"
+    url = (
+        "https://api.pexels.com/v1/videos/search"
+    )
 
     headers = {
         "Authorization": PEXELS_API_KEY
@@ -212,9 +310,15 @@ def choose_video_file(video):
         if not link:
             continue
 
-        # نفضّل الفيديو العمودي الحقيقي
-        if height > width and width >= 500:
-            usable.append(file)
+        # الأفضلية للفيديو العمودي الحقيقي
+        if (
+            height > width
+            and width >= 500
+        ):
+
+            usable.append(
+                file
+            )
 
     if usable:
 
@@ -226,7 +330,8 @@ def choose_video_file(video):
                 (x.get("height") or 0)
         )
 
-    # إذا لم يوجد عمودي، نأخذ أفضل ملف متاح
+    # إذا لم يوجد فيديو عمودي
+    # نستخدم أفضل ملف متوفر
     if files:
 
         return max(
@@ -240,7 +345,10 @@ def choose_video_file(video):
     return None
 
 
-def download_video(url, destination):
+def download_video(
+    url,
+    destination
+):
 
     print(
         f"Downloading: {destination}"
@@ -264,7 +372,10 @@ def download_video(url, destination):
         ):
 
             if chunk:
-                file.write(chunk)
+
+                file.write(
+                    chunk
+                )
 
 
 # =========================================================
@@ -337,13 +448,14 @@ def split_text_for_subtitles(text):
         if not current:
 
             current = word
+
             continue
 
         if (
             len(current)
             + len(word)
             + 1
-            <= 34
+            <= 32
         ):
 
             current += " " + word
@@ -357,6 +469,7 @@ def split_text_for_subtitles(text):
             current = word
 
     if current:
+
         sentences.append(
             current
         )
@@ -366,7 +479,9 @@ def split_text_for_subtitles(text):
 
 def ass_time(seconds):
 
-    hours = int(seconds // 3600)
+    hours = int(
+        seconds // 3600
+    )
 
     minutes = int(
         (seconds % 3600) // 60
@@ -374,7 +489,9 @@ def ass_time(seconds):
 
     secs = seconds % 60
 
-    whole_seconds = int(secs)
+    whole_seconds = int(
+        secs
+    )
 
     centiseconds = int(
         round(
@@ -406,11 +523,17 @@ def ass_time(seconds):
     )
 
 
-def create_subtitle_file(text, duration):
+def create_subtitle_file(
+    text,
+    duration
+):
 
-    parts = split_text_for_subtitles(text)
+    parts = split_text_for_subtitles(
+        text
+    )
 
     if not parts:
+
         return
 
     total_characters = sum(
@@ -428,7 +551,7 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Arabic,Arial,58,&H00FFFFFF,&H00FFFFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,4,2,2,70,70,300,1
+Style: Arabic,Arial,60,&H00FFFFFF,&H00FFFFFF,&H00101010,&H90000000,-1,0,0,0,100,100,0,0,1,4,2,2,70,70,280,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -460,9 +583,18 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 
             subtitle_text = (
                 part
-                .replace("\n", " ")
-                .replace("{", "\\{")
-                .replace("}", "\\}")
+                .replace(
+                    "\n",
+                    " "
+                )
+                .replace(
+                    "{",
+                    "\\{"
+                )
+                .replace(
+                    "}",
+                    "\\}"
+                )
             )
 
             line = (
@@ -491,25 +623,19 @@ def prepare_clip(
     duration,
 ):
 
-    # بداية عشوائية بسيطة حتى لا نأخذ نفس الجزء دائمًا
     start_time = random.uniform(
         0,
         1.5
     )
 
     # =====================================================
-    # مهم جدًا:
+    # 9:16 بدون تشويه
     #
-    # لا نستخدم scale=1080:1920 مباشرة
-    # لأنه قد يشوّه الفيديو إذا كانت أبعاده مختلفة.
+    # نحافظ على نسبة الصورة،
+    # ثم نكبّر حتى تغطي الشاشة،
+    # ثم نقص الزائد من الوسط.
     #
-    # نكبّر الفيديو مع الحفاظ على نسبة العرض/الارتفاع،
-    # ثم نقص الزائد فقط.
-    #
-    # النتيجة دائمًا:
-    # 1080x1920
-    # 9:16
-    # بدون ضغط للصورة.
+    # إضافة zoom خفيف تعطي حركة طبيعية.
     # =====================================================
 
     video_filter = (
@@ -520,7 +646,14 @@ def prepare_clip(
         "(in_w-out_w)/2:"
         "(in_h-out_h)/2,"
         "setsar=1,"
-        "setdar=9/16"
+        "setdar=9/16,"
+        "zoompan="
+        "z='min(zoom+0.0008,1.06)':"
+        "x='iw/2-(iw/zoom/2)':"
+        "y='ih/2-(ih/zoom/2)':"
+        f"d={int(duration * FPS)}:"
+        f"s={VIDEO_WIDTH}x{VIDEO_HEIGHT}:"
+        f"fps={FPS}"
     )
 
     command = [
@@ -539,10 +672,6 @@ def prepare_clip(
         "-vf",
         video_filter,
 
-        # FPS ثابت مناسب لليوتيوب
-        "-r",
-        "30",
-
         "-an",
 
         "-c:v",
@@ -556,6 +685,9 @@ def prepare_clip(
 
         "-pix_fmt",
         "yuv420p",
+
+        "-r",
+        str(FPS),
 
         "-movflags",
         "+faststart",
@@ -583,7 +715,9 @@ def create_concat_file(clips):
 
         for clip in clips:
 
-            absolute_path = clip.resolve()
+            absolute_path = (
+                clip.resolve()
+            )
 
             safe_path = str(
                 absolute_path
@@ -638,7 +772,7 @@ def create_silent_video(clips):
         "yuv420p",
 
         "-r",
-        "30",
+        str(FPS),
 
         "-an",
 
@@ -707,7 +841,6 @@ def create_final_video(
         "-preset",
         "veryfast",
 
-        # جودة أعلى من النسخة السابقة
         "-crf",
         "20",
 
@@ -715,7 +848,7 @@ def create_final_video(
         "yuv420p",
 
         "-r",
-        "30",
+        str(FPS),
 
         "-c:a",
         "aac",
@@ -757,9 +890,15 @@ def upload_to_youtube(
 ):
 
     print()
-    print("================================")
-    print("Uploading Short to YouTube...")
-    print("================================")
+    print(
+        "================================"
+    )
+    print(
+        "Uploading Short to YouTube..."
+    )
+    print(
+        "================================"
+    )
 
     scopes = [
         "https://www.googleapis.com/auth/youtube.upload"
@@ -839,14 +978,24 @@ def upload_to_youtube(
         )
 
     print()
-    print("================================")
-    print("YOUTUBE UPLOAD SUCCESS")
-    print(f"Video ID: {video_id}")
-    print("Privacy: PUBLIC")
+    print(
+        "================================"
+    )
+    print(
+        "YOUTUBE UPLOAD SUCCESS"
+    )
+    print(
+        f"Video ID: {video_id}"
+    )
+    print(
+        "Privacy: PUBLIC"
+    )
     print(
         f"https://www.youtube.com/watch?v={video_id}"
     )
-    print("================================")
+    print(
+        "================================"
+    )
 
     return video_id
 
@@ -911,6 +1060,7 @@ def main():
         )
 
         if video_id in used_ids:
+
             continue
 
         video_file = (
@@ -920,6 +1070,7 @@ def main():
         )
 
         if not video_file:
+
             continue
 
         selected.append(
@@ -930,7 +1081,11 @@ def main():
             video_id
         )
 
-        if len(selected) >= NUMBER_OF_CLIPS:
+        if (
+            len(selected)
+            >= NUMBER_OF_CLIPS
+        ):
+
             break
 
     if len(selected) < 4:
@@ -985,7 +1140,7 @@ def main():
     # -----------------------------------------------------
 
     print(
-        "Preparing 9:16 Shorts clips..."
+        "Preparing high-quality 9:16 clips..."
     )
 
     prepared_clips = []
@@ -1053,13 +1208,30 @@ def main():
     )
 
     print()
-    print("================================")
-    print("VIDEO CREATED SUCCESSFULLY")
-    print(f"Video: {OUTPUT_VIDEO}")
-    print(f"Size: {file_size:.2f} MB")
-    print("Format: 1080x1920 (9:16)")
-    print("Arabic subtitles added")
-    print("================================")
+    print(
+        "================================"
+    )
+    print(
+        "VIDEO CREATED SUCCESSFULLY"
+    )
+    print(
+        f"Video: {OUTPUT_VIDEO}"
+    )
+    print(
+        f"Size: {file_size:.2f} MB"
+    )
+    print(
+        "Resolution: 1080x1920"
+    )
+    print(
+        "Aspect Ratio: 9:16"
+    )
+    print(
+        "Arabic subtitles added"
+    )
+    print(
+        "================================"
+    )
 
     # -----------------------------------------------------
     # YOUTUBE UPLOAD
@@ -1069,7 +1241,7 @@ def main():
         topic["text"]
         +
         "\n\n"
-        "#Shorts #معلومات #هل_تعلم"
+        "#Shorts #كرة_القدم #معلومات #هل_تعلم"
     )
 
     upload_to_youtube(
