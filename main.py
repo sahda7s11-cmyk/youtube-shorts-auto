@@ -1,6 +1,7 @@
 import asyncio
 import os
 import random
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -25,184 +26,177 @@ YOUTUBE_REFRESH_TOKEN = os.getenv("YOUTUBE_REFRESH_TOKEN")
 
 OUTPUT_VIDEO = Path("short.mp4")
 VOICE_FILE = Path("voice.mp3")
-WORK_DIR = Path("clips")
 SUBTITLE_FILE = Path("subtitles.ass")
+WORK_DIR = Path("clips")
 
 VIDEO_WIDTH = 1080
 VIDEO_HEIGHT = 1920
 
-NUMBER_OF_CLIPS = 8
-CLIP_DURATION = 6
+# عدد المقاطع
+NUMBER_OF_CLIPS = 7
 
-FPS = 30
-
+# مدة المقطع الأساسية
+CLIP_DURATION = 3.5
 
 # =========================================================
 # TOPICS
 # =========================================================
-# كرة القدم هي المحتوى الغالب
-# والباقي معلومات عامة متنوعة
-# =========================================================
 
 TOPICS = [
 
-    # -----------------------------------------------------
-    # FOOTBALL 1
-    # -----------------------------------------------------
-
     {
         "search": "football stadium match players",
-        "title": "هل تعلم لماذا أصبحت البيانات مهمة في كرة القدم؟",
+        "title": "هل تعلم لماذا أصبحت البيانات مهمة جدًا في كرة القدم؟",
         "text": (
-            "هل تعلم أن كرة القدم الحديثة أصبحت تعتمد على البيانات بشكل كبير؟ "
-            "فالفرق المحترفة تتابع حركة اللاعبين، وسرعة الجري، ودقة التمرير، "
-            "وعدد التسديدات، وحتى المساحات التي يتحرك فيها كل لاعب. "
-            "هذه المعلومات تساعد المدربين على معرفة نقاط القوة والضعف، "
-            "ووضع خطط أفضل للمباريات. "
-            "ولهذا أصبحت البيانات اليوم جزءًا مهمًا من كرة القدم الحديثة."
+            "هل تعلم أن كرة القدم الحديثة أصبحت تعتمد على البيانات بشكل مذهل؟ "
+            "المدربون اليوم يستطيعون تحليل سرعة اللاعب، وعدد تمريراته، "
+            "ومساحاته داخل الملعب، وحتى تحركات الفريق بالكامل. "
+            "هذه البيانات تساعد المدرب على اكتشاف نقاط القوة والضعف، "
+            "وقد تغيّر طريقة لعب الفريق في المباراة التالية. "
+            "كرة القدم لم تعد تعتمد على المهارة فقط، بل أصبحت البيانات جزءًا مهمًا منها."
         ),
+        "hashtags": [
+            "#Shorts",
+            "#كرة_القدم",
+            "#معلومات",
+            "#هل_تعلم",
+            "#Football",
+            "#Soccer",
+            "#كرة",
+        ],
     },
-
-    # -----------------------------------------------------
-    # FOOTBALL 2
-    # -----------------------------------------------------
 
     {
         "search": "football player training stadium",
-        "title": "ماذا يحدث قبل بداية مباراة كرة القدم؟",
+        "title": "هل تعلم كم يركض لاعب كرة القدم في المباراة؟",
         "text": (
-            "قبل بداية أي مباراة كرة قدم مهمة، لا يقتصر الأمر على دخول اللاعبين إلى الملعب فقط. "
-            "فاللاعبون يستعدون بدنيًا، ويجرون عمليات الإحماء، "
-            "ويستمعون إلى تعليمات المدرب، بينما يقوم الجهاز الفني بمراجعة الخطة. "
-            "وفي المباريات الكبيرة قد يتم تحليل المنافس قبل المباراة بساعات وأيام. "
-            "لهذا فإن ما نراه خلال التسعين دقيقة هو نتيجة استعداد طويل خلف الكواليس."
+            "هل فكرت يومًا كم يركض لاعب كرة القدم خلال مباراة واحدة؟ "
+            "اللاعب المحترف قد يقطع عدة كيلومترات أثناء المباراة، "
+            "لكن المثير أن المسافة ليست كل شيء. "
+            "فاللاعب يغيّر سرعته باستمرار، بين المشي والركض والجري السريع. "
+            "ولهذا تحتاج كرة القدم الحديثة إلى لياقة عالية جدًا وسرعة في اتخاذ القرار."
         ),
+        "hashtags": [
+            "#Shorts",
+            "#كرة_القدم",
+            "#هل_تعلم",
+            "#معلومات_رياضية",
+            "#Football",
+            "#Soccer",
+        ],
     },
-
-    # -----------------------------------------------------
-    # FOOTBALL 3
-    # -----------------------------------------------------
 
     {
-        "search": "football goal goalkeeper save",
-        "title": "لماذا يتحرك حارس المرمى بهذه السرعة؟",
+        "search": "football goal goalkeeper match",
+        "title": "لماذا يبدو حارس المرمى أسرع مما تتوقع؟",
         "text": (
-            "هل تساءلت يومًا كيف يستطيع حارس المرمى الاستجابة لتسديدة قوية خلال لحظات؟ "
-            "الحراس يتدربون باستمرار على سرعة رد الفعل، "
-            "وتوقع اتجاه الكرة، والتحرك الصحيح قبل التسديدة. "
-            "كما تساعدهم الخبرة على قراءة وضعية جسم اللاعب المهاجم. "
-            "ولهذا فإن حراسة المرمى ليست مجرد قوة بدنية، بل تعتمد أيضًا على التركيز وسرعة اتخاذ القرار."
+            "هل تعلم أن رد فعل حارس المرمى يحدث خلال جزء صغير جدًا من الثانية؟ "
+            "الحارس لا يعتمد على سرعة يديه فقط، "
+            "بل يقرأ وضعية اللاعب واتجاه جسمه قبل التسديدة. "
+            "ولهذا يبدأ أحيانًا بالتحرك قبل أن تصل الكرة إليه. "
+            "في المستوى الاحترافي، جزء من الثانية قد يصنع الفرق بين التصدي والهدف."
         ),
+        "hashtags": [
+            "#Shorts",
+            "#كرة_القدم",
+            "#حراس_المرمى",
+            "#هل_تعلم",
+            "#Football",
+            "#Soccer",
+        ],
     },
-
-    # -----------------------------------------------------
-    # FOOTBALL 4
-    # -----------------------------------------------------
 
     {
         "search": "football fans stadium crowd",
-        "title": "لماذا تبدو ملاعب كرة القدم مختلفة تحت الأضواء؟",
+        "title": "هل تعلم لماذا تختلف أجواء ملاعب كرة القدم؟",
         "text": (
-            "هل لاحظت كيف تبدو ملاعب كرة القدم مختلفة تمامًا أثناء المباريات الليلية؟ "
-            "الإضاءة القوية لا تساعد اللاعبين والحكام فقط، "
-            "بل تجعل الكاميرات قادرة على تصوير التفاصيل بوضوح من زوايا مختلفة. "
-            "ولهذا تستخدم الملاعب الحديثة أنظمة إضاءة متطورة وموزعة بعناية. "
-            "والنتيجة صورة أوضح للمشاهد وتجربة أفضل داخل الملعب وخارجه."
+            "هل لاحظت أن بعض ملاعب كرة القدم تبدو مختلفة تمامًا من ناحية الأجواء؟ "
+            "التصميم، وحجم المدرجات، وطريقة توزيع الجماهير، "
+            "كلها تؤثر في تجربة المشجعين داخل الملعب. "
+            "ولهذا أصبحت بعض الملاعب الحديثة مصممة لتكون تجربة كاملة، "
+            "وليس مجرد مكان لمشاهدة المباراة."
         ),
+        "hashtags": [
+            "#Shorts",
+            "#كرة_القدم",
+            "#جماهير",
+            "#ملاعب",
+            "#هل_تعلم",
+            "#Football",
+        ],
     },
 
-    # -----------------------------------------------------
-    # FOOTBALL 5
-    # -----------------------------------------------------
-
     {
-        "search": "football training players running",
-        "title": "كم يركض لاعب كرة القدم أثناء المباراة؟",
+        "search": "football training player running",
+        "title": "لماذا يتدرب لاعبو كرة القدم على أشياء تبدو بسيطة؟",
         "text": (
-            "هل تعلم أن لاعب كرة القدم المحترف قد يقطع مسافة كبيرة خلال المباراة؟ "
-            "لكن الجري لا يكون بنفس السرعة طوال الوقت. "
-            "فاللاعب ينتقل بين المشي والجري والركض السريع، "
-            "ويغيّر سرعته حسب مكان الكرة وخطة الفريق. "
-            "ولهذا أصبحت أجهزة التتبع والبيانات مهمة جدًا لمعرفة مستوى المجهود الذي يبذله اللاعب."
+            "هل تعلم أن أبسط المهارات في كرة القدم تحتاج إلى تكرار هائل؟ "
+            "التمرير، واستلام الكرة، والتحرك بدون كرة، "
+            "كلها مهارات يتدرب عليها اللاعبون باستمرار حتى تصبح تلقائية. "
+            "وعندما تصل المباراة إلى لحظة حاسمة، "
+            "يحتاج اللاعب إلى تنفيذ هذه المهارة بسرعة دون التفكير في كل حركة."
         ),
+        "hashtags": [
+            "#Shorts",
+            "#كرة_القدم",
+            "#تدريب",
+            "#معلومات",
+            "#هل_تعلم",
+            "#Football",
+            "#Soccer",
+        ],
     },
 
-    # -----------------------------------------------------
-    # GENERAL 1
-    # -----------------------------------------------------
-
     {
-        "search": "modern technology city",
-        "title": "كم نظامًا يعمل خلف المدن الحديثة؟",
+        "search": "space earth science",
+        "title": "هل تعلم أن الأرض تتحرك بسرعة هائلة؟",
         "text": (
-            "هل فكرت يومًا في كمية الأنظمة التي تعمل خلف المدن الحديثة؟ "
-            "إشارات المرور، وشبكات الاتصال، وأنظمة المواصلات، والخدمات الرقمية، "
-            "كلها تعمل معًا بشكل مستمر حتى تبدو الحياة اليومية طبيعية وسلسة. "
-            "والأغرب أن معظم هذه الأنظمة تعمل في الخلفية دون أن نلاحظها."
+            "هل تعلم أنك تتحرك الآن بسرعة هائلة رغم أنك جالس في مكانك؟ "
+            "الأرض تدور حول نفسها، وفي الوقت نفسه تتحرك حول الشمس. "
+            "وفوق ذلك، النظام الشمسي نفسه يتحرك داخل مجرة درب التبانة. "
+            "وهذا يعني أننا في حركة مستمرة، حتى عندما نشعر أننا ثابتون تمامًا."
         ),
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#علوم",
+            "#معلومات",
+            "#فضاء",
+            "#Science",
+        ],
     },
 
-    # -----------------------------------------------------
-    # GENERAL 2
-    # -----------------------------------------------------
-
     {
-        "search": "science laboratory experiment",
-        "title": "لماذا تبدأ الاكتشافات العلمية بسؤال؟",
+        "search": "ancient history architecture",
+        "title": "كيف استطاع البشر بناء أشياء ضخمة قبل التكنولوجيا الحديثة؟",
         "text": (
-            "الكثير من الاكتشافات العلمية تبدأ بسؤال بسيط جدًا. "
-            "العالم يلاحظ شيئًا غير معتاد، ثم يبدأ في البحث والتجربة وجمع البيانات. "
-            "وبعد ذلك تتم مقارنة النتائج لمعرفة ما إذا كانت الفكرة صحيحة أم لا. "
-            "ولهذا فإن الفضول وطرح الأسئلة من أهم أسباب التقدم العلمي."
+            "كيف تمكن البشر قديمًا من بناء منشآت ضخمة دون الآلات الحديثة؟ "
+            "السر لم يكن في القوة فقط، بل في التخطيط والهندسة واستخدام أدوات بسيطة بطرق ذكية. "
+            "وكانت معرفة الزوايا والقياسات ونقل الأحمال مهمة جدًا في تلك المشاريع. "
+            "ولهذا ما زالت بعض المنشآت القديمة تثير إعجاب المهندسين حتى اليوم."
         ),
-    },
-
-    # -----------------------------------------------------
-    # GENERAL 3
-    # -----------------------------------------------------
-
-    {
-        "search": "modern car driving road",
-        "title": "لماذا تحتوي السيارات الحديثة على مستشعرات كثيرة؟",
-        "text": (
-            "السيارات الحديثة تحتوي على عدد كبير من الكاميرات والمستشعرات. "
-            "هذه الأجهزة تساعد السيارة على معرفة ما يحدث حولها، "
-            "مثل وجود سيارة قريبة أو جسم في الطريق. "
-            "وتستخدم بعض السيارات هذه المعلومات لتقديم تنبيهات ومساعدات للسائق أثناء القيادة."
-        ),
-    },
-
-    # -----------------------------------------------------
-    # GENERAL 4
-    # -----------------------------------------------------
-
-    {
-        "search": "ocean underwater nature",
-        "title": "ماذا يوجد في أعماق المحيطات؟",
-        "text": (
-            "رغم أن المحيطات تغطي جزءًا كبيرًا من سطح الأرض، "
-            "فإن العلماء ما زالوا يكتشفون أشياء جديدة في أعماقها. "
-            "الضغط والظلام والظروف الصعبة تجعل استكشاف الأعماق تحديًا كبيرًا. "
-            "ولهذا تعتمد الأبحاث على الغواصات والأجهزة المتخصصة للوصول إلى أماكن يصعب على الإنسان الوصول إليها."
-        ),
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#تاريخ",
+            "#معلومات",
+            "#حقائق",
+            "#History",
+        ],
     },
 ]
 
 
 # =========================================================
-# BASIC FUNCTIONS
+# BASIC
 # =========================================================
 
 def run_command(command):
-
-    print(
-        "Running:",
-        " ".join(str(x) for x in command)
-    )
+    print("Running:", " ".join(str(x) for x in command))
 
     subprocess.run(
         command,
-        check=True
+        check=True,
     )
 
 
@@ -218,7 +212,6 @@ def check_environment():
     for name, value in required.items():
 
         if not value:
-
             raise RuntimeError(
                 f"{name} is missing"
             )
@@ -230,9 +223,7 @@ def check_environment():
 
 def clean_previous_files():
 
-    print(
-        "Cleaning previous files..."
-    )
+    print("Cleaning previous files...")
 
     for file in [
         OUTPUT_VIDEO,
@@ -241,14 +232,10 @@ def clean_previous_files():
     ]:
 
         if file.exists():
-
             file.unlink()
 
     if WORK_DIR.exists():
-
-        shutil.rmtree(
-            WORK_DIR
-        )
+        shutil.rmtree(WORK_DIR)
 
     WORK_DIR.mkdir(
         exist_ok=True
@@ -261,9 +248,7 @@ def clean_previous_files():
 
 def search_pexels(query):
 
-    url = (
-        "https://api.pexels.com/v1/videos/search"
-    )
+    url = "https://api.pexels.com/v1/videos/search"
 
     headers = {
         "Authorization": PEXELS_API_KEY
@@ -273,7 +258,7 @@ def search_pexels(query):
         "query": query,
         "orientation": "portrait",
         "size": "medium",
-        "per_page": 20,
+        "per_page": 30,
         "locale": "en-US",
     }
 
@@ -310,45 +295,30 @@ def choose_video_file(video):
         if not link:
             continue
 
-        # الأفضلية للفيديو العمودي الحقيقي
         if (
             height > width
-            and width >= 500
+            and width >= 600
+            and height >= 1000
         ):
-
-            usable.append(
-                file
-            )
+            usable.append(file)
 
     if usable:
 
-        return max(
-            usable,
+        # اختيار جودة جيدة بدون تحميل ملف ضخم جدًا
+        usable.sort(
             key=lambda x:
                 (x.get("width") or 0)
                 *
                 (x.get("height") or 0)
         )
 
-    # إذا لم يوجد فيديو عمودي
-    # نستخدم أفضل ملف متوفر
-    if files:
-
-        return max(
-            files,
-            key=lambda x:
-                (x.get("width") or 0)
-                *
-                (x.get("height") or 0)
-        )
+        # نختار أعلى جودة مناسبة
+        return usable[-1]
 
     return None
 
 
-def download_video(
-    url,
-    destination
-):
+def download_video(url, destination):
 
     print(
         f"Downloading: {destination}"
@@ -357,7 +327,7 @@ def download_video(
     response = requests.get(
         url,
         stream=True,
-        timeout=60,
+        timeout=90,
     )
 
     response.raise_for_status()
@@ -372,10 +342,7 @@ def download_video(
         ):
 
             if chunk:
-
-                file.write(
-                    chunk
-                )
+                file.write(chunk)
 
 
 # =========================================================
@@ -389,7 +356,10 @@ def create_voice(text):
         communicate = edge_tts.Communicate(
             text,
             "ar-SA-HamedNeural",
-            rate="-6%",
+
+            # أسرع وأكثر حيوية
+            rate="+4%",
+
             volume="+0%",
             pitch="+0Hz",
         )
@@ -404,7 +374,7 @@ def create_voice(text):
 
 
 # =========================================================
-# AUDIO DURATION
+# AUDIO
 # =========================================================
 
 def get_audio_duration():
@@ -434,47 +404,53 @@ def get_audio_duration():
 
 
 # =========================================================
-# SUBTITLES
+# TEXT / SUBTITLES
 # =========================================================
+
+def clean_text(text):
+
+    text = re.sub(
+        r"\s+",
+        " ",
+        text
+    )
+
+    return text.strip()
+
 
 def split_text_for_subtitles(text):
 
-    sentences = []
+    words = clean_text(text).split()
 
-    current = ""
+    parts = []
 
-    for word in text.split():
+    current = []
 
-        if not current:
+    for word in words:
 
-            current = word
+        test = " ".join(
+            current + [word]
+        )
 
-            continue
+        if len(test) <= 28:
 
-        if (
-            len(current)
-            + len(word)
-            + 1
-            <= 32
-        ):
-
-            current += " " + word
+            current.append(word)
 
         else:
 
-            sentences.append(
-                current
-            )
+            if current:
+                parts.append(
+                    " ".join(current)
+                )
 
-            current = word
+            current = [word]
 
     if current:
-
-        sentences.append(
-            current
+        parts.append(
+            " ".join(current)
         )
 
-    return sentences
+    return parts
 
 
 def ass_time(seconds):
@@ -489,43 +465,29 @@ def ass_time(seconds):
 
     secs = seconds % 60
 
-    whole_seconds = int(
-        secs
-    )
+    whole = int(secs)
 
     centiseconds = int(
         round(
-            (secs - whole_seconds)
-            * 100
+            (secs - whole) * 100
         )
     )
 
     if centiseconds >= 100:
-
-        whole_seconds += 1
+        whole += 1
         centiseconds = 0
-
-    if whole_seconds >= 60:
-
-        minutes += 1
-        whole_seconds = 0
-
-    if minutes >= 60:
-
-        hours += 1
-        minutes = 0
 
     return (
         f"{hours}:"
         f"{minutes:02d}:"
-        f"{whole_seconds:02d}."
+        f"{whole:02d}."
         f"{centiseconds:02d}"
     )
 
 
 def create_subtitle_file(
     text,
-    duration
+    duration,
 ):
 
     parts = split_text_for_subtitles(
@@ -533,17 +495,16 @@ def create_subtitle_file(
     )
 
     if not parts:
-
         return
 
-    total_characters = sum(
-        len(part)
-        for part in parts
+    total_chars = sum(
+        len(x)
+        for x in parts
     )
 
-    current_time = 0.0
+    current = 0.0
 
-    ass_header = """[Script Info]
+    header = """[Script Info]
 ScriptType: v4.00+
 PlayResX: 1080
 PlayResY: 1920
@@ -551,7 +512,7 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Arabic,Arial,60,&H00FFFFFF,&H00FFFFFF,&H00101010,&H90000000,-1,0,0,0,100,100,0,0,1,4,2,2,70,70,280,1
+Style: Arabic,Arial,64,&H00FFFFFF,&H00FFFFFF,&H00000000,&H99000000,-1,0,0,0,100,100,0,0,1,5,2,2,70,70,260,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -563,30 +524,25 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         encoding="utf-8-sig",
     ) as file:
 
-        file.write(
-            ass_header
-        )
+        file.write(header)
 
         for part in parts:
 
             part_duration = (
                 len(part)
-                / total_characters
+                /
+                total_chars
             ) * duration
 
-            start = current_time
+            start = current
 
             end = min(
-                current_time + part_duration,
+                current + part_duration,
                 duration
             )
 
-            subtitle_text = (
+            subtitle = (
                 part
-                .replace(
-                    "\n",
-                    " "
-                )
                 .replace(
                     "{",
                     "\\{"
@@ -597,20 +553,16 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                 )
             )
 
-            line = (
+            file.write(
                 "Dialogue: 0,"
                 f"{ass_time(start)},"
                 f"{ass_time(end)},"
                 "Arabic,,"
                 "0,0,0,,"
-                f"{subtitle_text}\n"
+                f"{subtitle}\n"
             )
 
-            file.write(
-                line
-            )
-
-            current_time = end
+            current = end
 
 
 # =========================================================
@@ -625,35 +577,24 @@ def prepare_clip(
 
     start_time = random.uniform(
         0,
-        1.5
+        1.2
     )
 
-    # =====================================================
-    # 9:16 بدون تشويه
-    #
-    # نحافظ على نسبة الصورة،
-    # ثم نكبّر حتى تغطي الشاشة،
-    # ثم نقص الزائد من الوسط.
-    #
-    # إضافة zoom خفيف تعطي حركة طبيعية.
-    # =====================================================
-
+    # Zoom خفيف + قص ذكي بدون تشويه
     video_filter = (
         "scale="
-        f"{VIDEO_WIDTH}:{VIDEO_HEIGHT}:"
-        "force_original_aspect_ratio=increase,"
-        f"crop={VIDEO_WIDTH}:{VIDEO_HEIGHT}:"
-        "(in_w-out_w)/2:"
-        "(in_h-out_h)/2,"
+        "if(gt(a,9/16),-2,1080):"
+        "if(gt(a,9/16),1920,-2),"
+        "crop=1080:1920,"
         "setsar=1,"
         "setdar=9/16,"
         "zoompan="
         "z='min(zoom+0.0008,1.06)':"
         "x='iw/2-(iw/zoom/2)':"
         "y='ih/2-(ih/zoom/2)':"
-        f"d={int(duration * FPS)}:"
-        f"s={VIDEO_WIDTH}x{VIDEO_HEIGHT}:"
-        f"fps={FPS}"
+        "d=105:"
+        "s=1080x1920:"
+        "fps=30"
     )
 
     command = [
@@ -681,13 +622,10 @@ def prepare_clip(
         "veryfast",
 
         "-crf",
-        "20",
+        "19",
 
         "-pix_fmt",
         "yuv420p",
-
-        "-r",
-        str(FPS),
 
         "-movflags",
         "+faststart",
@@ -715,19 +653,15 @@ def create_concat_file(clips):
 
         for clip in clips:
 
-            absolute_path = (
+            path = str(
                 clip.resolve()
-            )
-
-            safe_path = str(
-                absolute_path
             ).replace(
                 "'",
                 "'\\''"
             )
 
             file.write(
-                f"file '{safe_path}'\n"
+                f"file '{path}'\n"
             )
 
     return concat_file
@@ -741,7 +675,7 @@ def create_silent_video(clips):
         )
     )
 
-    silent_video = (
+    silent = (
         WORK_DIR /
         "silent.mp4"
     )
@@ -766,27 +700,27 @@ def create_silent_video(clips):
         "veryfast",
 
         "-crf",
-        "20",
+        "19",
 
         "-pix_fmt",
         "yuv420p",
 
         "-r",
-        str(FPS),
+        "30",
 
         "-an",
 
         "-movflags",
         "+faststart",
 
-        str(silent_video),
+        str(silent),
     ]
 
     run_command(
         command
     )
 
-    return silent_video
+    return silent
 
 
 # =========================================================
@@ -802,18 +736,24 @@ def create_final_video(
         get_audio_duration()
     )
 
-    print(
-        f"Audio duration: "
-        f"{audio_duration:.2f} seconds"
-    )
-
-    print(
-        "Creating Arabic subtitles..."
-    )
-
     create_subtitle_file(
         text,
         audio_duration
+    )
+
+    # معالجة خفيفة للصوت لجعله أوضح وأكثر توازنًا
+    audio_filter = (
+        "highpass=f=70,"
+        "lowpass=f=14000,"
+        "acompressor="
+        "threshold=-18dB:"
+        "ratio=2.2:"
+        "attack=15:"
+        "release=120,"
+        "loudnorm="
+        "I=-15:"
+        "TP=-1.5:"
+        "LRA=8"
     )
 
     final_command = [
@@ -842,30 +782,25 @@ def create_final_video(
         "veryfast",
 
         "-crf",
-        "20",
+        "19",
 
         "-pix_fmt",
         "yuv420p",
 
         "-r",
-        str(FPS),
+        "30",
 
         "-c:a",
         "aac",
 
         "-b:a",
-        "128k",
+        "160k",
 
         "-ar",
         "44100",
 
         "-af",
-        (
-            "loudnorm="
-            "I=-16:"
-            "TP=-1.5:"
-            "LRA=11"
-        ),
+        audio_filter,
 
         "-shortest",
 
@@ -881,7 +816,7 @@ def create_final_video(
 
 
 # =========================================================
-# YOUTUBE UPLOAD
+# YOUTUBE
 # =========================================================
 
 def upload_to_youtube(
@@ -889,15 +824,8 @@ def upload_to_youtube(
     description,
 ):
 
-    print()
     print(
-        "================================"
-    )
-    print(
-        "Uploading Short to YouTube..."
-    )
-    print(
-        "================================"
+        "Uploading to YouTube..."
     )
 
     scopes = [
@@ -923,13 +851,11 @@ def upload_to_youtube(
         "snippet": {
             "title": title,
             "description": description,
-            "categoryId": "22",
+            "categoryId": "17",
         },
 
         "status": {
-            # PUBLIC
             "privacyStatus": "public",
-
             "selfDeclaredMadeForKids": False,
         },
     }
@@ -956,14 +882,12 @@ def upload_to_youtube(
 
         if status:
 
-            progress = int(
-                status.progress()
-                * 100
-            )
-
             print(
-                f"Upload progress: "
-                f"{progress}%"
+                "Upload:",
+                int(
+                    status.progress() * 100
+                ),
+                "%"
             )
 
     video_id = response.get(
@@ -971,13 +895,10 @@ def upload_to_youtube(
     )
 
     if not video_id:
-
         raise RuntimeError(
-            "YouTube upload completed "
-            "but no video ID was returned."
+            "No YouTube video ID returned."
         )
 
-    print()
     print(
         "================================"
     )
@@ -997,8 +918,6 @@ def upload_to_youtube(
         "================================"
     )
 
-    return video_id
-
 
 # =========================================================
 # MAIN
@@ -1010,26 +929,19 @@ def main():
 
     clean_previous_files()
 
-    # -----------------------------------------------------
     # اختيار موضوع
-    # -----------------------------------------------------
-
     topic = random.choice(
         TOPICS
     )
 
     print(
-        f"Selected topic: "
-        f"{topic['search']}"
+        "Selected:",
+        topic["title"]
     )
 
-    # -----------------------------------------------------
-    # SEARCH PEXELS
-    # -----------------------------------------------------
-
-    print(
-        "Searching Pexels..."
-    )
+    # =====================================================
+    # SEARCH
+    # =====================================================
 
     videos = search_pexels(
         topic["search"]
@@ -1038,19 +950,14 @@ def main():
     if not videos:
 
         raise RuntimeError(
-            "No Pexels videos found"
+            "No Pexels videos found."
         )
 
     random.shuffle(
         videos
     )
 
-    # -----------------------------------------------------
-    # SELECT
-    # -----------------------------------------------------
-
     selected = []
-
     used_ids = set()
 
     for video in videos:
@@ -1060,7 +967,6 @@ def main():
         )
 
         if video_id in used_ids:
-
             continue
 
         video_file = (
@@ -1070,7 +976,6 @@ def main():
         )
 
         if not video_file:
-
             continue
 
         selected.append(
@@ -1081,27 +986,22 @@ def main():
             video_id
         )
 
-        if (
-            len(selected)
-            >= NUMBER_OF_CLIPS
-        ):
-
+        if len(selected) >= NUMBER_OF_CLIPS:
             break
 
     if len(selected) < 4:
 
         raise RuntimeError(
-            "Not enough usable "
-            "video files found"
+            "Not enough suitable vertical videos."
         )
 
     print(
-        f"Selected {len(selected)} clips"
+        f"Selected {len(selected)} clips."
     )
 
-    # -----------------------------------------------------
+    # =====================================================
     # DOWNLOAD
-    # -----------------------------------------------------
+    # =====================================================
 
     downloaded = []
 
@@ -1123,27 +1023,23 @@ def main():
             destination
         )
 
-    # -----------------------------------------------------
+    # =====================================================
     # VOICE
-    # -----------------------------------------------------
+    # =====================================================
 
     print(
-        "Creating Arabic narration..."
+        "Creating Arabic voice..."
     )
 
     create_voice(
         topic["text"]
     )
 
-    # -----------------------------------------------------
-    # PREPARE CLIPS
-    # -----------------------------------------------------
+    # =====================================================
+    # PREPARE
+    # =====================================================
 
-    print(
-        "Preparing high-quality 9:16 clips..."
-    )
-
-    prepared_clips = []
+    prepared = []
 
     for index, source in enumerate(
         downloaded
@@ -1160,88 +1056,78 @@ def main():
             CLIP_DURATION
         )
 
-        prepared_clips.append(
+        prepared.append(
             output
         )
 
-    # -----------------------------------------------------
-    # BUILD VIDEO
-    # -----------------------------------------------------
-
-    print(
-        "Joining clips..."
-    )
+    # =====================================================
+    # JOIN
+    # =====================================================
 
     silent_video = (
         create_silent_video(
-            prepared_clips
+            prepared
         )
     )
 
-    # -----------------------------------------------------
-    # AUDIO + SUBTITLES
-    # -----------------------------------------------------
-
-    print(
-        "Adding narration and subtitles..."
-    )
+    # =====================================================
+    # FINAL
+    # =====================================================
 
     create_final_video(
         silent_video,
         topic["text"]
     )
 
-    # -----------------------------------------------------
-    # CHECK
-    # -----------------------------------------------------
-
     if not OUTPUT_VIDEO.exists():
 
         raise RuntimeError(
-            "Video was not created"
+            "short.mp4 was not created."
         )
 
-    file_size = (
+    size_mb = (
         OUTPUT_VIDEO.stat().st_size
         /
         (1024 * 1024)
     )
 
-    print()
     print(
         "================================"
     )
     print(
-        "VIDEO CREATED SUCCESSFULLY"
+        "VIDEO CREATED"
     )
     print(
-        f"Video: {OUTPUT_VIDEO}"
-    )
-    print(
-        f"Size: {file_size:.2f} MB"
+        f"Size: {size_mb:.2f} MB"
     )
     print(
         "Resolution: 1080x1920"
     )
     print(
-        "Aspect Ratio: 9:16"
+        "Format: 9:16"
     )
     print(
-        "Arabic subtitles added"
+        "Music: OFF"
+    )
+    print(
+        "Arabic subtitles: ON"
     )
     print(
         "================================"
     )
 
-    # -----------------------------------------------------
-    # YOUTUBE UPLOAD
-    # -----------------------------------------------------
+    # =====================================================
+    # DESCRIPTION + HASHTAGS
+    # =====================================================
+
+    hashtags = " ".join(
+        topic["hashtags"]
+    )
 
     description = (
         topic["text"]
-        +
-        "\n\n"
-        "#Shorts #كرة_القدم #معلومات #هل_تعلم"
+        + "\n\n"
+        + hashtags
     )
 
     upload_to_youtube(
