@@ -2,11 +2,11 @@ name: Daily YouTube Short
 
 on:
   schedule:
-    # 09:00 صباحًا بتوقيت السعودية (UTC+3)
-    - cron: "0 6 * * *"
-
-    # 05:00 مساءً بتوقيت السعودية (UTC+3)
+    # 5:00 PM Saudi Arabia time (UTC+3)
     - cron: "0 14 * * *"
+
+    # 10:00 PM Saudi Arabia time (UTC+3)
+    - cron: "0 19 * * *"
 
   workflow_dispatch:
 
