@@ -32,37 +32,38 @@ WORK_DIR = Path("clips")
 VIDEO_WIDTH = 1080
 VIDEO_HEIGHT = 1920
 
-# عدد المقاطع
+# عدد اللقطات
 NUMBER_OF_CLIPS = 7
 
-# مدة المقطع الأساسية
+# مدة كل لقطة
 CLIP_DURATION = 3.5
+
 
 # =========================================================
 # TOPICS
 # =========================================================
 
 TOPICS = [
-
     {
         "search": "football stadium match players",
         "title": "هل تعلم لماذا أصبحت البيانات مهمة جدًا في كرة القدم؟",
         "text": (
             "هل تعلم أن كرة القدم الحديثة أصبحت تعتمد على البيانات بشكل مذهل؟ "
-            "المدربون اليوم يستطيعون تحليل سرعة اللاعب، وعدد تمريراته، "
-            "ومساحاته داخل الملعب، وحتى تحركات الفريق بالكامل. "
-            "هذه البيانات تساعد المدرب على اكتشاف نقاط القوة والضعف، "
+            "المدربون اليوم يستطيعون تحليل سرعة اللاعب وعدد تمريراته "
+            "ومساحاته داخل الملعب وحتى تحركات الفريق بالكامل. "
+            "هذه البيانات تساعد المدرب على اكتشاف نقاط القوة والضعف "
             "وقد تغيّر طريقة لعب الفريق في المباراة التالية. "
-            "كرة القدم لم تعد تعتمد على المهارة فقط، بل أصبحت البيانات جزءًا مهمًا منها."
+            "كرة القدم لم تعد تعتمد على المهارة فقط، "
+            "بل أصبحت البيانات جزءًا مهمًا منها."
         ),
         "hashtags": [
             "#Shorts",
             "#كرة_القدم",
-            "#معلومات",
             "#هل_تعلم",
+            "#معلومات",
             "#Football",
             "#Soccer",
-            "#كرة",
+            "#رياضة",
         ],
     },
 
@@ -73,8 +74,9 @@ TOPICS = [
             "هل فكرت يومًا كم يركض لاعب كرة القدم خلال مباراة واحدة؟ "
             "اللاعب المحترف قد يقطع عدة كيلومترات أثناء المباراة، "
             "لكن المثير أن المسافة ليست كل شيء. "
-            "فاللاعب يغيّر سرعته باستمرار، بين المشي والركض والجري السريع. "
-            "ولهذا تحتاج كرة القدم الحديثة إلى لياقة عالية جدًا وسرعة في اتخاذ القرار."
+            "فاللاعب يغيّر سرعته باستمرار بين المشي والركض والجري السريع. "
+            "ولهذا تحتاج كرة القدم الحديثة إلى لياقة عالية "
+            "وسرعة كبيرة في اتخاذ القرار."
         ),
         "hashtags": [
             "#Shorts",
@@ -83,18 +85,19 @@ TOPICS = [
             "#معلومات_رياضية",
             "#Football",
             "#Soccer",
+            "#رياضة",
         ],
     },
 
     {
-        "search": "football goal goalkeeper match",
+        "search": "football goalkeeper goal match",
         "title": "لماذا يبدو حارس المرمى أسرع مما تتوقع؟",
         "text": (
             "هل تعلم أن رد فعل حارس المرمى يحدث خلال جزء صغير جدًا من الثانية؟ "
             "الحارس لا يعتمد على سرعة يديه فقط، "
             "بل يقرأ وضعية اللاعب واتجاه جسمه قبل التسديدة. "
             "ولهذا يبدأ أحيانًا بالتحرك قبل أن تصل الكرة إليه. "
-            "في المستوى الاحترافي، جزء من الثانية قد يصنع الفرق بين التصدي والهدف."
+            "في المستوى الاحترافي، جزء من الثانية قد يصنع الفرق."
         ),
         "hashtags": [
             "#Shorts",
@@ -103,6 +106,7 @@ TOPICS = [
             "#هل_تعلم",
             "#Football",
             "#Soccer",
+            "#رياضة",
         ],
     },
 
@@ -111,7 +115,7 @@ TOPICS = [
         "title": "هل تعلم لماذا تختلف أجواء ملاعب كرة القدم؟",
         "text": (
             "هل لاحظت أن بعض ملاعب كرة القدم تبدو مختلفة تمامًا من ناحية الأجواء؟ "
-            "التصميم، وحجم المدرجات، وطريقة توزيع الجماهير، "
+            "التصميم وحجم المدرجات وطريقة توزيع الجماهير "
             "كلها تؤثر في تجربة المشجعين داخل الملعب. "
             "ولهذا أصبحت بعض الملاعب الحديثة مصممة لتكون تجربة كاملة، "
             "وليس مجرد مكان لمشاهدة المباراة."
@@ -123,6 +127,7 @@ TOPICS = [
             "#ملاعب",
             "#هل_تعلم",
             "#Football",
+            "#Soccer",
         ],
     },
 
@@ -131,30 +136,52 @@ TOPICS = [
         "title": "لماذا يتدرب لاعبو كرة القدم على أشياء تبدو بسيطة؟",
         "text": (
             "هل تعلم أن أبسط المهارات في كرة القدم تحتاج إلى تكرار هائل؟ "
-            "التمرير، واستلام الكرة، والتحرك بدون كرة، "
+            "التمرير واستلام الكرة والتحرك بدون كرة "
             "كلها مهارات يتدرب عليها اللاعبون باستمرار حتى تصبح تلقائية. "
             "وعندما تصل المباراة إلى لحظة حاسمة، "
-            "يحتاج اللاعب إلى تنفيذ هذه المهارة بسرعة دون التفكير في كل حركة."
+            "يحتاج اللاعب إلى تنفيذ المهارة بسرعة دون تردد."
         ),
         "hashtags": [
             "#Shorts",
             "#كرة_القدم",
             "#تدريب",
-            "#معلومات",
             "#هل_تعلم",
             "#Football",
             "#Soccer",
+            "#رياضة",
+        ],
+    },
+
+    {
+        "search": "football goal stadium match",
+        "title": "هل تعلم لماذا يصعب تسجيل الهدف في كرة القدم؟",
+        "text": (
+            "تسجيل الهدف في كرة القدم ليس مجرد تسديدة قوية. "
+            "اللاعب يحتاج إلى اختيار المكان والتوقيت والزاوية المناسبة "
+            "خلال ثوانٍ قليلة. "
+            "ولهذا قد تكون اللمسة الأخيرة أهم من قوة التسديدة نفسها. "
+            "وفي المباريات الكبيرة، قرار واحد سريع قد يغيّر النتيجة بالكامل."
+        ),
+        "hashtags": [
+            "#Shorts",
+            "#كرة_القدم",
+            "#أهداف",
+            "#هل_تعلم",
+            "#Football",
+            "#Soccer",
+            "#رياضة",
         ],
     },
 
     {
         "search": "space earth science",
-        "title": "هل تعلم أن الأرض تتحرك بسرعة هائلة؟",
+        "title": "هل تعلم أنك تتحرك الآن رغم أنك جالس؟",
         "text": (
             "هل تعلم أنك تتحرك الآن بسرعة هائلة رغم أنك جالس في مكانك؟ "
             "الأرض تدور حول نفسها، وفي الوقت نفسه تتحرك حول الشمس. "
-            "وفوق ذلك، النظام الشمسي نفسه يتحرك داخل مجرة درب التبانة. "
-            "وهذا يعني أننا في حركة مستمرة، حتى عندما نشعر أننا ثابتون تمامًا."
+            "والنظام الشمسي نفسه يتحرك داخل مجرة درب التبانة. "
+            "وهذا يعني أننا في حركة مستمرة، "
+            "حتى عندما نشعر أننا ثابتون تمامًا."
         ),
         "hashtags": [
             "#Shorts",
@@ -165,30 +192,11 @@ TOPICS = [
             "#Science",
         ],
     },
-
-    {
-        "search": "ancient history architecture",
-        "title": "كيف استطاع البشر بناء أشياء ضخمة قبل التكنولوجيا الحديثة؟",
-        "text": (
-            "كيف تمكن البشر قديمًا من بناء منشآت ضخمة دون الآلات الحديثة؟ "
-            "السر لم يكن في القوة فقط، بل في التخطيط والهندسة واستخدام أدوات بسيطة بطرق ذكية. "
-            "وكانت معرفة الزوايا والقياسات ونقل الأحمال مهمة جدًا في تلك المشاريع. "
-            "ولهذا ما زالت بعض المنشآت القديمة تثير إعجاب المهندسين حتى اليوم."
-        ),
-        "hashtags": [
-            "#Shorts",
-            "#هل_تعلم",
-            "#تاريخ",
-            "#معلومات",
-            "#حقائق",
-            "#History",
-        ],
-    },
 ]
 
 
 # =========================================================
-# BASIC
+# BASIC FUNCTIONS
 # =========================================================
 
 def run_command(command):
@@ -284,36 +292,35 @@ def choose_video_file(video):
         []
     )
 
-    usable = []
+    vertical = []
 
-    for file in files:
+    for video_file in files:
 
-        width = file.get("width") or 0
-        height = file.get("height") or 0
-        link = file.get("link")
+        width = video_file.get("width") or 0
+        height = video_file.get("height") or 0
+        link = video_file.get("link")
 
         if not link:
             continue
 
         if (
             height > width
-            and width >= 600
-            and height >= 1000
+            and width >= 500
+            and height >= 800
         ):
-            usable.append(file)
+            vertical.append(
+                video_file
+            )
 
-    if usable:
+    if vertical:
 
-        # اختيار جودة جيدة بدون تحميل ملف ضخم جدًا
-        usable.sort(
-            key=lambda x:
-                (x.get("width") or 0)
+        return max(
+            vertical,
+            key=lambda item:
+                (item.get("width") or 0)
                 *
-                (x.get("height") or 0)
+                (item.get("height") or 0)
         )
-
-        # نختار أعلى جودة مناسبة
-        return usable[-1]
 
     return None
 
@@ -357,8 +364,8 @@ def create_voice(text):
             text,
             "ar-SA-HamedNeural",
 
-            # أسرع وأكثر حيوية
-            rate="+4%",
+            # سرعة أعلى قليلًا وحيوية أكثر
+            rate="+5%",
 
             volume="+0%",
             pitch="+0Hz",
@@ -374,7 +381,7 @@ def create_voice(text):
 
 
 # =========================================================
-# AUDIO
+# AUDIO DURATION
 # =========================================================
 
 def get_audio_duration():
@@ -404,7 +411,7 @@ def get_audio_duration():
 
 
 # =========================================================
-# TEXT / SUBTITLES
+# SUBTITLES
 # =========================================================
 
 def clean_text(text):
@@ -420,21 +427,24 @@ def clean_text(text):
 
 def split_text_for_subtitles(text):
 
-    words = clean_text(text).split()
+    words = clean_text(
+        text
+    ).split()
 
     parts = []
-
     current = []
 
     for word in words:
 
-        test = " ".join(
+        candidate = " ".join(
             current + [word]
         )
 
-        if len(test) <= 28:
+        if len(candidate) <= 27:
 
-            current.append(word)
+            current.append(
+                word
+            )
 
         else:
 
@@ -443,7 +453,9 @@ def split_text_for_subtitles(text):
                     " ".join(current)
                 )
 
-            current = [word]
+            current = [
+                word
+            ]
 
     if current:
         parts.append(
@@ -463,24 +475,38 @@ def ass_time(seconds):
         (seconds % 3600) // 60
     )
 
-    secs = seconds % 60
+    remaining = (
+        seconds
+        -
+        hours * 3600
+        -
+        minutes * 60
+    )
 
-    whole = int(secs)
+    whole_seconds = int(
+        remaining
+    )
 
     centiseconds = int(
         round(
-            (secs - whole) * 100
+            (
+                remaining
+                -
+                whole_seconds
+            )
+            * 100
         )
     )
 
     if centiseconds >= 100:
-        whole += 1
+
+        whole_seconds += 1
         centiseconds = 0
 
     return (
         f"{hours}:"
         f"{minutes:02d}:"
-        f"{whole:02d}."
+        f"{whole_seconds:02d}."
         f"{centiseconds:02d}"
     )
 
@@ -497,14 +523,14 @@ def create_subtitle_file(
     if not parts:
         return
 
-    total_chars = sum(
-        len(x)
-        for x in parts
+    total_characters = sum(
+        len(part)
+        for part in parts
     )
 
-    current = 0.0
+    current_time = 0.0
 
-    header = """[Script Info]
+    ass_header = """[Script Info]
 ScriptType: v4.00+
 PlayResX: 1080
 PlayResY: 1920
@@ -512,7 +538,7 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Arabic,Arial,64,&H00FFFFFF,&H00FFFFFF,&H00000000,&H99000000,-1,0,0,0,100,100,0,0,1,5,2,2,70,70,260,1
+Style: Arabic,Arial,64,&H00FFFFFF,&H00FFFFFF,&H00000000,&H99000000,-1,0,0,0,100,100,0,0,1,5,2,2,60,60,270,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -524,24 +550,28 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         encoding="utf-8-sig",
     ) as file:
 
-        file.write(header)
+        file.write(
+            ass_header
+        )
 
         for part in parts:
 
             part_duration = (
                 len(part)
                 /
-                total_chars
+                total_characters
             ) * duration
 
-            start = current
+            start = current_time
 
             end = min(
-                current + part_duration,
+                current_time
+                +
+                part_duration,
                 duration
             )
 
-            subtitle = (
+            subtitle_text = (
                 part
                 .replace(
                     "{",
@@ -559,10 +589,10 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                 f"{ass_time(end)},"
                 "Arabic,,"
                 "0,0,0,,"
-                f"{subtitle}\n"
+                f"{subtitle_text}\n"
             )
 
-            current = end
+            current_time = end
 
 
 # =========================================================
@@ -577,24 +607,25 @@ def prepare_clip(
 
     start_time = random.uniform(
         0,
-        1.2
+        1.0
     )
 
-    # Zoom خفيف + قص ذكي بدون تشويه
+    # -----------------------------------------------------
+    # مهم:
+    # لا نستخدم zoompan هنا.
+    #
+    # هذا الفلتر:
+    # 1. يضبط الفيديو على ارتفاع 1920.
+    # 2. يحافظ على النسبة الأصلية.
+    # 3. يقص الجوانب الزائدة فقط.
+    # 4. ينتج 1080x1920 بدون ضغط للصورة.
+    # -----------------------------------------------------
+
     video_filter = (
-        "scale="
-        "if(gt(a,9/16),-2,1080):"
-        "if(gt(a,9/16),1920,-2),"
+        "scale=-2:1920,"
         "crop=1080:1920,"
         "setsar=1,"
-        "setdar=9/16,"
-        "zoompan="
-        "z='min(zoom+0.0008,1.06)':"
-        "x='iw/2-(iw/zoom/2)':"
-        "y='ih/2-(ih/zoom/2)':"
-        "d=105:"
-        "s=1080x1920:"
-        "fps=30"
+        "setdar=9/16"
     )
 
     command = [
@@ -614,6 +645,9 @@ def prepare_clip(
         video_filter,
 
         "-an",
+
+        "-r",
+        "30",
 
         "-c:v",
         "libx264",
@@ -653,15 +687,22 @@ def create_concat_file(clips):
 
         for clip in clips:
 
-            path = str(
+            absolute_path = (
                 clip.resolve()
-            ).replace(
-                "'",
-                "'\\''"
+            )
+
+            safe_path = (
+                str(
+                    absolute_path
+                )
+                .replace(
+                    "'",
+                    "'\\''"
+                )
             )
 
             file.write(
-                f"file '{path}'\n"
+                f"file '{safe_path}'\n"
             )
 
     return concat_file
@@ -675,7 +716,7 @@ def create_silent_video(clips):
         )
     )
 
-    silent = (
+    silent_video = (
         WORK_DIR /
         "silent.mp4"
     )
@@ -713,14 +754,14 @@ def create_silent_video(clips):
         "-movflags",
         "+faststart",
 
-        str(silent),
+        str(silent_video),
     ]
 
     run_command(
         command
     )
 
-    return silent
+    return silent_video
 
 
 # =========================================================
@@ -736,18 +777,31 @@ def create_final_video(
         get_audio_duration()
     )
 
+    print(
+        f"Audio duration: "
+        f"{audio_duration:.2f}s"
+    )
+
     create_subtitle_file(
         text,
         audio_duration
     )
 
-    # معالجة خفيفة للصوت لجعله أوضح وأكثر توازنًا
+    # -----------------------------------------------------
+    # تحسين الصوت:
+    # إزالة الترددات المنخفضة جدًا
+    # + ضغط خفيف
+    # + رفع مستوى الصوت بشكل متوازن
+    #
+    # بدون موسيقى.
+    # -----------------------------------------------------
+
     audio_filter = (
         "highpass=f=70,"
         "lowpass=f=14000,"
         "acompressor="
         "threshold=-18dB:"
-        "ratio=2.2:"
+        "ratio=2:"
         "attack=15:"
         "release=120,"
         "loudnorm="
@@ -816,7 +870,7 @@ def create_final_video(
 
 
 # =========================================================
-# YOUTUBE
+# YOUTUBE UPLOAD
 # =========================================================
 
 def upload_to_youtube(
@@ -824,8 +878,15 @@ def upload_to_youtube(
     description,
 ):
 
+    print()
+    print(
+        "================================"
+    )
     print(
         "Uploading to YouTube..."
+    )
+    print(
+        "================================"
     )
 
     scopes = [
@@ -882,12 +943,14 @@ def upload_to_youtube(
 
         if status:
 
+            progress = int(
+                status.progress()
+                * 100
+            )
+
             print(
-                "Upload:",
-                int(
-                    status.progress() * 100
-                ),
-                "%"
+                f"Upload progress: "
+                f"{progress}%"
             )
 
     video_id = response.get(
@@ -895,10 +958,13 @@ def upload_to_youtube(
     )
 
     if not video_id:
+
         raise RuntimeError(
-            "No YouTube video ID returned."
+            "YouTube upload completed "
+            "but no video ID was returned."
         )
 
+    print()
     print(
         "================================"
     )
@@ -910,9 +976,6 @@ def upload_to_youtube(
     )
     print(
         "Privacy: PUBLIC"
-    )
-    print(
-        f"https://www.youtube.com/watch?v={video_id}"
     )
     print(
         "================================"
@@ -929,19 +992,29 @@ def main():
 
     clean_previous_files()
 
+    # -----------------------------------------------------
     # اختيار موضوع
+    # -----------------------------------------------------
+
     topic = random.choice(
         TOPICS
     )
 
     print(
-        "Selected:",
+        "Selected topic:"
+    )
+
+    print(
         topic["title"]
     )
 
-    # =====================================================
-    # SEARCH
-    # =====================================================
+    # -----------------------------------------------------
+    # PEXELS SEARCH
+    # -----------------------------------------------------
+
+    print(
+        "Searching Pexels..."
+    )
 
     videos = search_pexels(
         topic["search"]
@@ -957,7 +1030,12 @@ def main():
         videos
     )
 
+    # -----------------------------------------------------
+    # اختيار لقطات عمودية فقط
+    # -----------------------------------------------------
+
     selected = []
+
     used_ids = set()
 
     for video in videos:
@@ -965,6 +1043,9 @@ def main():
         video_id = video.get(
             "id"
         )
+
+        if not video_id:
+            continue
 
         if video_id in used_ids:
             continue
@@ -992,16 +1073,17 @@ def main():
     if len(selected) < 4:
 
         raise RuntimeError(
-            "Not enough suitable vertical videos."
+            "Not enough suitable "
+            "vertical videos found."
         )
 
     print(
         f"Selected {len(selected)} clips."
     )
 
-    # =====================================================
+    # -----------------------------------------------------
     # DOWNLOAD
-    # =====================================================
+    # -----------------------------------------------------
 
     downloaded = []
 
@@ -1023,23 +1105,27 @@ def main():
             destination
         )
 
-    # =====================================================
+    # -----------------------------------------------------
     # VOICE
-    # =====================================================
+    # -----------------------------------------------------
 
     print(
-        "Creating Arabic voice..."
+        "Creating Arabic narration..."
     )
 
     create_voice(
         topic["text"]
     )
 
-    # =====================================================
-    # PREPARE
-    # =====================================================
+    # -----------------------------------------------------
+    # PREPARE CLIPS
+    # -----------------------------------------------------
 
-    prepared = []
+    print(
+        "Preparing vertical clips..."
+    )
+
+    prepared_clips = []
 
     for index, source in enumerate(
         downloaded
@@ -1056,28 +1142,40 @@ def main():
             CLIP_DURATION
         )
 
-        prepared.append(
+        prepared_clips.append(
             output
         )
 
-    # =====================================================
+    # -----------------------------------------------------
     # JOIN
-    # =====================================================
+    # -----------------------------------------------------
+
+    print(
+        "Joining clips..."
+    )
 
     silent_video = (
         create_silent_video(
-            prepared
+            prepared_clips
         )
     )
 
-    # =====================================================
-    # FINAL
-    # =====================================================
+    # -----------------------------------------------------
+    # AUDIO + SUBTITLES
+    # -----------------------------------------------------
+
+    print(
+        "Adding narration and subtitles..."
+    )
 
     create_final_video(
         silent_video,
         topic["text"]
     )
+
+    # -----------------------------------------------------
+    # FINAL CHECK
+    # -----------------------------------------------------
 
     if not OUTPUT_VIDEO.exists():
 
@@ -1085,26 +1183,27 @@ def main():
             "short.mp4 was not created."
         )
 
-    size_mb = (
+    file_size = (
         OUTPUT_VIDEO.stat().st_size
         /
         (1024 * 1024)
     )
 
+    print()
     print(
         "================================"
     )
     print(
-        "VIDEO CREATED"
+        "VIDEO CREATED SUCCESSFULLY"
     )
     print(
-        f"Size: {size_mb:.2f} MB"
+        f"Size: {file_size:.2f} MB"
     )
     print(
         "Resolution: 1080x1920"
     )
     print(
-        "Format: 9:16"
+        "Aspect ratio: 9:16"
     )
     print(
         "Music: OFF"
@@ -1116,9 +1215,9 @@ def main():
         "================================"
     )
 
-    # =====================================================
+    # -----------------------------------------------------
     # DESCRIPTION + HASHTAGS
-    # =====================================================
+    # -----------------------------------------------------
 
     hashtags = " ".join(
         topic["hashtags"]
@@ -1126,9 +1225,15 @@ def main():
 
     description = (
         topic["text"]
-        + "\n\n"
-        + hashtags
+        +
+        "\n\n"
+        +
+        hashtags
     )
+
+    # -----------------------------------------------------
+    # UPLOAD
+    # -----------------------------------------------------
 
     upload_to_youtube(
         topic["title"],
