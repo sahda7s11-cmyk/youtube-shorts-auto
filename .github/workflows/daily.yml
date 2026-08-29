@@ -2,12 +2,16 @@ name: Daily YouTube Short
 
 on:
   schedule:
-    - cron: "0 12 * * *"
-    - cron: "0 17 * * *"
+    # 09:00 صباحًا بتوقيت السعودية (UTC+3)
+    - cron: "0 6 * * *"
+
+    # 05:00 مساءً بتوقيت السعودية (UTC+3)
+    - cron: "0 14 * * *"
+
   workflow_dispatch:
 
 jobs:
-  test:
+  generate-and-upload:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,12 +24,16 @@ jobs:
           python-version: "3.11"
 
       - name: Install FFmpeg
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-      - name: Run automation
+      - name: Run YouTube Shorts automation
         env:
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
@@ -33,20 +41,29 @@ jobs:
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
-        run: python main.py
+        run: |
+          python main.py
 
-      - name: Check generated video
+      - name: Verify generated video
         run: |
           if [ ! -f "short.mp4" ]; then
             echo "ERROR: short.mp4 was not created."
             exit 1
           fi
+
+          echo "Video created successfully:"
           ls -lh short.mp4
-          file short.mp4
+
+          echo "Video information:"
+          ffprobe -v error \
+            -show_entries stream=width,height,codec_name \
+            -show_entries format=duration \
+            -of default=noprint_wrappers=1 \
+            short.mp4
 
       - name: Save generated Short
         uses: actions/upload-artifact@v4
         with:
-          name: generated-short
+          name: generated-short-${{ github.run_number }}
           path: short.mp4
           if-no-files-found: error
