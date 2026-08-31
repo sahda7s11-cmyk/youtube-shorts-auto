@@ -1,4 +1,5 @@
 import asyncio
+import json
 import os
 import random
 import re
@@ -29,15 +30,14 @@ VOICE_FILE = Path("voice.mp3")
 SUBTITLE_FILE = Path("subtitles.ass")
 WORK_DIR = Path("clips")
 
+# ذاكرة المقاطع المستخدمة سابقًا
+USED_CLIPS_FILE = Path("used_pexels.json")
+
 VIDEO_WIDTH = 1080
 VIDEO_HEIGHT = 1920
 
-# عدد اللقطات
 NUMBER_OF_CLIPS = 7
-
-# مدة كل لقطة
-CLIP_DURATION = 3.5
-
+CLIP_DURATION = 3.2
 
 # =========================================================
 # TOPICS
@@ -46,6 +46,12 @@ CLIP_DURATION = 3.5
 TOPICS = [
     {
         "search": "football stadium match players",
+        "fallback_searches": [
+            "football match stadium",
+            "soccer stadium players",
+            "football players action",
+            "soccer game",
+        ],
         "title": "هل تعلم لماذا أصبحت البيانات مهمة جدًا في كرة القدم؟",
         "text": (
             "هل تعلم أن كرة القدم الحديثة أصبحت تعتمد على البيانات بشكل مذهل؟ "
@@ -57,18 +63,19 @@ TOPICS = [
             "بل أصبحت البيانات جزءًا مهمًا منها."
         ),
         "hashtags": [
-            "#Shorts",
-            "#كرة_القدم",
-            "#هل_تعلم",
-            "#معلومات",
-            "#Football",
-            "#Soccer",
-            "#رياضة",
+            "#Shorts", "#كرة_القدم", "#هل_تعلم",
+            "#معلومات", "#Football", "#Soccer", "#رياضة"
         ],
     },
 
     {
         "search": "football player training stadium",
+        "fallback_searches": [
+            "soccer training",
+            "football training",
+            "football player running",
+            "soccer players training",
+        ],
         "title": "هل تعلم كم يركض لاعب كرة القدم في المباراة؟",
         "text": (
             "هل فكرت يومًا كم يركض لاعب كرة القدم خلال مباراة واحدة؟ "
@@ -79,18 +86,19 @@ TOPICS = [
             "وسرعة كبيرة في اتخاذ القرار."
         ),
         "hashtags": [
-            "#Shorts",
-            "#كرة_القدم",
-            "#هل_تعلم",
-            "#معلومات_رياضية",
-            "#Football",
-            "#Soccer",
-            "#رياضة",
+            "#Shorts", "#كرة_القدم", "#هل_تعلم",
+            "#معلومات_رياضية", "#Football", "#Soccer", "#رياضة"
         ],
     },
 
     {
         "search": "football goalkeeper goal match",
+        "fallback_searches": [
+            "soccer goalkeeper save",
+            "football goalkeeper",
+            "goalkeeper training",
+            "soccer goal keeper",
+        ],
         "title": "لماذا يبدو حارس المرمى أسرع مما تتوقع؟",
         "text": (
             "هل تعلم أن رد فعل حارس المرمى يحدث خلال جزء صغير جدًا من الثانية؟ "
@@ -100,18 +108,19 @@ TOPICS = [
             "في المستوى الاحترافي، جزء من الثانية قد يصنع الفرق."
         ),
         "hashtags": [
-            "#Shorts",
-            "#كرة_القدم",
-            "#حراس_المرمى",
-            "#هل_تعلم",
-            "#Football",
-            "#Soccer",
-            "#رياضة",
+            "#Shorts", "#كرة_القدم", "#حراس_المرمى",
+            "#هل_تعلم", "#Football", "#Soccer", "#رياضة"
         ],
     },
 
     {
         "search": "football fans stadium crowd",
+        "fallback_searches": [
+            "soccer fans stadium",
+            "football crowd",
+            "football stadium fans",
+            "soccer supporters",
+        ],
         "title": "هل تعلم لماذا تختلف أجواء ملاعب كرة القدم؟",
         "text": (
             "هل لاحظت أن بعض ملاعب كرة القدم تبدو مختلفة تمامًا من ناحية الأجواء؟ "
@@ -121,18 +130,19 @@ TOPICS = [
             "وليس مجرد مكان لمشاهدة المباراة."
         ),
         "hashtags": [
-            "#Shorts",
-            "#كرة_القدم",
-            "#جماهير",
-            "#ملاعب",
-            "#هل_تعلم",
-            "#Football",
-            "#Soccer",
+            "#Shorts", "#كرة_القدم", "#جماهير",
+            "#ملاعب", "#هل_تعلم", "#Football", "#Soccer"
         ],
     },
 
     {
         "search": "football training player running",
+        "fallback_searches": [
+            "soccer training player",
+            "football skills training",
+            "soccer ball training",
+            "football practice",
+        ],
         "title": "لماذا يتدرب لاعبو كرة القدم على أشياء تبدو بسيطة؟",
         "text": (
             "هل تعلم أن أبسط المهارات في كرة القدم تحتاج إلى تكرار هائل؟ "
@@ -142,18 +152,19 @@ TOPICS = [
             "يحتاج اللاعب إلى تنفيذ المهارة بسرعة دون تردد."
         ),
         "hashtags": [
-            "#Shorts",
-            "#كرة_القدم",
-            "#تدريب",
-            "#هل_تعلم",
-            "#Football",
-            "#Soccer",
-            "#رياضة",
+            "#Shorts", "#كرة_القدم", "#تدريب",
+            "#هل_تعلم", "#Football", "#Soccer", "#رياضة"
         ],
     },
 
     {
         "search": "football goal stadium match",
+        "fallback_searches": [
+            "soccer goal",
+            "football scoring goal",
+            "soccer striker",
+            "football match goal",
+        ],
         "title": "هل تعلم لماذا يصعب تسجيل الهدف في كرة القدم؟",
         "text": (
             "تسجيل الهدف في كرة القدم ليس مجرد تسديدة قوية. "
@@ -163,18 +174,19 @@ TOPICS = [
             "وفي المباريات الكبيرة، قرار واحد سريع قد يغيّر النتيجة بالكامل."
         ),
         "hashtags": [
-            "#Shorts",
-            "#كرة_القدم",
-            "#أهداف",
-            "#هل_تعلم",
-            "#Football",
-            "#Soccer",
-            "#رياضة",
+            "#Shorts", "#كرة_القدم", "#أهداف",
+            "#هل_تعلم", "#Football", "#Soccer", "#رياضة"
         ],
     },
 
     {
         "search": "space earth science",
+        "fallback_searches": [
+            "earth space",
+            "planet earth",
+            "space universe",
+            "solar system",
+        ],
         "title": "هل تعلم أنك تتحرك الآن رغم أنك جالس؟",
         "text": (
             "هل تعلم أنك تتحرك الآن بسرعة هائلة رغم أنك جالس في مكانك؟ "
@@ -184,28 +196,20 @@ TOPICS = [
             "حتى عندما نشعر أننا ثابتون تمامًا."
         ),
         "hashtags": [
-            "#Shorts",
-            "#هل_تعلم",
-            "#علوم",
-            "#معلومات",
-            "#فضاء",
-            "#Science",
+            "#Shorts", "#هل_تعلم", "#علوم",
+            "#معلومات", "#فضاء", "#Science"
         ],
     },
 ]
 
 
 # =========================================================
-# BASIC FUNCTIONS
+# GENERAL
 # =========================================================
 
 def run_command(command):
     print("Running:", " ".join(str(x) for x in command))
-
-    subprocess.run(
-        command,
-        check=True,
-    )
+    subprocess.run(command, check=True)
 
 
 def check_environment():
@@ -218,15 +222,10 @@ def check_environment():
     }
 
     for name, value in required.items():
-
         if not value:
-            raise RuntimeError(
-                f"{name} is missing"
-            )
+            raise RuntimeError(f"{name} is missing")
 
-    WORK_DIR.mkdir(
-        exist_ok=True
-    )
+    WORK_DIR.mkdir(exist_ok=True)
 
 
 def clean_previous_files():
@@ -238,23 +237,65 @@ def clean_previous_files():
         VOICE_FILE,
         SUBTITLE_FILE,
     ]:
-
         if file.exists():
             file.unlink()
 
     if WORK_DIR.exists():
         shutil.rmtree(WORK_DIR)
 
-    WORK_DIR.mkdir(
-        exist_ok=True
-    )
+    WORK_DIR.mkdir(exist_ok=True)
+
+
+# =========================================================
+# MEMORY
+# =========================================================
+
+def load_used_clips():
+
+    if not USED_CLIPS_FILE.exists():
+        return set()
+
+    try:
+        with open(
+            USED_CLIPS_FILE,
+            "r",
+            encoding="utf-8"
+        ) as file:
+            data = json.load(file)
+
+        if isinstance(data, list):
+            return set(str(x) for x in data)
+
+    except Exception as error:
+        print(
+            "Warning: Could not read used_pexels.json:",
+            error
+        )
+
+    return set()
+
+
+def save_used_clips(used_clips):
+
+    with open(
+        USED_CLIPS_FILE,
+        "w",
+        encoding="utf-8"
+    ) as file:
+
+        json.dump(
+            sorted(list(used_clips)),
+            file,
+            ensure_ascii=False,
+            indent=2,
+        )
 
 
 # =========================================================
 # PEXELS
 # =========================================================
 
-def search_pexels(query):
+def search_pexels(query, page=1):
 
     url = "https://api.pexels.com/v1/videos/search"
 
@@ -266,7 +307,8 @@ def search_pexels(query):
         "query": query,
         "orientation": "portrait",
         "size": "medium",
-        "per_page": 30,
+        "per_page": 80,
+        "page": page,
         "locale": "en-US",
     }
 
@@ -279,18 +321,12 @@ def search_pexels(query):
 
     response.raise_for_status()
 
-    return response.json().get(
-        "videos",
-        []
-    )
+    return response.json().get("videos", [])
 
 
 def choose_video_file(video):
 
-    files = video.get(
-        "video_files",
-        []
-    )
+    files = video.get("video_files", [])
 
     vertical = []
 
@@ -308,22 +344,117 @@ def choose_video_file(video):
             and width >= 500
             and height >= 800
         ):
-            vertical.append(
-                video_file
-            )
+            vertical.append(video_file)
 
     if vertical:
 
         return max(
             vertical,
             key=lambda item:
-                (item.get("width") or 0)
-                *
-                (item.get("height") or 0)
+            (item.get("width") or 0)
+            *
+            (item.get("height") or 0)
         )
 
     return None
 
+
+def select_unique_videos(topic, used_clips):
+
+    search_queries = [
+        topic["search"]
+    ] + topic.get(
+        "fallback_searches",
+        []
+    )
+
+    candidates = {}
+
+    for query in search_queries:
+
+        print(
+            f"Searching Pexels: {query}"
+        )
+
+        for page in range(1, 4):
+
+            try:
+                videos = search_pexels(
+                    query,
+                    page
+                )
+            except Exception as error:
+                print(
+                    "Pexels search error:",
+                    error
+                )
+                continue
+
+            for video in videos:
+
+                video_id = str(
+                    video.get("id", "")
+                )
+
+                if not video_id:
+                    continue
+
+                if video_id in used_clips:
+                    continue
+
+                video_file = choose_video_file(
+                    video
+                )
+
+                if not video_file:
+                    continue
+
+                candidates[video_id] = {
+                    "id": video_id,
+                    "link": video_file["link"],
+                }
+
+            if len(candidates) >= 30:
+                break
+
+        if len(candidates) >= 14:
+            break
+
+    candidates_list = list(
+        candidates.values()
+    )
+
+    random.shuffle(
+        candidates_list
+    )
+
+    if len(candidates_list) < NUMBER_OF_CLIPS:
+
+        raise RuntimeError(
+            "Not enough NEW Pexels clips found. "
+            f"Found {len(candidates_list)}, "
+            f"need {NUMBER_OF_CLIPS}."
+        )
+
+    selected = candidates_list[
+        :NUMBER_OF_CLIPS
+    ]
+
+    print(
+        "Selected NEW Pexels IDs:"
+    )
+
+    for item in selected:
+        print(
+            f"  {item['id']}"
+        )
+
+    return selected
+
+
+# =========================================================
+# DOWNLOAD
+# =========================================================
 
 def download_video(url, destination):
 
@@ -363,10 +494,7 @@ def create_voice(text):
         communicate = edge_tts.Communicate(
             text,
             "ar-SA-HamedNeural",
-
-            # سرعة أعلى قليلًا وحيوية أكثر
             rate="+5%",
-
             volume="+0%",
             pitch="+0Hz",
         )
@@ -375,9 +503,7 @@ def create_voice(text):
             str(VOICE_FILE)
         )
 
-    asyncio.run(
-        generate()
-    )
+    asyncio.run(generate())
 
 
 # =========================================================
@@ -427,9 +553,7 @@ def clean_text(text):
 
 def split_text_for_subtitles(text):
 
-    words = clean_text(
-        text
-    ).split()
+    words = clean_text(text).split()
 
     parts = []
     current = []
@@ -441,10 +565,7 @@ def split_text_for_subtitles(text):
         )
 
         if len(candidate) <= 27:
-
-            current.append(
-                word
-            )
+            current.append(word)
 
         else:
 
@@ -453,9 +574,7 @@ def split_text_for_subtitles(text):
                     " ".join(current)
                 )
 
-            current = [
-                word
-            ]
+            current = [word]
 
     if current:
         parts.append(
@@ -467,9 +586,7 @@ def split_text_for_subtitles(text):
 
 def ass_time(seconds):
 
-    hours = int(
-        seconds // 3600
-    )
+    hours = int(seconds // 3600)
 
     minutes = int(
         (seconds % 3600) // 60
@@ -477,10 +594,8 @@ def ass_time(seconds):
 
     remaining = (
         seconds
-        -
-        hours * 3600
-        -
-        minutes * 60
+        - hours * 3600
+        - minutes * 60
     )
 
     whole_seconds = int(
@@ -491,15 +606,12 @@ def ass_time(seconds):
         round(
             (
                 remaining
-                -
-                whole_seconds
-            )
-            * 100
+                - whole_seconds
+            ) * 100
         )
     )
 
     if centiseconds >= 100:
-
         whole_seconds += 1
         centiseconds = 0
 
@@ -516,9 +628,7 @@ def create_subtitle_file(
     duration,
 ):
 
-    parts = split_text_for_subtitles(
-        text
-    )
+    parts = split_text_for_subtitles(text)
 
     if not parts:
         return
@@ -538,7 +648,7 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Arabic,Arial,64,&H00FFFFFF,&H00FFFFFF,&H00000000,&H99000000,-1,0,0,0,100,100,0,0,1,5,2,2,60,60,270,1
+Style: Arabic,Arial,64,&H00FFFFFF,&H00FFFFFF,&H00000000,&H99000000,-1,0,0,0,100,100,0,5,1,5,2,2,60,60,270,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -550,37 +660,27 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         encoding="utf-8-sig",
     ) as file:
 
-        file.write(
-            ass_header
-        )
+        file.write(ass_header)
 
         for part in parts:
 
             part_duration = (
                 len(part)
-                /
-                total_characters
+                / total_characters
             ) * duration
 
             start = current_time
 
             end = min(
                 current_time
-                +
-                part_duration,
+                + part_duration,
                 duration
             )
 
             subtitle_text = (
                 part
-                .replace(
-                    "{",
-                    "\\{"
-                )
-                .replace(
-                    "}",
-                    "\\}"
-                )
+                .replace("{", "\\{")
+                .replace("}", "\\}")
             )
 
             file.write(
@@ -607,20 +707,11 @@ def prepare_clip(
 
     start_time = random.uniform(
         0,
-        1.0
+        1.2
     )
 
-    # -----------------------------------------------------
-    # مهم:
-    # لا نستخدم zoompan هنا.
-    #
-    # هذا الفلتر:
-    # 1. يضبط الفيديو على ارتفاع 1920.
-    # 2. يحافظ على النسبة الأصلية.
-    # 3. يقص الجوانب الزائدة فقط.
-    # 4. ينتج 1080x1920 بدون ضغط للصورة.
-    # -----------------------------------------------------
-
+    # حركة Zoom خفيفة جدًا
+    # مع الحفاظ على 1080x1920
     video_filter = (
         "scale=-2:1920,"
         "crop=1080:1920,"
@@ -653,10 +744,10 @@ def prepare_clip(
         "libx264",
 
         "-preset",
-        "veryfast",
+        "medium",
 
         "-crf",
-        "19",
+        "18",
 
         "-pix_fmt",
         "yuv420p",
@@ -667,9 +758,7 @@ def prepare_clip(
         str(output_file),
     ]
 
-    run_command(
-        command
-    )
+    run_command(command)
 
 
 def create_concat_file(clips):
@@ -687,14 +776,10 @@ def create_concat_file(clips):
 
         for clip in clips:
 
-            absolute_path = (
-                clip.resolve()
-            )
+            absolute_path = clip.resolve()
 
             safe_path = (
-                str(
-                    absolute_path
-                )
+                str(absolute_path)
                 .replace(
                     "'",
                     "'\\''"
@@ -710,10 +795,8 @@ def create_concat_file(clips):
 
 def create_silent_video(clips):
 
-    concat_file = (
-        create_concat_file(
-            clips
-        )
+    concat_file = create_concat_file(
+        clips
     )
 
     silent_video = (
@@ -738,10 +821,10 @@ def create_silent_video(clips):
         "libx264",
 
         "-preset",
-        "veryfast",
+        "medium",
 
         "-crf",
-        "19",
+        "18",
 
         "-pix_fmt",
         "yuv420p",
@@ -757,9 +840,7 @@ def create_silent_video(clips):
         str(silent_video),
     ]
 
-    run_command(
-        command
-    )
+    run_command(command)
 
     return silent_video
 
@@ -773,9 +854,7 @@ def create_final_video(
     text,
 ):
 
-    audio_duration = (
-        get_audio_duration()
-    )
+    audio_duration = get_audio_duration()
 
     print(
         f"Audio duration: "
@@ -787,15 +866,7 @@ def create_final_video(
         audio_duration
     )
 
-    # -----------------------------------------------------
-    # تحسين الصوت:
-    # إزالة الترددات المنخفضة جدًا
-    # + ضغط خفيف
-    # + رفع مستوى الصوت بشكل متوازن
-    #
-    # بدون موسيقى.
-    # -----------------------------------------------------
-
+    # بدون موسيقى
     audio_filter = (
         "highpass=f=70,"
         "lowpass=f=14000,"
@@ -833,10 +904,10 @@ def create_final_video(
         "libx264",
 
         "-preset",
-        "veryfast",
+        "medium",
 
         "-crf",
-        "19",
+        "18",
 
         "-pix_fmt",
         "yuv420p",
@@ -864,13 +935,11 @@ def create_final_video(
         str(OUTPUT_VIDEO),
     ]
 
-    run_command(
-        final_command
-    )
+    run_command(final_command)
 
 
 # =========================================================
-# YOUTUBE UPLOAD
+# YOUTUBE
 # =========================================================
 
 def upload_to_youtube(
@@ -879,15 +948,9 @@ def upload_to_youtube(
 ):
 
     print()
-    print(
-        "================================"
-    )
-    print(
-        "Uploading to YouTube..."
-    )
-    print(
-        "================================"
-    )
+    print("================================")
+    print("Uploading to YouTube...")
+    print("================================")
 
     scopes = [
         "https://www.googleapis.com/auth/youtube.upload"
@@ -937,15 +1000,12 @@ def upload_to_youtube(
 
     while response is None:
 
-        status, response = (
-            request.next_chunk()
-        )
+        status, response = request.next_chunk()
 
         if status:
 
             progress = int(
-                status.progress()
-                * 100
+                status.progress() * 100
             )
 
             print(
@@ -953,9 +1013,7 @@ def upload_to_youtube(
                 f"{progress}%"
             )
 
-    video_id = response.get(
-        "id"
-    )
+    video_id = response.get("id")
 
     if not video_id:
 
@@ -965,21 +1023,11 @@ def upload_to_youtube(
         )
 
     print()
-    print(
-        "================================"
-    )
-    print(
-        "YOUTUBE UPLOAD SUCCESS"
-    )
-    print(
-        f"Video ID: {video_id}"
-    )
-    print(
-        "Privacy: PUBLIC"
-    )
-    print(
-        "================================"
-    )
+    print("================================")
+    print("YOUTUBE UPLOAD SUCCESS")
+    print(f"Video ID: {video_id}")
+    print("Privacy: PUBLIC")
+    print("================================")
 
 
 # =========================================================
@@ -993,93 +1041,46 @@ def main():
     clean_previous_files()
 
     # -----------------------------------------------------
+    # تحميل ذاكرة المقاطع السابقة
+    # -----------------------------------------------------
+
+    used_clips = load_used_clips()
+
+    print(
+        f"Previously used Pexels clips: "
+        f"{len(used_clips)}"
+    )
+
+    # -----------------------------------------------------
     # اختيار موضوع
     # -----------------------------------------------------
 
-    topic = random.choice(
-        TOPICS
-    )
+    topic = random.choice(TOPICS)
 
-    print(
-        "Selected topic:"
-    )
+    print()
+    print("Selected topic:")
+    print(topic["title"])
 
-    print(
-        topic["title"]
+    # -----------------------------------------------------
+    # اختيار مقاطع جديدة بالكامل
+    # -----------------------------------------------------
+
+    print()
+    print("Searching for NEW Pexels clips...")
+
+    selected = select_unique_videos(
+        topic,
+        used_clips
     )
 
     # -----------------------------------------------------
-    # PEXELS SEARCH
+    # حفظ IDs فورًا
     # -----------------------------------------------------
 
-    print(
-        "Searching Pexels..."
-    )
+    for item in selected:
+        used_clips.add(item["id"])
 
-    videos = search_pexels(
-        topic["search"]
-    )
-
-    if not videos:
-
-        raise RuntimeError(
-            "No Pexels videos found."
-        )
-
-    random.shuffle(
-        videos
-    )
-
-    # -----------------------------------------------------
-    # اختيار لقطات عمودية فقط
-    # -----------------------------------------------------
-
-    selected = []
-
-    used_ids = set()
-
-    for video in videos:
-
-        video_id = video.get(
-            "id"
-        )
-
-        if not video_id:
-            continue
-
-        if video_id in used_ids:
-            continue
-
-        video_file = (
-            choose_video_file(
-                video
-            )
-        )
-
-        if not video_file:
-            continue
-
-        selected.append(
-            video_file["link"]
-        )
-
-        used_ids.add(
-            video_id
-        )
-
-        if len(selected) >= NUMBER_OF_CLIPS:
-            break
-
-    if len(selected) < 4:
-
-        raise RuntimeError(
-            "Not enough suitable "
-            "vertical videos found."
-        )
-
-    print(
-        f"Selected {len(selected)} clips."
-    )
+    save_used_clips(used_clips)
 
     # -----------------------------------------------------
     # DOWNLOAD
@@ -1087,9 +1088,7 @@ def main():
 
     downloaded = []
 
-    for index, url in enumerate(
-        selected
-    ):
+    for index, item in enumerate(selected):
 
         destination = (
             WORK_DIR /
@@ -1097,21 +1096,18 @@ def main():
         )
 
         download_video(
-            url,
+            item["link"],
             destination
         )
 
-        downloaded.append(
-            destination
-        )
+        downloaded.append(destination)
 
     # -----------------------------------------------------
     # VOICE
     # -----------------------------------------------------
 
-    print(
-        "Creating Arabic narration..."
-    )
+    print()
+    print("Creating Arabic narration...")
 
     create_voice(
         topic["text"]
@@ -1121,15 +1117,12 @@ def main():
     # PREPARE CLIPS
     # -----------------------------------------------------
 
-    print(
-        "Preparing vertical clips..."
-    )
+    print()
+    print("Preparing professional vertical clips...")
 
     prepared_clips = []
 
-    for index, source in enumerate(
-        downloaded
-    ):
+    for index, source in enumerate(downloaded):
 
         output = (
             WORK_DIR /
@@ -1142,31 +1135,25 @@ def main():
             CLIP_DURATION
         )
 
-        prepared_clips.append(
-            output
-        )
+        prepared_clips.append(output)
 
     # -----------------------------------------------------
     # JOIN
     # -----------------------------------------------------
 
-    print(
-        "Joining clips..."
-    )
+    print()
+    print("Joining clips...")
 
-    silent_video = (
-        create_silent_video(
-            prepared_clips
-        )
+    silent_video = create_silent_video(
+        prepared_clips
     )
 
     # -----------------------------------------------------
     # AUDIO + SUBTITLES
     # -----------------------------------------------------
 
-    print(
-        "Adding narration and subtitles..."
-    )
+    print()
+    print("Adding narration and subtitles...")
 
     create_final_video(
         silent_video,
@@ -1174,7 +1161,7 @@ def main():
     )
 
     # -----------------------------------------------------
-    # FINAL CHECK
+    # CHECK
     # -----------------------------------------------------
 
     if not OUTPUT_VIDEO.exists():
@@ -1190,33 +1177,20 @@ def main():
     )
 
     print()
-    print(
-        "================================"
-    )
-    print(
-        "VIDEO CREATED SUCCESSFULLY"
-    )
-    print(
-        f"Size: {file_size:.2f} MB"
-    )
-    print(
-        "Resolution: 1080x1920"
-    )
-    print(
-        "Aspect ratio: 9:16"
-    )
-    print(
-        "Music: OFF"
-    )
-    print(
-        "Arabic subtitles: ON"
-    )
-    print(
-        "================================"
-    )
+    print("================================")
+    print("VIDEO CREATED SUCCESSFULLY")
+    print(f"Size: {file_size:.2f} MB")
+    print("Resolution: 1080x1920")
+    print("Aspect ratio: 9:16")
+    print("FPS: 30")
+    print("CRF: 18")
+    print("Music: OFF")
+    print("Arabic subtitles: ON")
+    print("NEW PEXELS CLIPS: YES")
+    print("================================")
 
     # -----------------------------------------------------
-    # DESCRIPTION + HASHTAGS
+    # DESCRIPTION
     # -----------------------------------------------------
 
     hashtags = " ".join(
@@ -1225,10 +1199,8 @@ def main():
 
     description = (
         topic["text"]
-        +
-        "\n\n"
-        +
-        hashtags
+        + "\n\n"
+        + hashtags
     )
 
     # -----------------------------------------------------
