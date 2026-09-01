@@ -1,4 +1,5 @@
 import asyncio
+import hashlib
 import json
 import os
 import random
@@ -30,7 +31,7 @@ VOICE_FILE = Path("voice.mp3")
 SUBTITLE_FILE = Path("subtitles.ass")
 WORK_DIR = Path("clips")
 
-# ذاكرة المقاطع
+# ذاكرة مقاطع Pexels
 USED_CLIPS_FILE = Path("used_pexels.json")
 
 # ذاكرة المحتوى
@@ -46,16 +47,9 @@ CLIP_DURATION = 3.2
 # =========================================================
 # TOPICS
 # =========================================================
-# مهم:
-# كل موضوع له topic_id مختلف.
-# بعد نشر الموضوع بنجاح يتم تسجيل topic_id.
-# لذلك لا يمكن أن يعود نفس النص والعنوان والفكرة مرة أخرى.
-# =========================================================
 
 TOPICS = [
-
     {
-        "topic_id": "football_data_001",
         "search": "football stadium match players",
         "fallback_searches": [
             "football match stadium",
@@ -85,7 +79,6 @@ TOPICS = [
     },
 
     {
-        "topic_id": "football_distance_002",
         "search": "football player training stadium",
         "fallback_searches": [
             "soccer training",
@@ -114,7 +107,6 @@ TOPICS = [
     },
 
     {
-        "topic_id": "football_goalkeeper_003",
         "search": "football goalkeeper goal match",
         "fallback_searches": [
             "soccer goalkeeper save",
@@ -142,7 +134,6 @@ TOPICS = [
     },
 
     {
-        "topic_id": "football_stadium_004",
         "search": "football fans stadium crowd",
         "fallback_searches": [
             "soccer fans stadium",
@@ -170,7 +161,6 @@ TOPICS = [
     },
 
     {
-        "topic_id": "football_training_005",
         "search": "football training player running",
         "fallback_searches": [
             "soccer training player",
@@ -198,7 +188,6 @@ TOPICS = [
     },
 
     {
-        "topic_id": "football_scoring_006",
         "search": "football goal stadium match",
         "fallback_searches": [
             "soccer goal",
@@ -226,7 +215,6 @@ TOPICS = [
     },
 
     {
-        "topic_id": "space_earth_007",
         "search": "space earth science",
         "fallback_searches": [
             "earth space",
@@ -255,7 +243,7 @@ TOPICS = [
 
 
 # =========================================================
-# BASIC
+# BASIC FUNCTIONS
 # =========================================================
 
 def run_command(command):
@@ -267,7 +255,7 @@ def run_command(command):
 
     subprocess.run(
         command,
-        check=True,
+        check=True
     )
 
 
@@ -283,7 +271,6 @@ def check_environment():
     for name, value in required.items():
 
         if not value:
-
             raise RuntimeError(
                 f"{name} is missing"
             )
@@ -319,7 +306,7 @@ def clean_previous_files():
 
 
 # =========================================================
-# MEMORY - PEXELS
+# PEXELS MEMORY
 # =========================================================
 
 def load_used_clips():
@@ -332,7 +319,7 @@ def load_used_clips():
         with open(
             USED_CLIPS_FILE,
             "r",
-            encoding="utf-8",
+            encoding="utf-8"
         ) as file:
 
             data = json.load(file)
@@ -362,29 +349,93 @@ def save_used_clips(
     with open(
         USED_CLIPS_FILE,
         "w",
-        encoding="utf-8",
+        encoding="utf-8"
     ) as file:
 
         json.dump(
             sorted(
-                list(
-                    used_clips
-                )
+                list(used_clips)
             ),
             file,
             ensure_ascii=False,
-            indent=2,
+            indent=2
         )
 
 
 # =========================================================
-# MEMORY - TOPICS
+# CONTENT MEMORY
 # =========================================================
+
+def normalize_content(text):
+
+    if not text:
+        return ""
+
+    text = text.lower()
+
+    text = re.sub(
+        r"[\u064B-\u065F\u0670]",
+        "",
+        text
+    )
+
+    text = re.sub(
+        r"[^\w\s\u0600-\u06FF]",
+        " ",
+        text
+    )
+
+    text = re.sub(
+        r"\s+",
+        " ",
+        text
+    )
+
+    return text.strip()
+
+
+def create_topic_id(topic):
+
+    """
+    معرف ثابت وفريد للمحتوى.
+
+    يعتمد على:
+    - العنوان
+    - النص
+    - كلمة البحث
+
+    لذلك إذا تكرر نفس المحتوى فلن يسمح النظام
+    باستخدامه مرة ثانية.
+    """
+
+    title = normalize_content(
+        topic.get("title", "")
+    )
+
+    text = normalize_content(
+        topic.get("text", "")
+    )
+
+    search = normalize_content(
+        topic.get("search", "")
+    )
+
+    raw = (
+        title
+        + "|"
+        + text
+        + "|"
+        + search
+    )
+
+    return hashlib.sha256(
+        raw.encode("utf-8")
+    ).hexdigest()
+
 
 def load_used_topics():
 
     if not USED_TOPICS_FILE.exists():
-
         return set()
 
     try:
@@ -392,15 +443,12 @@ def load_used_topics():
         with open(
             USED_TOPICS_FILE,
             "r",
-            encoding="utf-8",
+            encoding="utf-8"
         ) as file:
 
             data = json.load(file)
 
-        if isinstance(
-            data,
-            list
-        ):
+        if isinstance(data, list):
 
             return set(
                 str(x)
@@ -425,155 +473,75 @@ def save_used_topics(
     with open(
         USED_TOPICS_FILE,
         "w",
-        encoding="utf-8",
+        encoding="utf-8"
     ) as file:
 
         json.dump(
             sorted(
-                list(
-                    used_topics
-                )
+                list(used_topics)
             ),
             file,
             ensure_ascii=False,
-            indent=2,
+            indent=2
         )
 
 
-def choose_unused_topic(
+def select_unique_topic(
     used_topics
 ):
 
-    available = []
+    available_topics = []
 
     for topic in TOPICS:
 
-        topic_id = str(
-            topic["topic_id"]
+        topic_id = create_topic_id(
+            topic
         )
 
-        if topic_id not in used_topics:
+        if topic_id in used_topics:
+            continue
 
-            available.append(
+        available_topics.append(
+            (
+                topic_id,
                 topic
             )
+        )
 
-    # -----------------------------------------------------
-    # إذا انتهت القائمة الحالية:
-    #
-    # لا نسمح بإعادة موضوع قديم.
-    # نوقف التشغيل بدل نشر محتوى مكرر.
-    # -----------------------------------------------------
-
-    if not available:
+    if not available_topics:
 
         raise RuntimeError(
-            "NO UNUSED TOPICS LEFT. "
-            "No video was uploaded because "
-            "all current topics were already used. "
-            "Add new unique topics to TOPICS."
+            "NO NEW CONTENT AVAILABLE. "
+            "All current topics have already "
+            "been used. Add new unique topics "
+            "to TOPICS."
         )
 
-    return random.choice(
-        available
+    topic_id, topic = random.choice(
+        available_topics
     )
 
+    print()
+    print(
+        "================================"
+    )
+    print(
+        "NEW CONTENT SELECTED"
+    )
+    print(
+        "================================"
+    )
 
-# =========================================================
-# GIT MEMORY PERSISTENCE
-# =========================================================
+    print(
+        topic["title"]
+    )
 
-def persist_memory_to_github():
+    print(
+        f"Unused topics remaining: "
+        f"{len(available_topics) - 1}"
+    )
 
-    try:
-
-        print()
-        print(
-            "Saving memory to GitHub..."
-        )
-
-        subprocess.run(
-            [
-                "git",
-                "config",
-                "user.name",
-                "youtube-shorts-bot",
-            ],
-            check=True,
-        )
-
-        subprocess.run(
-            [
-                "git",
-                "config",
-                "user.email",
-                "youtube-shorts-bot@users.noreply.github.com",
-            ],
-            check=True,
-        )
-
-        subprocess.run(
-            [
-                "git",
-                "add",
-                str(USED_CLIPS_FILE),
-                str(USED_TOPICS_FILE),
-            ],
-            check=True,
-        )
-
-        result = subprocess.run(
-            [
-                "git",
-                "diff",
-                "--cached",
-                "--quiet",
-            ]
-        )
-
-        # 0 = لا يوجد تغيير
-        if result.returncode == 0:
-
-            print(
-                "No memory changes to commit."
-            )
-
-            return
-
-        subprocess.run(
-            [
-                "git",
-                "commit",
-                "-m",
-                "Update Shorts memory",
-            ],
-            check=True,
-        )
-
-        subprocess.run(
-            [
-                "git",
-                "push",
-            ],
-            check=True,
-        )
-
-        print(
-            "Memory successfully saved to GitHub."
-        )
-
-    except Exception as error:
-
-        # مهم:
-        # لا نعتبر فشل حفظ الذاكرة سببًا
-        # لإعادة رفع الفيديو.
-        print(
-            "WARNING: Could not persist memory to GitHub:"
-        )
-
-        print(
-            error
-        )
+    return topic_id, topic
 
 
 # =========================================================
@@ -582,7 +550,7 @@ def persist_memory_to_github():
 
 def search_pexels(
     query,
-    page=1,
+    page=1
 ):
 
     url = (
@@ -607,7 +575,7 @@ def search_pexels(
         url,
         headers=headers,
         params=params,
-        timeout=30,
+        timeout=30
     )
 
     response.raise_for_status()
@@ -775,6 +743,7 @@ def select_unique_videos(
         :NUMBER_OF_CLIPS
     ]
 
+    print()
     print(
         "Selected NEW Pexels IDs:"
     )
@@ -804,7 +773,7 @@ def download_video(
     response = requests.get(
         url,
         stream=True,
-        timeout=90,
+        timeout=90
     )
 
     response.raise_for_status()
@@ -819,7 +788,6 @@ def download_video(
         ):
 
             if chunk:
-
                 file.write(
                     chunk
                 )
@@ -840,7 +808,7 @@ def create_voice(
             "ar-SA-HamedNeural",
             rate="+5%",
             volume="+0%",
-            pitch="+0Hz",
+            pitch="+0Hz"
         )
 
         await communicate.save(
@@ -855,7 +823,7 @@ def create_voice(
 
 
 # =========================================================
-# AUDIO
+# AUDIO DURATION
 # =========================================================
 
 def get_audio_duration():
@@ -876,7 +844,7 @@ def get_audio_duration():
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
-        check=True,
+        check=True
     )
 
     return float(
@@ -997,7 +965,7 @@ def ass_time(
 
 def create_subtitle_file(
     text,
-    duration,
+    duration
 ):
 
     parts = split_text_for_subtitles(
@@ -1031,7 +999,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     with open(
         SUBTITLE_FILE,
         "w",
-        encoding="utf-8-sig",
+        encoding="utf-8-sig"
     ) as file:
 
         file.write(
@@ -1085,7 +1053,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 def prepare_clip(
     input_file,
     output_file,
-    duration,
+    duration
 ):
 
     start_time = random.uniform(
@@ -1093,7 +1061,6 @@ def prepare_clip(
         1.2
     )
 
-    # إصلاح المقاطع غير المطابقة لـ 9:16
     video_filter = (
         "scale=1080:1920:"
         "force_original_aspect_ratio=increase,"
@@ -1252,7 +1219,7 @@ def create_silent_video(
 
 def create_final_video(
     silent_video,
-    text,
+    text
 ):
 
     audio_duration = (
@@ -1349,12 +1316,12 @@ def create_final_video(
 
 
 # =========================================================
-# YOUTUBE
+# YOUTUBE UPLOAD
 # =========================================================
 
 def upload_to_youtube(
     title,
-    description,
+    description
 ):
 
     print()
@@ -1380,7 +1347,7 @@ def upload_to_youtube(
         ),
         client_id=YOUTUBE_CLIENT_ID,
         client_secret=YOUTUBE_CLIENT_SECRET,
-        scopes=scopes,
+        scopes=scopes
     )
 
     youtube = build(
@@ -1407,13 +1374,13 @@ def upload_to_youtube(
             OUTPUT_VIDEO
         ),
         mimetype="video/mp4",
-        resumable=True,
+        resumable=True
     )
 
     request = youtube.videos().insert(
         part="snippet,status",
         body=body,
-        media_body=media,
+        media_body=media
     )
 
     response = None
@@ -1477,47 +1444,39 @@ def main():
 
     clean_previous_files()
 
-    # -----------------------------------------------------
-    # تحميل الذاكرة
-    # -----------------------------------------------------
+    # =====================================================
+    # PEXELS MEMORY
+    # =====================================================
 
     used_clips = load_used_clips()
-    used_topics = load_used_topics()
 
     print(
         f"Previously used Pexels clips: "
         f"{len(used_clips)}"
     )
 
+    # =====================================================
+    # CONTENT MEMORY
+    # =====================================================
+
+    used_topics = load_used_topics()
+
     print(
-        f"Previously used topics: "
+        f"Previously used contents: "
         f"{len(used_topics)}"
     )
 
-    # -----------------------------------------------------
-    # اختيار موضوع غير مستخدم
-    # -----------------------------------------------------
+    # =====================================================
+    # SELECT UNIQUE CONTENT
+    # =====================================================
 
-    topic = choose_unused_topic(
+    topic_id, topic = select_unique_topic(
         used_topics
     )
 
-    print()
-    print(
-        "Selected NEW topic:"
-    )
-
-    print(
-        f"Topic ID: {topic['topic_id']}"
-    )
-
-    print(
-        topic["title"]
-    )
-
-    # -----------------------------------------------------
-    # PEXELS
-    # -----------------------------------------------------
+    # =====================================================
+    # SEARCH NEW PEXELS CLIPS
+    # =====================================================
 
     print()
     print(
@@ -1529,14 +1488,20 @@ def main():
         used_clips
     )
 
+    # =====================================================
+    # CURRENT VIDEO CLIP IDS
+    #
+    # لا نحفظها إلا بعد نجاح الرفع.
+    # =====================================================
+
     current_video_ids = set(
         item["id"]
         for item in selected
     )
 
-    # -----------------------------------------------------
+    # =====================================================
     # DOWNLOAD
-    # -----------------------------------------------------
+    # =====================================================
 
     downloaded = []
 
@@ -1558,9 +1523,9 @@ def main():
             destination
         )
 
-    # -----------------------------------------------------
+    # =====================================================
     # VOICE
-    # -----------------------------------------------------
+    # =====================================================
 
     print()
     print(
@@ -1571,9 +1536,9 @@ def main():
         topic["text"]
     )
 
-    # -----------------------------------------------------
+    # =====================================================
     # PREPARE CLIPS
-    # -----------------------------------------------------
+    # =====================================================
 
     print()
     print(
@@ -1602,9 +1567,9 @@ def main():
             output
         )
 
-    # -----------------------------------------------------
+    # =====================================================
     # JOIN
-    # -----------------------------------------------------
+    # =====================================================
 
     print()
     print(
@@ -1617,9 +1582,9 @@ def main():
         )
     )
 
-    # -----------------------------------------------------
+    # =====================================================
     # AUDIO + SUBTITLES
-    # -----------------------------------------------------
+    # =====================================================
 
     print()
     print(
@@ -1631,9 +1596,9 @@ def main():
         topic["text"]
     )
 
-    # -----------------------------------------------------
+    # =====================================================
     # FINAL CHECK
-    # -----------------------------------------------------
+    # =====================================================
 
     if not OUTPUT_VIDEO.exists():
 
@@ -1679,15 +1644,15 @@ def main():
         "NEW PEXELS CLIPS: YES"
     )
     print(
-        "NEW TOPIC: YES"
+        "NEW CONTENT MEMORY: YES"
     )
     print(
         "================================"
     )
 
-    # -----------------------------------------------------
+    # =====================================================
     # DESCRIPTION
-    # -----------------------------------------------------
+    # =====================================================
 
     hashtags = " ".join(
         topic["hashtags"]
@@ -1699,22 +1664,25 @@ def main():
         + hashtags
     )
 
-    # -----------------------------------------------------
+    # =====================================================
     # UPLOAD
-    # -----------------------------------------------------
+    # =====================================================
 
     video_id = upload_to_youtube(
         topic["title"],
         description
     )
 
-    # -----------------------------------------------------
-    # حفظ الذاكرة بعد نجاح الرفع فقط
-    # -----------------------------------------------------
+    # =====================================================
+    # SAVE MEMORIES ONLY AFTER SUCCESSFUL UPLOAD
+    # =====================================================
 
     if video_id:
 
-        # ذاكرة المقاطع
+        # -------------------------------------------------
+        # PEXELS MEMORY
+        # -------------------------------------------------
+
         used_clips.update(
             current_video_ids
         )
@@ -1723,11 +1691,23 @@ def main():
             used_clips
         )
 
-        # ذاكرة الموضوع
+        print()
+        print(
+            "Pexels memory updated "
+            "after successful upload."
+        )
+
+        print(
+            f"Total remembered clips: "
+            f"{len(used_clips)}"
+        )
+
+        # -------------------------------------------------
+        # CONTENT MEMORY
+        # -------------------------------------------------
+
         used_topics.add(
-            str(
-                topic["topic_id"]
-            )
+            topic_id
         )
 
         save_used_topics(
@@ -1736,32 +1716,14 @@ def main():
 
         print()
         print(
-            "================================"
+            "CONTENT MEMORY UPDATED "
+            "AFTER SUCCESSFUL UPLOAD."
         )
+
         print(
-            "MEMORY UPDATED"
-        )
-        print(
-            f"Topic saved: "
-            f"{topic['topic_id']}"
-        )
-        print(
-            f"Total used topics: "
+            f"Total remembered contents: "
             f"{len(used_topics)}"
         )
-        print(
-            f"Total remembered clips: "
-            f"{len(used_clips)}"
-        )
-        print(
-            "================================"
-        )
-
-        # -------------------------------------------------
-        # محاولة حفظ الذاكرة داخل GitHub
-        # -------------------------------------------------
-
-        persist_memory_to_github()
 
 
 # =========================================================
