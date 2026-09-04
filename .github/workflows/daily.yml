@@ -3,6 +3,10 @@ name: Daily YouTube Short
 permissions:
   contents: write
 
+concurrency:
+  group: youtube-shorts-automation
+  cancel-in-progress: false
+
 on:
   schedule:
     # 5:00 PM Saudi Arabia time (UTC+3)
@@ -18,23 +22,45 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # =====================================================
+      # CHECKOUT
+      # =====================================================
+
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # =====================================================
+      # PYTHON
+      # =====================================================
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
+      # =====================================================
+      # FFMPEG
+      # =====================================================
+
       - name: Install FFmpeg
         run: |
           sudo apt-get update
           sudo apt-get install -y ffmpeg
 
+      # =====================================================
+      # DEPENDENCIES
+      # =====================================================
+
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+
+      # =====================================================
+      # RUN AUTOMATION
+      # =====================================================
 
       - name: Run YouTube Shorts automation
         env:
@@ -46,6 +72,10 @@ jobs:
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
         run: |
           python main.py
+
+      # =====================================================
+      # VERIFY VIDEO
+      # =====================================================
 
       - name: Verify generated video
         run: |
@@ -64,19 +94,46 @@ jobs:
             -of default=noprint_wrappers=1 \
             short.mp4
 
-      - name: Save used Pexels clips
+      # =====================================================
+      # SAVE MEMORY
+      # =====================================================
+
+      - name: Save content and clips memory
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add used_pexels.json
+          echo "Checking memory files..."
+
+          if [ -f "used_pexels.json" ]; then
+            echo "used_pexels.json found."
+          else
+            echo "WARNING: used_pexels.json not found."
+          fi
+
+          if [ -f "used_content.json" ]; then
+            echo "used_content.json found."
+          else
+            echo "WARNING: used_content.json not found."
+          fi
+
+          git add used_pexels.json used_content.json
 
           if git diff --cached --quiet; then
-            echo "No changes to save."
+            echo "No memory changes to save."
           else
-            git commit -m "Update used Pexels clips"
+            echo "Memory changes detected."
+
+            git commit -m "Update Shorts content memory"
+
             git push
+
+            echo "Memory successfully saved to repository."
           fi
+
+      # =====================================================
+      # SAVE GENERATED SHORT
+      # =====================================================
 
       - name: Save generated Short
         uses: actions/upload-artifact@v4
