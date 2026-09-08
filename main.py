@@ -748,6 +748,7 @@ def create_voice(text):
             rate=VOICE_RATE,
             volume=VOICE_VOLUME,
             pitch=VOICE_PITCH,
+            boundary="WordBoundary",
         )
 
         with open(VOICE_FILE, "wb") as audio_file:
