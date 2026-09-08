@@ -41,14 +41,46 @@ VIDEO_HEIGHT = 1920
 
 NUMBER_OF_CLIPS = 7
 CLIP_DURATION = 3.2
-MIN_CLIP_DURATION = 2.8
-MAX_CLIP_DURATION = 5.8
 FPS = 30
 
 VOICE_NAME = "ar-SA-HamedNeural"
 VOICE_RATE = "+5%"
 VOICE_VOLUME = "+0%"
 VOICE_PITCH = "+0Hz"
+
+# =========================================================
+# STRICT CONTENT BLOCK
+# =========================================================
+# These filters are checked before content selection and again before upload.
+# They are intentionally conservative: the automation refuses to publish
+# instead of silently allowing a blocked topic.
+BLOCKED_CONTENT_TERMS = {
+    # Adult / sexual content
+    "porn", "pornography", "nude", "nudity", "sexual", "sex",
+    "adult", "erotic", "xxx",
+    "اباحي", "إباحي", "عري", "عارية", "جنسي", "جنس", "للكبار",
+    # Drugs / gambling / self-harm / dangerous challenges
+    "drug", "drugs", "cocaine", "heroin", "meth", "marijuana",
+    "gambling", "casino", "betting", "suicide", "self-harm",
+    "challenge dangerous",
+    "مخدر", "مخدرات", "قمار", "رهان", "انتحار", "إيذاء النفس",
+    # Female-person references requested to be excluded from this channel
+    "woman", "women", "woman's", "girl", "girls", "female",
+    "امرأة", "امرأه", "نساء", "مرأة", "بنت", "بنات", "أنثى",
+    # Rainbow / pride-related references requested to be excluded
+    "rainbow", "pride", "lgbt", "lgbtq",
+    "قوس قزح", "فخر",
+}
+
+BLOCKED_VIDEO_METADATA_TERMS = {
+    "woman", "women", "girl", "girls", "female",
+    "امرأة", "نساء", "بنت", "بنات", "أنثى",
+    "rainbow", "pride", "lgbt", "lgbtq",
+    "قوس قزح",
+}
+
+# Exact text used for TTS is locked to the selected topic.
+TTS_BOUNDARIES = []
 
 YOUTUBE_PRIVACY = "public"
 YOUTUBE_CATEGORY_ID = "17"
@@ -332,69 +364,6 @@ TOPICS = [
         "text": "الهواء موجود حولنا في كل مكان، لكننا لا نراه لأن معظم مكوناته غازات شفافة. ومع ذلك فإن للهواء كتلة وضغطًا ويمكنه التأثير في الأجسام. ولهذا نستطيع ملاحظة وجوده من خلال الرياح والضغط وحركة الأشياء.",
         "hashtags": ["#Shorts", "#علوم", "#هواء", "#طقس", "#هل_تعلم"],
     },
-    {'search': 'football penalty kick', 'fallback_searches': ['soccer penalty kick', 'football science'], 'title': 'لماذا تبدو ركلة الجزاء أسهل مما هي عليه؟', 'text': 'ركلة الجزاء تبدو بسيطة لأن المسافة قصيرة، لكن الحارس واللاعب تحت ضغط كبير. اللاعب يجب أن يختار الزاوية والسرعة والتوقيت خلال لحظة واحدة، والحارس يحاول توقع الاتجاه قبل التسديدة. لذلك التفاصيل الصغيرة قد تحسم الركلة.', 'hashtags': ['#Shorts', '#كرة_القدم', '#ركلة_جزاء', '#رياضة']},
-    {'search': 'football referee', 'fallback_searches': ['soccer referee', 'football science'], 'title': 'كيف يتابع الحكم مباراة سريعة بهذا الشكل؟', 'text': 'الحكم في كرة القدم لا يراقب الكرة فقط. عليه متابعة المخالفات والتمركز واللاعبين في مساحة واسعة، ويتحرك باستمرار ليبقى قريبًا من الأحداث. لهذا يعتمد الحكام على التدريب والتمركز والتعاون مع بقية طاقم التحكيم.', 'hashtags': ['#Shorts', '#كرة_القدم', '#حكم', '#رياضة']},
-    {'search': 'football corner kick', 'fallback_searches': ['soccer corner kick', 'football science'], 'title': 'لماذا تكون الركلات الركنية خطيرة أحيانًا؟', 'text': 'الركلة الركنية تمنح الفريق فرصة إرسال الكرة مباشرة إلى منطقة مزدحمة أمام المرمى. اللاعبون يتحركون في لحظة واحدة بحثًا عن أفضل موقع، بينما يحاول الدفاع إبعاد الكرة. ولهذا قد تتحول ركلة واحدة إلى فرصة خطيرة جدًا.', 'hashtags': ['#Shorts', '#كرة_القدم', '#ركنية', '#رياضة']},
-    {'search': 'football goalkeeper gloves', 'fallback_searches': ['soccer goalkeeper gloves', 'football science'], 'title': 'لماذا يرتدي حارس المرمى قفازات خاصة؟', 'text': 'قفازات حارس المرمى مصممة لتساعده على الإمساك بالكرة وحماية يديه. سطح القفاز يمكن أن يوفر احتكاكًا أفضل مع الكرة، كما تساعد سماكته في تقليل أثر بعض التسديدات. لذلك القفازات جزء مهم من معدات الحارس.', 'hashtags': ['#Shorts', '#كرة_القدم', '#حارس_مرمى', '#رياضة']},
-    {'search': 'basketball dunk', 'fallback_searches': ['basketball science'], 'title': 'كيف يستطيع لاعب كرة السلة القفز بهذا الارتفاع؟', 'text': 'القفز العالي في كرة السلة يعتمد على قوة عضلات الساقين وسرعة الدفع والتنسيق بين أجزاء الجسم. اللاعب يحول الحركة الأفقية أو الثابتة إلى قوة دفع للأعلى خلال وقت قصير. التدريب يحسن هذه القدرة مع الوقت.', 'hashtags': ['#Shorts', '#كرة_السلة', '#رياضة', '#معلومات']},
-    {'search': 'tennis serve', 'fallback_searches': ['tennis science'], 'title': 'لماذا تُعد الإرسالية من أهم ضربات التنس؟', 'text': 'الإرسالية تبدأ بها النقطة ويمكن أن تمنح اللاعب أفضلية كبيرة منذ البداية. سرعة الكرة وزاوية الإرسال ومكان سقوطها كلها تؤثر في صعوبة رد الخصم. ولهذا يتدرب لاعبو التنس على الإرسالية بشكل مستمر.', 'hashtags': ['#Shorts', '#تنس', '#رياضة', '#معلومات']},
-    {'search': 'formula one', 'fallback_searches': ['formula science'], 'title': 'لماذا تتغير إطارات سيارات السباق؟', 'text': 'إطارات سيارات السباق لا تعمل بنفس الطريقة في كل الظروف. بعض الأنواع تعطي تماسكًا أكبر، وأخرى تتحمل ظروفًا مختلفة. درجة الحرارة وحالة المسار وطريقة القيادة تؤثر في الاختيار، ولهذا قد يكون قرار الإطارات جزءًا مهمًا من السباق.', 'hashtags': ['#Shorts', '#فورمولا_1', '#سيارات', '#رياضة']},
-    {'search': 'race car pit stop', 'fallback_searches': ['race science'], 'title': 'كيف يتم تغيير إطارات سيارة السباق بهذه السرعة؟', 'text': 'توقف سيارة السباق لتغيير الإطارات يعتمد على تقسيم العمل بين أفراد الفريق. كل شخص يعرف مهمته مسبقًا ويتدرب عليها مرات كثيرة، لذلك يمكن تنفيذ عدة خطوات في ثوانٍ قليلة. السرعة هنا نتيجة للتخطيط والتنسيق والدقة.', 'hashtags': ['#Shorts', '#سباقات', '#فورمولا_1', '#سيارات']},
-    {'search': 'airplane wing', 'fallback_searches': ['airplane science'], 'title': 'كيف تساعد أجنحة الطائرة على الطيران؟', 'text': 'جناح الطائرة يغير طريقة مرور الهواء حوله ويولد قوة رفع عندما تتحرك الطائرة بالسرعة المناسبة. شكل الجناح وزاويته وسرعة الهواء كلها عوامل مهمة. لذلك الجناح ليس مجرد سطح يحمل الطائرة، بل جزء أساسي من نظام الطيران.', 'hashtags': ['#Shorts', '#طيران', '#طائرات', '#علوم']},
-    {'search': 'airplane landing', 'fallback_searches': ['airplane science'], 'title': 'لماذا تبدو عملية هبوط الطائرة دقيقة جدًا؟', 'text': 'الهبوط يحتاج إلى ضبط السرعة والارتفاع والاتجاه ومعدل النزول في الوقت نفسه. الطيار يتابع المدرج والأنظمة المساعدة والظروف الجوية، ويعدل مسار الطائرة باستمرار. لهذا تبدو عملية الهبوط بسيطة للمشاهد لكنها تعتمد على دقة كبيرة.', 'hashtags': ['#Shorts', '#طيران', '#طيارات', '#علوم']},
-    {'search': 'jet engine', 'fallback_searches': ['jet science'], 'title': 'ماذا يحدث داخل محرك الطائرة النفاث؟', 'text': 'المحرك النفاث يسحب الهواء ثم يضغطه ويخلطه بالوقود قبل الاحتراق. الغازات الساخنة تتمدد وتخرج بسرعة عالية من الخلف، وينتج عن ذلك قوة دفع تدفع الطائرة إلى الأمام. العملية تحدث باستمرار أثناء عمل المحرك.', 'hashtags': ['#Shorts', '#طيران', '#محرك_نفاث', '#علوم']},
-    {'search': 'helicopter', 'fallback_searches': ['helicopter science'], 'title': 'كيف تستطيع المروحية البقاء في مكانها؟', 'text': 'المروحية تستطيع البقاء في مكانها عندما تولد المراوح قوة رفع تعادل وزنها تقريبًا. الطيار يضبط زاوية شفرات المروحة للتحكم في الرفع والحركة. ومع تعديل الاتجاه يمكن للمروحية التحرك للأمام أو الخلف أو الجانبين.', 'hashtags': ['#Shorts', '#مروحيات', '#طيران', '#هندسة']},
-    {'search': 'air traffic control', 'fallback_searches': ['air science'], 'title': 'كيف تنظم أبراج المراقبة حركة الطائرات؟', 'text': 'المراقبة الجوية تساعد على تنظيم مسارات الطائرات ومواعيد الإقلاع والهبوط والمسافات بينها. المراقبون يتابعون معلومات الرحلات ويتواصلون مع الطيارين لتنسيق الحركة. الهدف هو إبقاء الحركة الجوية منظمة وآمنة.', 'hashtags': ['#Shorts', '#طيران', '#مراقبة_جوية', '#تقنية']},
-    {'search': 'electric car charging', 'fallback_searches': ['electric science'], 'title': 'كيف تنتقل الكهرباء من الشاحن إلى بطارية السيارة؟', 'text': 'عند شحن السيارة الكهربائية تنتقل الطاقة من مصدر الكهرباء عبر نظام الشحن إلى البطارية. أنظمة إلكترونية تراقب الجهد والتيار ودرجة الحرارة أثناء العملية. بعدها تخزن البطارية الطاقة لاستخدامها لاحقًا في تشغيل السيارة.', 'hashtags': ['#Shorts', '#سيارات', '#سيارات_كهربائية', '#تقنية']},
-    {'search': 'car brakes', 'fallback_searches': ['car science'], 'title': 'كيف تتوقف السيارة عندما تضغط على الفرامل؟', 'text': 'عندما تضغط على دواسة الفرامل تنتقل القوة إلى نظام الفرامل الذي يضغط أجزاء خاصة على العجلات. الاحتكاك يحول طاقة الحركة إلى حرارة ويقلل سرعة السيارة. أنظمة مثل مانع انغلاق المكابح تساعد السائق على التحكم أثناء التوقف.', 'hashtags': ['#Shorts', '#سيارات', '#هندسة', '#علوم']},
-    {'search': 'airbag', 'fallback_searches': ['airbag science'], 'title': 'كيف تعمل الوسادة الهوائية في السيارة؟', 'text': 'الوسادة الهوائية جزء من نظام حماية يعمل خلال لحظة قصيرة جدًا عند اكتشاف تصادم قوي. حساسات السيارة ترسل معلومات إلى وحدة التحكم، وإذا تحققت شروط معينة تبدأ عملية نفخ الوسادة. الهدف هو توفير طبقة حماية إضافية للركاب.', 'hashtags': ['#Shorts', '#سيارات', '#سلامة', '#تقنية']},
-    {'search': 'tire tread', 'fallback_searches': ['tire science'], 'title': 'لماذا يحتاج إطار السيارة إلى نقشة مختلفة؟', 'text': 'نقشة الإطار تساعد على التعامل مع الطريق والظروف المختلفة. الأخاديد يمكن أن تساعد على تصريف الماء وتحسين التماسك، بينما تختلف التصاميم حسب نوع الاستخدام. لذلك شكل سطح الإطار يؤثر في أداء السيارة على الطريق.', 'hashtags': ['#Shorts', '#سيارات', '#إطارات', '#هندسة']},
-    {'search': 'fiber optic', 'fallback_searches': ['fiber science'], 'title': 'كيف يمكن للضوء أن ينقل بيانات الإنترنت؟', 'text': 'في الألياف البصرية تنتقل البيانات على شكل نبضات ضوئية داخل ألياف رفيعة جدًا. الضوء ينعكس داخل الليف بطريقة تسمح له بالسفر لمسافات طويلة مع فقد محدود. ولهذا تستطيع الألياف نقل كميات ضخمة من البيانات بسرعة عالية.', 'hashtags': ['#Shorts', '#إنترنت', '#ألياف_بصرية', '#تقنية']},
-    {'search': 'Wi-Fi', 'fallback_searches': ['Wi-Fi science'], 'title': 'كيف يصل الواي فاي إلى هاتفك؟', 'text': 'جهاز الراوتر يحول البيانات إلى إشارات لاسلكية تنتشر في المكان، ويستقبل الهاتف هذه الإشارات عبر مكون لاسلكي داخله. بعدها تتحول الإشارات إلى بيانات تفهمها التطبيقات. كل هذا يحدث خلال أجزاء صغيرة من الثانية.', 'hashtags': ['#Shorts', '#واي_فاي', '#إنترنت', '#تقنية']},
-    {'search': 'GPU', 'fallback_searches': ['GPU science'], 'title': 'لماذا تحتاج الألعاب إلى معالج رسومي؟', 'text': 'المعالج الرسومي مصمم لتنفيذ عدد هائل من العمليات المتوازية المرتبطة بالصور والرسوم. الألعاب تحتاج إلى حساب الإضاءة والألوان والأشكال والإطارات بسرعة كبيرة. لذلك وجود GPU قوي يساعد على عرض مشاهد أكثر تعقيدًا وسلاسة.', 'hashtags': ['#Shorts', '#تقنية', '#ألعاب', '#كمبيوتر']},
-    {'search': 'RAM', 'fallback_searches': ['RAM science'], 'title': 'ماذا يحدث عندما تمتلئ ذاكرة RAM؟', 'text': 'ذاكرة RAM تستخدم لحفظ البيانات التي تحتاجها البرامج بسرعة أثناء التشغيل. عندما تصبح المساحة المتاحة قليلة جدًا، قد يعتمد النظام أكثر على التخزين الأبطأ، وقد تشعر بتباطؤ عند تشغيل عدة برامج. لذلك زيادة الذاكرة قد تساعد في تعدد المهام.', 'hashtags': ['#Shorts', '#تقنية', '#رام', '#كمبيوتر']},
-    {'search': 'SSD', 'fallback_searches': ['SSD science'], 'title': 'لماذا تكون أقراص SSD سريعة؟', 'text': 'أقراص SSD تخزن البيانات في شرائح ذاكرة إلكترونية بدل الأقراص الدوارة الموجودة في بعض وحدات التخزين القديمة. عدم وجود أجزاء ميكانيكية متحركة يقلل زمن الوصول ويزيد السرعة. ولهذا يلاحظ المستخدم فرقًا واضحًا عند تشغيل النظام والبرامج.', 'hashtags': ['#Shorts', '#تقنية', '#SSD', '#كمبيوتر']},
-    {'search': 'data center cooling', 'fallback_searches': ['data science'], 'title': 'لماذا تحتاج مراكز البيانات إلى تبريد قوي؟', 'text': 'الخوادم تعمل باستمرار وتستهلك طاقة تتحول أجزاء منها إلى حرارة. إذا ارتفعت الحرارة كثيرًا قد تتأثر كفاءة الأجهزة واستقرارها. لذلك تستخدم مراكز البيانات أنظمة تبريد ومراقبة للحرارة للحفاظ على المعدات أثناء التشغيل.', 'hashtags': ['#Shorts', '#تقنية', '#مراكز_البيانات', '#كمبيوتر']},
-    {'search': 'AI neural networks', 'fallback_searches': ['AI science'], 'title': 'كيف تتعلم أنظمة الذكاء الاصطناعي من البيانات؟', 'text': 'الشبكات العصبية الاصطناعية تتعلم من أمثلة كثيرة عبر تعديل أوزان داخل النموذج أثناء التدريب. عندما يخطئ النموذج تقارن النتيجة بالإجابة المطلوبة وتستخدم الخوارزميات لتعديل الأوزان. بعد تكرار العملية يستطيع النموذج اكتشاف أنماط في البيانات.', 'hashtags': ['#Shorts', '#ذكاء_اصطناعي', '#تقنية', '#علوم']},
-    {'search': '3D scanner', 'fallback_searches': ['3D science'], 'title': 'كيف يستطيع الماسح ثلاثي الأبعاد نسخ شكل جسم؟', 'text': 'الماسح ثلاثي الأبعاد يجمع معلومات عن سطح الجسم من زوايا مختلفة باستخدام الضوء أو تقنيات أخرى. بعدها يحول القياسات إلى نقاط وبيانات يمكن للبرنامج استخدامها لبناء نموذج رقمي. وهكذا يصبح الشكل الحقيقي قابلًا للعرض والمعالجة على الكمبيوتر.', 'hashtags': ['#Shorts', '#تقنية', '#ثلاثي_الأبعاد', '#هندسة']},
-    {'search': 'drone', 'fallback_searches': ['drone science'], 'title': 'كيف يحافظ الدرون على توازنه في الهواء؟', 'text': 'الدرون يستخدم حساسات لقياس الحركة والميلان والدوران، ثم تعدل وحدة التحكم سرعة المحركات باستمرار. إذا مال الجهاز في اتجاه معين يمكن للنظام تغيير قوة المراوح لإعادته إلى الوضع المطلوب. هذه التصحيحات تحدث بسرعة كبيرة.', 'hashtags': ['#Shorts', '#درون', '#تقنية', '#هندسة']},
-    {'search': 'solar eclipse', 'fallback_searches': ['solar science'], 'title': 'كيف يحدث كسوف الشمس؟', 'text': 'يحدث كسوف الشمس عندما يمر القمر بين الأرض والشمس بطريقة تجعل ظل القمر يصل إلى جزء من سطح الأرض. لأن القمر أصغر بكثير من الشمس والأرض، لا يحدث الكسوف من كل مكان في الوقت نفسه. ولهذا تكون مشاهدته مرتبطة بموقع محدد.', 'hashtags': ['#Shorts', '#فضاء', '#كسوف', '#علوم']},
-    {'search': 'aurora', 'fallback_searches': ['aurora science'], 'title': 'لماذا تظهر ألوان الشفق القطبي؟', 'text': 'الشفق القطبي يظهر عندما تتفاعل جسيمات قادمة من الشمس مع الغازات في الغلاف الجوي للأرض. هذه التفاعلات تطلق ضوءًا بألوان مختلفة حسب نوع الغاز والارتفاع. ولهذا يمكن رؤية ألوان خضراء أو حمراء أو بنفسجية في السماء.', 'hashtags': ['#Shorts', '#فضاء', '#شفق_قطبي', '#علوم']},
-    {'search': 'Milky Way', 'fallback_searches': ['Milky science'], 'title': 'ماذا نرى عندما ننظر إلى درب التبانة؟', 'text': 'درب التبانة مجرة ضخمة تحتوي على عدد هائل من النجوم والغاز والغبار. عندما تكون السماء مظلمة يمكن رؤية جزء من قرص المجرة كشريط ضوئي ممتد في السماء. ما نراه هو جزء من المجرة التي نعيش داخلها.', 'hashtags': ['#Shorts', '#فضاء', '#درب_التبانة', '#علوم']},
-    {'search': 'black hole', 'fallback_searches': ['black science'], 'title': 'لماذا لا يستطيع الضوء الهروب من الثقب الأسود؟', 'text': 'الثقب الأسود منطقة من الفضاء تكون فيها الجاذبية قوية جدًا بسبب تركّز كتلة كبيرة في حيز صغير. بعد عبور حدود تسمى أفق الحدث تصبح العودة إلى الخارج مستحيلة وفق النسبية العامة، حتى بالنسبة للضوء. لذلك لا نرى الثقب الأسود مباشرة كجسم مضيء.', 'hashtags': ['#Shorts', '#فضاء', '#ثقب_أسود', '#علوم']},
-    {'search': 'Mars', 'fallback_searches': ['Mars science'], 'title': 'لماذا يبدو كوكب المريخ أحمر؟', 'text': 'المريخ يبدو أحمر بسبب وجود مواد غنية بالحديد على سطحه وفي غباره. عندما يتفاعل الحديد مع الأكسجين تحدث عمليات تشبه الصدأ، فتكتسب التربة لونًا مائلًا إلى الأحمر. ولهذا حصل المريخ على لقب الكوكب الأحمر.', 'hashtags': ['#Shorts', '#مريخ', '#فضاء', '#علوم']},
-    {'search': 'Saturn rings', 'fallback_searches': ['Saturn science'], 'title': 'مم تتكون حلقات زحل؟', 'text': 'حلقات زحل ليست حلقة صلبة واحدة. هي تجمعات هائلة من قطع الجليد والصخور والغبار تدور حول الكوكب. تختلف أحجام هذه القطع، وتظهر من بعيد كأنها نظام واحد ضخم يحيط بزحل.', 'hashtags': ['#Shorts', '#زحل', '#فضاء', '#علوم']},
-    {'search': 'Sun', 'fallback_searches': ['Sun science'], 'title': 'لماذا لا تبدو الشمس سطحًا صلبًا؟', 'text': 'الشمس ليست كرة صخرية لها سطح صلب مثل الأرض، بل نجم يتكون أساسًا من غازات وبلازما شديدة الحرارة. الضوء الذي نراه يأتي من طبقة مرئية من غلافها الخارجي. لذلك لا يوجد سطح صلب يمكن الوقوف عليه.', 'hashtags': ['#Shorts', '#شمس', '#فضاء', '#علوم']},
-    {'search': 'Earth magnetic field', 'fallback_searches': ['Earth science'], 'title': 'كيف تحمي الأرض نفسها من بعض جسيمات الشمس؟', 'text': 'الأرض تمتلك مجالًا مغناطيسيًا يمتد حولها ويساعد على توجيه جزء من الجسيمات المشحونة القادمة من الشمس. المجال ليس درعًا كاملًا، لكنه يقلل تأثير بعض الجسيمات على البيئة القريبة من الأرض. وهذا المجال مرتبط بحركة المواد داخل باطن الكوكب.', 'hashtags': ['#Shorts', '#الأرض', '#مغناطيسية', '#فضاء']},
-    {'search': 'rain drops', 'fallback_searches': ['rain science'], 'title': 'كيف تتكون قطرات المطر داخل السحب؟', 'text': 'داخل السحب تتجمع قطرات الماء أو بلورات الجليد الصغيرة وتكبر تدريجيًا عبر عمليات مختلفة. عندما تصبح الجسيمات أثقل من أن تبقى معلقة في الهواء تبدأ بالسقوط. وإذا كانت الظروف مناسبة تصل إلى الأرض على شكل مطر.', 'hashtags': ['#Shorts', '#مطر', '#طقس', '#علوم']},
-    {'search': 'cloud formation', 'fallback_searches': ['cloud science'], 'title': 'لماذا تتكون السحب في السماء؟', 'text': 'تتكون السحب عندما يرتفع الهواء الرطب ويبرد، فيتكاثف جزء من بخار الماء حول جسيمات صغيرة في الجو. تتجمع قطرات الماء أو بلورات الجليد وتصبح مرئية لنا كسحابة. شكل السحابة يتأثر بدرجة الحرارة وحركة الهواء.', 'hashtags': ['#Shorts', '#سحب', '#طقس', '#علوم']},
-    {'search': 'rainbow', 'fallback_searches': ['rainbow science'], 'title': 'كيف يظهر قوس قزح بعد المطر؟', 'text': 'قوس قزح يظهر عندما يدخل ضوء الشمس إلى قطرات الماء في الهواء. ينكسر الضوء وينعكس داخل القطرة ثم يخرج بعد أن تتفرق ألوانه بدرجات مختلفة. لهذا نرى قوسًا من الألوان عندما تكون الزاوية والظروف مناسبة.', 'hashtags': ['#Shorts', '#قوس_قزح', '#مطر', '#علوم']},
-    {'search': 'earthquake', 'fallback_searches': ['earthquake science'], 'title': 'كيف يعرف العلماء أن زلزالًا حدث بعيدًا؟', 'text': 'عندما يحدث زلزال تنتشر موجات زلزالية عبر الأرض. أجهزة رصد موجودة في أماكن مختلفة تسجل وصول هذه الموجات، ومن خلال مقارنة أزمنة الوصول يمكن للعلماء تحديد موقع الزلزال وخصائصه. لذلك يمكن رصد زلزال بعيد جدًا.', 'hashtags': ['#Shorts', '#زلازل', '#علوم', '#أرض']},
-    {'search': 'tsunami', 'fallback_searches': ['tsunami science'], 'title': 'لماذا يختلف تسونامي عن موجة البحر العادية؟', 'text': 'تسونامي ينتج عادة عن إزاحة مفاجئة لكمية كبيرة من مياه البحر، مثل ما يحدث بعد بعض الزلازل تحت البحر. تنتقل الطاقة عبر مسافات طويلة، وقد تكبر الموجات قرب السواحل بسبب انخفاض عمق الماء. لذلك لا يشبه موجة الشاطئ المعتادة.', 'hashtags': ['#Shorts', '#تسونامي', '#محيط', '#علوم']},
-    {'search': 'deep sea', 'fallback_searches': ['deep science'], 'title': 'لماذا يصعب الوصول إلى أعماق المحيط؟', 'text': 'كلما نزلنا إلى أعماق المحيط يزداد ضغط الماء وتقل الإضاءة وتنخفض الحرارة في مناطق كثيرة. المعدات التي تعمل هناك تحتاج إلى تحمل ظروف قاسية جدًا. ولهذا تعد الرحلات إلى الأعماق من أصعب عمليات الاستكشاف العلمي.', 'hashtags': ['#Shorts', '#محيط', '#أعماق_البحر', '#علوم']},
-    {'search': 'coral reef', 'fallback_searches': ['coral science'], 'title': 'لماذا تُعد الشعاب المرجانية مهمة جدًا؟', 'text': 'الشعاب المرجانية توفر موائل لعدد كبير من الكائنات البحرية وتساهم في دعم تنوع الحياة في المحيط. كما تساعد هياكلها في تقليل بعض تأثيرات الأمواج على السواحل. لذلك تدهورها يمكن أن يؤثر في نظام بيئي كامل.', 'hashtags': ['#Shorts', '#شعاب_مرجانية', '#محيط', '#طبيعة']},
-    {'search': 'octopus', 'fallback_searches': ['octopus science'], 'title': 'كيف يستطيع الأخطبوط تغيير لونه؟', 'text': 'الأخطبوط يمتلك خلايا متخصصة في جلده تستطيع تغيير طريقة انعكاس الضوء والألوان الظاهرة. يستخدم هذه القدرة في التمويه والتواصل وفي بعض المواقف الدفاعية. لذلك يمكن أن يتغير مظهره بسرعة مقارنة بكثير من الحيوانات الأخرى.', 'hashtags': ['#Shorts', '#أخطبوط', '#حيوانات', '#محيط']},
-    {'search': 'dolphin', 'fallback_searches': ['dolphin science'], 'title': 'كيف تستخدم الدلافين الأصوات لمعرفة ما حولها؟', 'text': 'الدلافين تستطيع إصدار أصوات عالية التردد ثم استقبال الأصداء العائدة من الأجسام المحيطة. هذه العملية تساعدها على تقدير مكان بعض الأشياء والمسافة بينها وبينها، وتعرف باسم تحديد الموقع بالصدى. وهي مفيدة خصوصًا في الماء.', 'hashtags': ['#Shorts', '#دلافين', '#حيوانات', '#محيط']},
-    {'search': 'owl flight', 'fallback_searches': ['owl science'], 'title': 'لماذا تستطيع البومة الطيران بهدوء؟', 'text': 'ريش أجنحة البومة يمتلك خصائص تساعد على تقليل الضوضاء الناتجة عن حركة الهواء. حواف بعض الريش تكسر تدفق الهواء بطريقة تقلل الأصوات الحادة. لذلك تستطيع بعض أنواع البوم الاقتراب من فرائسها بهدوء نسبي.', 'hashtags': ['#Shorts', '#بومة', '#حيوانات', '#علوم']},
-    {'search': 'elephant communication', 'fallback_searches': ['elephant science'], 'title': 'كيف تتواصل الفيلة مع بعضها؟', 'text': 'الفيلة تستخدم مجموعة من الأصوات والإشارات والحركات للتواصل. بعض أصواتها منخفض التردد ويمكن أن تنتقل لمسافات بعيدة، ما يساعد أفراد المجموعة على البقاء على اتصال. كما تستخدم اللمس ووضعية الجسم في مواقف مختلفة.', 'hashtags': ['#Shorts', '#فيلة', '#حيوانات', '#طبيعة']},
-    {'search': 'hummingbird', 'fallback_searches': ['hummingbird science'], 'title': 'كيف يستطيع الطائر الطنان التحليق أمام الزهرة؟', 'text': 'الطائر الطنان يحرك جناحيه بسرعة كبيرة وبنمط يسمح له بتوليد قوة رفع أثناء التحليق. يستطيع تغيير اتجاهه بسرعة، وحتى البقاء أمام الزهرة أثناء التغذي. هذه القدرة مرتبطة بتصميم جسمه وطريقة حركة جناحيه.', 'hashtags': ['#Shorts', '#طائر_طنان', '#حيوانات', '#طبيعة']},
-    {'search': 'camel', 'fallback_searches': ['camel science'], 'title': 'كيف يساعد الجمل نفسه على العيش في الصحراء؟', 'text': 'الجمل يمتلك تكيفات تساعده على تحمل الحرارة ونقص الماء والغذاء في البيئة الصحراوية. جسمه يستطيع التعامل مع تغيرات كبيرة في الماء والحرارة، كما تساعده خصائص الأنف والرموش والأقدام في البيئة الرملية. لذلك يعد مثالًا واضحًا على التكيف.', 'hashtags': ['#Shorts', '#جمل', '#صحراء', '#حيوانات']},
-    {'search': 'polar bear', 'fallback_searches': ['polar science'], 'title': 'كيف يحافظ الدب القطبي على حرارته؟', 'text': 'الدب القطبي يعيش في بيئة شديدة البرودة ويملك طبقة من الدهون وفراء كثيفًا يساعدان على العزل. كما أن شكل جسمه يقلل فقدان الحرارة مقارنة بجسم أكثر نحافة. هذه التكيفات تساعده على البقاء في المناطق القطبية.', 'hashtags': ['#Shorts', '#دب_قطبي', '#حيوانات', '#علوم']},
-    {'search': 'spider silk', 'fallback_searches': ['spider science'], 'title': 'لماذا يُعد خيط العنكبوت مادة مميزة؟', 'text': 'خيط العنكبوت خفيف ومرن وله خصائص ميكانيكية مميزة بالنسبة إلى وزنه. العناكب تنتج أنواعًا مختلفة من الخيوط بحسب الوظيفة، مثل بناء الشبكة أو تثبيت نفسها. لهذا يدرس العلماء خصائصه ويبحثون عن طرق للاستفادة من فكرته في مواد جديدة.', 'hashtags': ['#Shorts', '#عناكب', '#علوم', '#طبيعة']},
-    {'search': 'bee pollination', 'fallback_searches': ['bee science'], 'title': 'لماذا تحتاج النباتات إلى النحل؟', 'text': 'عندما تنتقل حبوب اللقاح بين أزهار النباتات يمكن أن تساعد على حدوث التلقيح وتكوين البذور والثمار في أنواع كثيرة من النباتات. النحل من أهم الملقحات لأنه يزور عددًا كبيرًا من الأزهار بحثًا عن الغذاء. لذلك وجوده مهم للأنظمة البيئية والزراعة.', 'hashtags': ['#Shorts', '#نحل', '#نباتات', '#طبيعة']},
-    {'search': 'human heart', 'fallback_searches': ['human science'], 'title': 'كيف يستمر القلب في ضخ الدم؟', 'text': 'القلب عضلة تعمل على دفع الدم عبر الأوعية الدموية في الجسم. تنقبض حجراته وتسترخي في دورة متكررة تنظمها إشارات كهربائية داخل القلب. بهذه الطريقة يصل الدم المحمل بالأكسجين والمواد الضرورية إلى الأنسجة ويعود الدم إلى القلب.', 'hashtags': ['#Shorts', '#قلب', '#جسم_الإنسان', '#علوم']},
-    {'search': 'lungs', 'fallback_searches': ['lungs science'], 'title': 'كيف يدخل الأكسجين إلى الدم؟', 'text': 'عندما نتنفس يصل الهواء إلى الرئتين، وهناك توجد حويصلات هوائية صغيرة محاطة بشعيرات دموية. ينتقل الأكسجين من الهواء إلى الدم عبر جدران رقيقة، بينما ينتقل ثاني أكسيد الكربون في الاتجاه المعاكس. بعدها يحمل الدم الأكسجين إلى أنحاء الجسم.', 'hashtags': ['#Shorts', '#رئتين', '#جسم_الإنسان', '#علوم']},
-    {'search': 'skin', 'fallback_searches': ['skin science'], 'title': 'لماذا تُعد البشرة حاجزًا مهمًا للجسم؟', 'text': 'البشرة هي الطبقة الخارجية من الجلد وتعمل كحاجز يساعد على حماية الجسم من البيئة المحيطة. كما تقلل فقدان الماء وتشارك في الإحساس وتنظيم الحرارة. ولهذا فالجلد ليس مجرد غطاء خارجي، بل عضو له وظائف متعددة.', 'hashtags': ['#Shorts', '#جلد', '#جسم_الإنسان', '#علوم']},
-    {'search': 'bones', 'fallback_searches': ['bones science'], 'title': 'لماذا لا تكون العظام صلبة بالكامل من الداخل؟', 'text': 'العظام قوية لكنها ليست كتلًا صلبة بالكامل. كثير من العظام تحتوي على بنية داخلية خفيفة نسبيًا تساعد على الجمع بين القوة وتقليل الوزن. كما يوجد داخل بعض العظام نخاع يشارك في إنتاج خلايا الدم. لذلك تصميم العظم يجمع عدة وظائف.', 'hashtags': ['#Shorts', '#عظام', '#جسم_الإنسان', '#علوم']},
-    {'search': 'fingerprints', 'fallback_searches': ['fingerprints science'], 'title': 'لماذا تختلف بصمات الأصابع بين الناس؟', 'text': 'بصمات الأصابع تتكون من أنماط من الحواف الجلدية على أطراف الأصابع. تتأثر طريقة تشكلها بعوامل وراثية وبيئية أثناء نمو الجنين، ولذلك تكون التفاصيل مختلفة بين الأشخاص. لهذا تستخدم البصمات في التعرف على الهوية.', 'hashtags': ['#Shorts', '#بصمات', '#جسم_الإنسان', '#علوم']},
-    {'search': 'sleep brain', 'fallback_searches': ['sleep science'], 'title': 'ماذا يفعل الدماغ أثناء النوم؟', 'text': 'النوم ليس فترة يتوقف فيها الدماغ عن العمل. خلال النوم تتغير أنماط نشاط الدماغ وتحدث عمليات مرتبطة بالذاكرة وتنظيم وظائف الجسم. يمر الإنسان بمراحل مختلفة من النوم، ولكل مرحلة خصائص عصبية مختلفة.', 'hashtags': ['#Shorts', '#نوم', '#دماغ', '#علوم']},
-    {'search': 'memory', 'fallback_searches': ['memory science'], 'title': 'كيف يحتفظ الدماغ بالمعلومات؟', 'text': 'الذاكرة ليست ملفًا واحدًا داخل الدماغ. المعلومات ترتبط بتغيرات في نشاط واتصالات الخلايا العصبية، وتختلف طريقة التعامل معها حسب نوع الذاكرة والوقت. التكرار والانتباه والنوم يمكن أن تؤثر في قدرة الدماغ على التعلم والتذكر.', 'hashtags': ['#Shorts', '#ذاكرة', '#دماغ', '#علوم']},
-    {'search': 'muscles', 'fallback_searches': ['muscles science'], 'title': 'كيف تتحرك عضلاتك عندما تريد تحريك يدك؟', 'text': 'عندما تريد تحريك يدك يرسل الدماغ إشارات عصبية إلى عضلات معينة. تستجيب العضلات عبر تفاعلات داخل أليافها فتتقلص أو ترتخي، وتعمل مجموعات من العضلات معًا لإنتاج حركة منسقة. لذلك الحركة نتيجة تعاون بين الدماغ والأعصاب والعضلات.', 'hashtags': ['#Shorts', '#عضلات', '#جسم_الإنسان', '#علوم']},
-    {'search': 'leaf photosynthesis', 'fallback_searches': ['leaf science'], 'title': 'لماذا تبدو معظم أوراق النباتات خضراء؟', 'text': 'أوراق كثيرة تبدو خضراء لأنها تحتوي على الكلوروفيل، وهو صبغة تمتص بعض أطوال موجات الضوء بكفاءة أكبر من غيرها وتشارك في البناء الضوئي. الجزء الأخضر الذي يصل إلى أعيننا هو الضوء الذي لا تمتصه الصبغة بنفس الدرجة.', 'hashtags': ['#Shorts', '#نباتات', '#أوراق', '#علوم']},
-    {'search': 'tree roots', 'fallback_searches': ['tree science'], 'title': 'كيف تحصل الأشجار على الماء من التربة؟', 'text': 'جذور الأشجار تمتص الماء من التربة عبر مناطق متخصصة، ثم ينتقل الماء داخل أنسجة ناقلة إلى أجزاء النبات العليا. يساعد تبخر الماء من الأوراق في سحب الماء إلى أعلى، إلى جانب قوى فيزيائية أخرى. لذلك يمكن للماء الوصول إلى أغصان مرتفعة جدًا.', 'hashtags': ['#Shorts', '#أشجار', '#نباتات', '#علوم']},
-    {'search': 'forest ecosystem', 'fallback_searches': ['forest science'], 'title': 'لماذا تؤثر الأشجار في البيئة حولها؟', 'text': 'الأشجار توفر موائل وغذاء لكائنات كثيرة، وتؤثر في حركة الماء والحرارة داخل البيئة. كما تمتص ثاني أكسيد الكربون أثناء نموها وتطلق الأكسجين في عملية البناء الضوئي. لذلك وجود الأشجار يمكن أن يغير خصائص النظام البيئي المحيط بها.', 'hashtags': ['#Shorts', '#غابات', '#طبيعة', '#علوم']},
-    {'search': 'river delta', 'fallback_searches': ['river science'], 'title': 'كيف تتكون دلتا الأنهار؟', 'text': 'عندما يصل النهر إلى منطقة أبطأ في الحركة، مثل البحر أو بحيرة، يمكن أن تترسب بعض الرواسب التي حملها معه. مع مرور الوقت تتجمع الرواسب وتتفرع مجاري الماء، وقد تتكون منطقة مثلثة أو متعددة الفروع تعرف بدلتا النهر.', 'hashtags': ['#Shorts', '#أنهار', '#دلتا', '#طبيعة']},
-
 ]
 
 
@@ -503,181 +472,115 @@ def save_used_content(used_content):
 def normalize_content(text):
     text = str(text).lower()
     text = re.sub(r"[\u064B-\u065F\u0670]", "", text)
-    text = re.sub(r"[إأآٱ]", "ا", text)
-    text = re.sub(r"ة", "ه", text)
-    text = re.sub(r"ى", "ي", text)
     text = re.sub(r"[^\w\s\u0600-\u06FF]", " ", text)
     text = re.sub(r"\s+", " ", text)
     return text.strip()
 
 
-CONTENT_STOPWORDS = {
-    "في", "من", "الى", "إلى", "على", "عن", "مع", "هذا", "هذه",
-    "ذلك", "تلك", "هو", "هي", "هم", "هناك", "يمكن", "قد", "هل",
-    "ما", "ماذا", "لماذا", "كيف", "كم", "ماهو", "ماهي", "أن", "ان",
-    "إن", "اذا", "إذا", "ثم", "و", "أو", "او", "لكن", "لأن", "لان",
-    "الذي", "التي", "الذين", "بشكل", "فقط", "جدا", "منذ", "حتى",
-    "كل", "بعض", "أي", "اي", "واحد", "واحدة", "شيء", "شي",
-    "يعني", "يعتبر", "تعتبر", "يتم", "توجد", "يوجد", "عندما",
-    "أثناء", "خلال", "بين", "بعد", "قبل", "الى", "عن", "مع",
-}
-
-CONTENT_SIMILARITY_LIMIT = 0.58
-TITLE_SIMILARITY_LIMIT = 0.62
-SEARCH_SIMILARITY_LIMIT = 0.70
-MIN_SHARED_CONCEPT_WORDS = 3
-
-
-def content_tokens(text):
-    return {
-        word for word in normalize_content(text).split()
-        if len(word) >= 3 and word not in CONTENT_STOPWORDS
-    }
-
-
-def text_similarity(text_a, text_b):
-    a = normalize_content(text_a)
-    b = normalize_content(text_b)
-    if not a or not b:
-        return 0.0
-    if a == b:
-        return 1.0
-
-    words_a = content_tokens(a)
-    words_b = content_tokens(b)
-    if words_a and words_b:
-        shared = len(words_a & words_b)
-        union = len(words_a | words_b)
-        jaccard = shared / union if union else 0.0
-        containment = shared / min(len(words_a), len(words_b))
-    else:
-        jaccard = containment = 0.0
-
-    from difflib import SequenceMatcher
-    character_similarity = SequenceMatcher(None, a, b).ratio()
-    return max(character_similarity, 0.65 * containment + 0.35 * jaccard)
-
-
 def content_fingerprint(topic):
+    return (
+        normalize_content(topic.get("title", "")),
+        normalize_content(topic.get("text", "")),
+        normalize_content(topic.get("search", "")),
+    )
+
+
+def content_already_used(topic, used_content):
     title = normalize_content(topic.get("title", ""))
     text = normalize_content(topic.get("text", ""))
     search = normalize_content(topic.get("search", ""))
-    return (title, text, search, sorted(content_tokens(f"{title} {text} {search}")))
-
-
-def topic_key(topic):
-    return normalize_content(topic.get("search", ""))
-
-
-def content_already_used(topic, used_content, verbose=False):
-    title = normalize_content(topic.get("title", ""))
-    text = normalize_content(topic.get("text", ""))
-    search = normalize_content(topic.get("search", ""))
-    candidate_concepts = content_tokens(f"{title} {text} {search}")
-    candidate_key = topic_key(topic)
 
     for old in used_content:
         old_title = normalize_content(old.get("title", ""))
         old_text = normalize_content(old.get("text", ""))
         old_search = normalize_content(old.get("search", ""))
-        old_key = normalize_content(old.get("topic_key", old_search))
 
-        if candidate_key and old_key and candidate_key == old_key:
-            if verbose:
-                print(f"Rejected exact topic key: {old.get('title', '')}")
+        if title and title == old_title:
             return True
 
-        if (title and title == old_title) or (text and text == old_text) or (search and search == old_search):
+        if text and text == old_text:
             return True
 
-        if title and old_title:
-            score = text_similarity(title, old_title)
-            if score >= TITLE_SIMILARITY_LIMIT:
-                if verbose:
-                    print(f"Rejected title similarity {score:.2f}: {old.get('title', '')}")
-                return True
-
-        if text and old_text:
-            score = text_similarity(text, old_text)
-            if score >= CONTENT_SIMILARITY_LIMIT:
-                if verbose:
-                    print(f"Rejected script similarity {score:.2f}: {old.get('title', '')}")
-                return True
-
-        if search and old_search:
-            score = text_similarity(search, old_search)
-            if score >= SEARCH_SIMILARITY_LIMIT:
-                if verbose:
-                    print(f"Rejected search similarity {score:.2f}: {old.get('title', '')}")
-                return True
-
-        old_concepts = content_tokens(f"{old_title} {old_text} {old_search}")
-        shared = candidate_concepts & old_concepts
-        smaller = min(len(candidate_concepts), len(old_concepts))
-        containment = len(shared) / smaller if smaller else 0.0
-        if len(shared) >= MIN_SHARED_CONCEPT_WORDS and containment >= 0.60:
-            if verbose:
-                print(f"Rejected concept overlap ({len(shared)} words): {old.get('title', '')}")
+        if search and search == old_search:
             return True
 
     return False
 
 
+def normalized_words(text):
+    text = str(text).lower()
+    text = re.sub(r"[\u064B-\u065F\u0670]", "", text)
+    text = re.sub(r"[^\w\s\u0600-\u06FF]", " ", text)
+    return re.sub(r"\s+", " ", text).strip().split()
+
+
+def contains_blocked_content(topic):
+    fields = [
+        topic.get("title", ""),
+        topic.get("text", ""),
+        topic.get("search", ""),
+        " ".join(topic.get("fallback_searches", [])),
+        " ".join(topic.get("hashtags", [])),
+    ]
+    haystack = normalize_content(" ".join(fields))
+    hits = [term for term in BLOCKED_CONTENT_TERMS if normalize_content(term) in haystack]
+    return sorted(set(hits))
+
+
+def validate_topic_policy(topic):
+    blocked = contains_blocked_content(topic)
+    if blocked:
+        raise RuntimeError(
+            "BLOCKED CONTENT POLICY: selected topic contains forbidden content: "
+            + ", ".join(blocked)
+        )
+
+
+def video_metadata_is_blocked(video):
+    try:
+        metadata = json.dumps(video, ensure_ascii=False).lower()
+    except Exception:
+        metadata = str(video).lower()
+
+    return any(
+        normalize_content(term) in normalize_content(metadata)
+        for term in BLOCKED_VIDEO_METADATA_TERMS
+    )
+
+
 def select_new_topic(used_content):
-    # First reject every topic already published or semantically too close.
-    available = [topic for topic in TOPICS if not content_already_used(topic, used_content)]
+    available = [
+        topic for topic in TOPICS
+        if not content_already_used(topic, used_content)
+        and not contains_blocked_content(topic)
+    ]
+
     if not available:
         raise RuntimeError(
-            "NO UNIQUE CONTENT TOPIC IS AVAILABLE. The system refused to publish rather than repeat an old idea."
+            "ALL CONTENT TOPICS HAVE BEEN USED. Add more unique topics to TOPICS."
         )
 
-    random.shuffle(available)
+    topic = random.choice(available)
 
-    # Make sure today's candidate is also unique against every other candidate,
-    # preventing near-duplicate ideas from being selected back-to-back.
-    selected = []
-    for candidate in available:
-        if not any(
-            content_already_used(
-                candidate,
-                [{
-                    "title": chosen.get("title", ""),
-                    "text": chosen.get("text", ""),
-                    "search": chosen.get("search", ""),
-                    "topic_key": chosen.get("search", ""),
-                }],
-            )
-            for chosen in selected
-        ):
-            selected.append(candidate)
-
-    if not selected:
-        raise RuntimeError(
-            "NO SUFFICIENTLY UNIQUE TOPIC REMAINS. The system refused to publish rather than repeat content."
-        )
-
-    topic = random.choice(selected)
     print("\n================================")
-    print("NEW UNIQUE CONTENT SELECTED")
+    print("NEW CONTENT SELECTED")
     print(topic["title"])
-    print(f"Unique candidates available: {len(selected)}")
-    print(f"Previously used content checked: {len(used_content)}")
-    print("Duplicate protection: ENABLED")
+    print(f"Remaining unused topics: {len(available) - 1}")
     print("================================\n")
+
     return topic
 
 
-def remember_content(topic, video_id, used_content, narration=None):
+def remember_content(topic, video_id, used_content):
     used_content.append({
-        "topic_key": topic_key(topic),
         "title": topic["title"],
-        "text": narration or topic["text"],
-        "original_text": topic["text"],
+        "text": topic["text"],
         "search": topic["search"],
         "fingerprint": list(content_fingerprint(topic)),
         "video_id": video_id,
         "saved_at": int(time.time()),
     })
+
     save_used_content(used_content)
     print(f"Content memory updated. Total: {len(used_content)}")
 
@@ -694,7 +597,7 @@ def search_pexels(query, page=1):
     params = {
         "query": query,
         "orientation": "portrait",
-        "size": "large",
+        "size": "medium",
         "per_page": 80,
         "page": page,
         "locale": "en-US",
@@ -719,31 +622,29 @@ def choose_video_file(video):
         width = item.get("width") or 0
         height = item.get("height") or 0
         link = item.get("link")
+
         if not link:
             continue
-        if height > width and width >= 540 and height >= 960:
+
+        if height > width and width >= 500 and height >= 800:
             vertical.append(item)
 
     if vertical:
         return max(
             vertical,
-            key=lambda item: (
-                (item.get("width") or 0) * (item.get("height") or 0),
-                item.get("fps") or 0,
-            ),
+            key=lambda item: (item.get("width") or 0) * (item.get("height") or 0),
         )
 
+    # If Pexels returns no vertical file, accept a good landscape source.
     usable = [
         item for item in files
-        if item.get("link") and (item.get("width") or 0) >= 720
+        if item.get("link") and (item.get("width") or 0) >= 640
     ]
+
     if usable:
         return max(
             usable,
-            key=lambda item: (
-                (item.get("width") or 0) * (item.get("height") or 0),
-                item.get("fps") or 0,
-            ),
+            key=lambda item: (item.get("width") or 0) * (item.get("height") or 0),
         )
 
     return None
@@ -766,6 +667,10 @@ def select_unique_videos(topic, used_clips):
             for video in videos:
                 video_id = str(video.get("id", ""))
                 if not video_id or video_id in used_clips:
+                    continue
+
+                if video_metadata_is_blocked(video):
+                    print(f"Skipping blocked Pexels video: {video_id}")
                     continue
 
                 video_file = choose_video_file(video)
@@ -823,41 +728,70 @@ def download_video(url, destination):
 # =========================================================
 
 def create_voice(text):
+    """Generate audio and capture Edge-TTS word boundaries in the same pass.
+
+    The exact same source string is used for both the audio and subtitles.
+    If Edge-TTS returns boundaries that do not match the source words, the
+    pipeline stops instead of publishing a potentially mismatched video.
+    """
+    global TTS_BOUNDARIES
+    TTS_BOUNDARIES = []
+
+    exact_text = str(text).strip()
+    if not exact_text:
+        raise RuntimeError("TTS source text is empty.")
+
     async def generate():
         communicate = edge_tts.Communicate(
-            text,
+            exact_text,
             VOICE_NAME,
             rate=VOICE_RATE,
             volume=VOICE_VOLUME,
             pitch=VOICE_PITCH,
         )
 
-        boundaries = []
         with open(VOICE_FILE, "wb") as audio_file:
             async for chunk in communicate.stream():
-                kind = str(chunk.get("type", "")).lower()
-                if kind == "audio":
-                    audio_file.write(chunk["data"])
-                elif kind == "wordboundary":
-                    offset = float(chunk.get("offset", 0)) / 10_000_000
-                    duration = float(chunk.get("duration", 0)) / 10_000_000
-                    word = str(chunk.get("text", "")).strip()
-                    if word:
-                        boundaries.append({
-                            "text": word,
-                            "start": max(0.0, offset),
-                            "end": max(0.0, offset + duration),
-                        })
-        return boundaries
+                chunk_type = chunk.get("type")
 
-    boundaries = asyncio.run(generate())
+                if chunk_type == "audio":
+                    data = chunk.get("data", b"")
+                    if data:
+                        audio_file.write(data)
+
+                elif chunk_type == "WordBoundary":
+                    data = chunk.get("offset")
+                    duration = chunk.get("duration")
+                    word = chunk.get("text", "")
+
+                    if data is not None and duration is not None and word:
+                        TTS_BOUNDARIES.append({
+                            "text": str(word),
+                            "start": float(data) / 10_000_000.0,
+                            "end": float(data + duration) / 10_000_000.0,
+                        })
+
+    asyncio.run(generate())
 
     if not VOICE_FILE.exists() or VOICE_FILE.stat().st_size < 1000:
         raise RuntimeError("Voice file was not created correctly.")
 
-    print(f"Voice created: {VOICE_FILE.stat().st_size / 1024:.1f} KB")
-    print(f"Word boundaries received: {len(boundaries)}")
-    return boundaries
+    if not TTS_BOUNDARIES:
+        raise RuntimeError(
+            "TTS word boundaries were not returned. "
+            "Publishing was stopped to prevent subtitle/audio mismatch."
+        )
+
+    source_words = normalized_words(exact_text)
+    spoken_words = normalized_words(" ".join(item["text"] for item in TTS_BOUNDARIES))
+
+    if source_words != spoken_words:
+        raise RuntimeError(
+            "TTS TEXT MISMATCH: the speech boundary words do not exactly match "
+            "the selected script. Publishing was stopped."
+        )
+
+    print(f"TTS locked: {len(source_words)} words / {len(TTS_BOUNDARIES)} boundaries")
 
 
 def get_audio_duration():
@@ -892,7 +826,8 @@ def split_text_for_subtitles(text):
 
     for word in words:
         candidate = " ".join(current + [word])
-        if len(candidate) <= 27 and len(current) < 5:
+
+        if len(candidate) <= 27:
             current.append(word)
         else:
             if current:
@@ -901,6 +836,7 @@ def split_text_for_subtitles(text):
 
     if current:
         parts.append(" ".join(current))
+
     return parts
 
 
@@ -909,6 +845,7 @@ def ass_time(seconds):
     hours, remainder = divmod(total_cs, 360000)
     minutes, remainder = divmod(remainder, 6000)
     seconds_value, centiseconds = divmod(remainder, 100)
+
     return f"{hours}:{minutes:02d}:{seconds_value:02d}.{centiseconds:02d}"
 
 
@@ -922,108 +859,18 @@ def escape_ass_text(text):
     )
 
 
-ATTENTION_WORDS = {
-    "أسرع", "اسرع", "أكبر", "اكبر", "أعمق", "اعمق", "أغرب", "اغرب",
-    "هائل", "هائلة", "ضخم", "ضخمة", "مفاجأة", "سر", "أول", "اول",
-    "أقوى", "اقوى", "البرق", "المريخ", "الثقب", "الشمس", "الطائرة",
-    "البطارية", "المحيط", "الدماغ", "القمر", "زحل", "الروبوت", "الإنترنت",
-    "الجاذبية", "الضوء", "الماء", "القلب", "الأكسجين", "النحل", "الفهد",
-}
+def create_subtitle_file(text, duration):
+    """Create subtitles from the exact TTS word-boundary timings."""
+    if not TTS_BOUNDARIES:
+        raise RuntimeError("No TTS word boundaries available for subtitles.")
 
+    source_words = normalized_words(text)
+    boundary_words = normalized_words(" ".join(item["text"] for item in TTS_BOUNDARIES))
 
-def choose_attention_word(words):
-    for word in words:
-        normalized = re.sub(r"[^\w\u0600-\u06FF]", "", word)
-        if normalized in ATTENTION_WORDS:
-            return word
-
-    candidates = [
-        word for word in words
-        if len(re.sub(r"[^\w\u0600-\u06FF]", "", word)) >= 4
-        and normalize_content(word) not in CONTENT_STOPWORDS
-    ]
-    if not candidates:
-        return words[-1] if words else ""
-    return max(candidates, key=lambda word: len(re.sub(r"[^\w\u0600-\u06FF]", "", word)))
-
-
-def build_subtitle_groups(text, boundaries, duration):
-    clean = clean_text(text)
-    words = clean.split()
-
-    if boundaries:
-        usable = [b for b in boundaries if b.get("text")]
-        if usable:
-            groups = []
-            current = []
-            current_chars = 0
-
-            for boundary in usable:
-                word = str(boundary["text"]).strip()
-                projected = current_chars + len(word) + (1 if current else 0)
-                if current and (projected > 27 or len(current) >= 5):
-                    groups.append(current)
-                    current = []
-                    current_chars = 0
-                current.append(boundary)
-                current_chars += len(word) + (1 if len(current) > 1 else 0)
-
-            if current:
-                groups.append(current)
-
-            result = []
-            for group in groups:
-                start = max(0.0, float(group[0]["start"]) - 0.02)
-                end = min(duration, max(float(group[-1]["end"]) + 0.06, start + 0.35))
-                result.append((start, end, [str(x["text"]) for x in group]))
-
-            if result:
-                # Close gaps only slightly; do not overlap adjacent dialogue events.
-                fixed = []
-                for i, (start, end, group_words) in enumerate(result):
-                    if i > 0:
-                        prev_end = fixed[-1][1]
-                        start = max(start, prev_end)
-                    if i + 1 < len(result):
-                        next_start = result[i + 1][0]
-                        end = min(end, next_start)
-                    end = max(end, start + 0.30)
-                    end = min(end, duration)
-                    fixed.append((start, end, group_words))
-                return fixed
-
-    # Reliable fallback when edge_tts does not provide boundaries.
-    parts = split_text_for_subtitles(clean)
-    if not parts:
-        return []
-    total_chars = sum(max(1, len(p)) for p in parts)
-    current = 0.0
-    result = []
-    for part in parts:
-        part_duration = max(0.25, len(part) / total_chars * duration)
-        end = min(duration, current + part_duration)
-        result.append((current, end, part.split()))
-        current = end
-    return result
-
-
-def format_highlighted_ass(words):
-    attention = choose_attention_word(words)
-    output = []
-    highlighted = False
-    for word in words:
-        if not highlighted and word == attention:
-            output.append(r"{\c&H00C8FF&\b1\fscx105\fscy105}" + escape_ass_text(word) + r"{\rArabic}")
-            highlighted = True
-        else:
-            output.append(escape_ass_text(word))
-    return " ".join(output)
-
-
-def create_subtitle_file(text, duration, boundaries=None):
-    groups = build_subtitle_groups(text, boundaries or [], duration)
-    if not groups:
-        raise RuntimeError("Subtitle text is empty.")
+    if source_words != boundary_words:
+        raise RuntimeError(
+            "Subtitle source does not match the exact TTS word sequence."
+        )
 
     ass_header = """[Script Info]
 ScriptType: v4.00+
@@ -1033,26 +880,52 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Arabic,Arial,64,&H00FFFFFF,&H00FFFFFF,&H00101010,&H88000000,-1,0,0,0,100,100,0,0,1,4,2,2,70,70,260,1
+Style: Arabic,Arial,64,&H00FFFFFF,&H00FFFFFF,&H00000000,&H99000000,-1,0,0,0,100,100,0,5,1,5,2,2,60,60,270,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
 
+    # Group words into readable subtitle chunks while preserving exact word timing.
+    groups = []
+    current = []
+    current_chars = 0
+
+    for item in TTS_BOUNDARIES:
+        word = str(item["text"]).strip()
+        if not word:
+            continue
+
+        proposed_chars = current_chars + (1 if current else 0) + len(word)
+        if current and (len(current) >= 6 or proposed_chars > 27):
+            groups.append(current)
+            current = []
+            current_chars = 0
+
+        current.append(item)
+        current_chars += (1 if current_chars else 0) + len(word)
+
+    if current:
+        groups.append(current)
+
     with open(SUBTITLE_FILE, "w", encoding="utf-8-sig") as file:
         file.write(ass_header)
-        for start, end, group_words in groups:
-            if end <= start:
-                continue
-            text_line = format_highlighted_ass(group_words)
-            # Subtle entrance/exit makes captions feel less static.
-            text_line = r"{\fad(70,70)}" + text_line
+
+        for group in groups:
+            start_time = max(0.0, group[0]["start"])
+            end_time = min(duration, group[-1]["end"] + 0.04)
+            words = [str(item["text"]).strip() for item in group]
+            subtitle_text = " ".join(words)
+
+            if end_time <= start_time:
+                end_time = min(duration, start_time + 0.20)
+
             file.write(
                 "Dialogue: 0,"
-                f"{ass_time(start)},"
-                f"{ass_time(end)},"
+                f"{ass_time(start_time)},"
+                f"{ass_time(end_time)},"
                 "Arabic,,0,0,0,,"
-                f"{text_line}\n"
+                f"{escape_ass_text(subtitle_text)}\n"
             )
 
 
@@ -1077,53 +950,37 @@ def prepare_clip(input_file, output_file, duration):
     source_duration = probe_video_duration(input_file)
 
     if source_duration <= duration + 0.2:
-        start_time = 0.0
+        start_time = 0
     else:
         max_start = max(0.0, source_duration - duration - 0.1)
-        start_time = random.uniform(0, max_start)
-
-    zoom = random.uniform(1.03, 1.10)
-    pan_x = random.choice(["left", "right", "center"])
-    pan_y = random.choice(["top", "bottom", "center"])
-
-    # Overscale first, then crop with a tiny animated movement.
-    base_w = int(VIDEO_WIDTH * zoom)
-    base_h = int(VIDEO_HEIGHT * zoom)
-    if pan_x == "left":
-        x_expr = "0"
-    elif pan_x == "right":
-        x_expr = f"iw-{VIDEO_WIDTH}"
-    else:
-        x_expr = f"(iw-{VIDEO_WIDTH})/2"
-    if pan_y == "top":
-        y_expr = "0"
-    elif pan_y == "bottom":
-        y_expr = f"ih-{VIDEO_HEIGHT}"
-    else:
-        y_expr = f"(ih-{VIDEO_HEIGHT})/2"
+        start_time = random.uniform(0, min(max_start, 3.0))
 
     video_filter = (
-        f"scale={base_w}:{base_h}:force_original_aspect_ratio=increase:flags=lanczos,"
-        f"crop={VIDEO_WIDTH}:{VIDEO_HEIGHT}:"
-        f"x='{x_expr}':y='{y_expr}',"
-        "setsar=1,setdar=9/16,fps=30"
+        "scale=1080:1920:"
+        "force_original_aspect_ratio=increase,"
+        "crop=1080:1920,"
+        "setsar=1,"
+        "setdar=9/16,"
+        "fps=30"
     )
 
     command = [
-        "ffmpeg", "-y",
+        "ffmpeg",
+        "-y",
         "-ss", f"{start_time:.3f}",
         "-i", str(input_file),
-        "-t", f"{duration:.3f}",
+        "-t", str(duration),
         "-vf", video_filter,
         "-an",
         "-r", str(FPS),
         "-c:v", "libx264",
         "-preset", "medium",
-        "-crf", "17",
+        "-crf", "18",
         "-pix_fmt", "yuv420p",
         "-movflags", "+faststart",
         str(output_file),
     ]
+
     run_command(command)
 
 
@@ -1144,48 +1001,57 @@ def create_silent_video(clips):
     silent_video = WORK_DIR / "silent.mp4"
 
     command = [
-        "ffmpeg", "-y",
+        "ffmpeg",
+        "-y",
         "-f", "concat",
         "-safe", "0",
         "-i", str(concat_file),
         "-c:v", "libx264",
         "-preset", "medium",
-        "-crf", "17",
+        "-crf", "18",
         "-pix_fmt", "yuv420p",
         "-r", str(FPS),
         "-an",
         "-movflags", "+faststart",
         str(silent_video),
     ]
+
     run_command(command)
     return silent_video
 
 
-def create_final_video(silent_video, text, boundaries=None):
+def create_final_video(silent_video, text):
     audio_duration = get_audio_duration()
+
     print(f"Audio duration: {audio_duration:.2f}s")
 
+    # Make sure the visual track is never shorter than the voice.
     silent_duration = probe_video_duration(silent_video)
+
     if silent_duration < audio_duration:
-        extra = audio_duration - silent_duration + 0.25
+        extra = audio_duration - silent_duration + 0.2
         print(f"Extending visual track by {extra:.2f}s")
+
         extended = WORK_DIR / "silent_extended.mp4"
+
         command = [
-            "ffmpeg", "-y",
+            "ffmpeg",
+            "-y",
             "-stream_loop", "-1",
             "-i", str(silent_video),
-            "-t", f"{audio_duration + 0.25:.3f}",
+            "-t", f"{audio_duration + 0.2:.3f}",
             "-c:v", "libx264",
             "-preset", "medium",
-            "-crf", "17",
+            "-crf", "18",
             "-pix_fmt", "yuv420p",
             "-r", str(FPS),
             str(extended),
         ]
+
         run_command(command)
         silent_video = extended
 
-    create_subtitle_file(text, audio_duration, boundaries=boundaries)
+    create_subtitle_file(text, audio_duration)
 
     audio_filter = (
         "highpass=f=70,"
@@ -1198,7 +1064,8 @@ def create_final_video(silent_video, text, boundaries=None):
     subtitle_filter = f"ass='{subtitle_path}'"
 
     final_command = [
-        "ffmpeg", "-y",
+        "ffmpeg",
+        "-y",
         "-i", str(silent_video),
         "-i", str(VOICE_FILE),
         "-map", "0:v:0",
@@ -1206,13 +1073,11 @@ def create_final_video(silent_video, text, boundaries=None):
         "-vf", subtitle_filter,
         "-af", audio_filter,
         "-c:v", "libx264",
-        "-preset", "slow",
-        "-crf", "17",
-        "-profile:v", "high",
-        "-level", "4.2",
+        "-preset", "medium",
+        "-crf", "18",
         "-pix_fmt", "yuv420p",
         "-c:a", "aac",
-        "-b:a", "192k",
+        "-b:a", "160k",
         "-ar", "48000",
         "-shortest",
         "-movflags", "+faststart",
@@ -1273,42 +1138,15 @@ def get_youtube_service():
 # YOUTUBE UPLOAD
 # =========================================================
 
-def clean_hook(title):
-    return re.sub(r"^\s*هل\s+تعلم\s+", "", clean_text(title)).strip()
-
-
-def first_sentence(text):
-    parts = re.split(r"(?<=[.!؟])\s+", clean_text(text))
-    return parts[0].strip() if parts else clean_text(text)
-
-
-def build_narration(topic):
-    hook = clean_hook(topic.get("title", ""))
-    body = clean_text(topic.get("text", ""))
-
-    # Remove the duplicated opening question when the script starts by
-    # repeating the same idea as the title.
-    first = first_sentence(body)
-    if hook and first and text_similarity(hook, first) >= 0.72:
-        remaining = body[len(first):].strip(" .،؟!")
-        body = remaining
-
-    narration = hook
-    if body:
-        narration += " " + body
-    return clean_text(narration)
-
-
 def build_video_title(topic):
-    # Cleaner title for YouTube; no generic "هل تعلم" prefix.
-    return clean_hook(topic["title"])
+    return topic["title"]
 
 
 def build_video_description(topic):
     hashtags = " ".join(topic.get("hashtags", []))
 
     return (
-        f"{build_narration(topic)}\n\n"
+        f"{topic['text']}\n\n"
         f"{hashtags}\n\n"
         "معلومات قصيرة وحقائق متنوعة بشكل مبسط.\n"
         "اشترك للمزيد من المقاطع."
@@ -1412,49 +1250,42 @@ def validate_final_video():
 def main():
     print("\n========================================")
     print("YOUTUBE SHORTS AUTOMATION")
-    print("101 UNIQUE IDEAS / DAILY SHORT")
     print("========================================\n")
 
     check_environment()
-
-    if len(TOPICS) != 101:
-        raise RuntimeError(f"TOPICS must contain exactly 101 ideas. Found: {len(TOPICS)}")
 
     used_content = load_used_content()
     used_clips = load_used_clips()
 
     topic = select_new_topic(used_content)
-    narration = build_narration(topic)
-    print(f"Narration: {narration}")
+    validate_topic_policy(topic)
 
     clean_previous_files()
 
-    print("\nCreating Arabic voice...")
-    boundaries = create_voice(narration)
-    audio_duration = get_audio_duration()
-
-    if audio_duration < 15 or audio_duration > 50:
-        raise RuntimeError(
-            f"Unexpected narration duration: {audio_duration:.2f}s. Refusing to publish."
-        )
-
-    # Match visual pacing to the actual narration length.
-    clip_duration = max(
-        MIN_CLIP_DURATION,
-        min(MAX_CLIP_DURATION, audio_duration / NUMBER_OF_CLIPS),
+    selected_videos = select_unique_videos(
+        topic,
+        used_clips,
     )
-    print(f"Dynamic clip duration: {clip_duration:.2f}s")
 
-    selected_videos = select_unique_videos(topic, used_clips)
     downloaded = []
 
     print("\nDownloading clips...")
+
     for index, item in enumerate(selected_videos, start=1):
         raw_file = WORK_DIR / f"raw_{index:02d}.mp4"
         prepared_file = WORK_DIR / f"clip_{index:02d}.mp4"
 
-        download_video(item["link"], raw_file)
-        prepare_clip(raw_file, prepared_file, clip_duration)
+        download_video(
+            item["link"],
+            raw_file,
+        )
+
+        prepare_clip(
+            raw_file,
+            prepared_file,
+            CLIP_DURATION,
+        )
+
         downloaded.append(prepared_file)
 
     if len(downloaded) != NUMBER_OF_CLIPS:
@@ -1463,19 +1294,20 @@ def main():
     print("\nCreating silent video...")
     silent_video = create_silent_video(downloaded)
 
+    print("\nCreating Arabic voice...")
+    create_voice(topic["text"])
+
     print("\nCreating final Short...")
     create_final_video(
         silent_video,
-        narration,
-        boundaries=boundaries,
+        topic["text"],
     )
 
     validate_final_video()
+    validate_topic_policy(topic)
 
     print("\nUploading...")
-    upload_topic = dict(topic)
-    upload_topic["text"] = narration
-    video_id = upload_to_youtube(upload_topic)
+    video_id = upload_to_youtube(topic)
 
     # Only remember the content and Pexels clips AFTER a successful upload.
     for item in selected_videos:
@@ -1486,7 +1318,6 @@ def main():
         topic,
         video_id,
         used_content,
-        narration=narration,
     )
 
     print("\n========================================")
@@ -1494,7 +1325,6 @@ def main():
     print(f"Video ID: {video_id}")
     print(f"Used Pexels clips remembered: {len(used_clips)}")
     print(f"Used content items remembered: {len(used_content)}")
-    print(f"Ideas in pool: {len(TOPICS)}")
     print("========================================")
 
 
