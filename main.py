@@ -881,7 +881,7 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Arabic,Arial,64,&H00FFFFFF,&H00FFFFFF,&H00000000,&H99000000,-1,0,0,0,100,100,0,5,1,5,2,2,60,60,270,1
+Style: Arabic,Arial,64,&H00FFFFFF,&H00FFFFFF,&H00000000,&H99000000,-1,0,0,0,100,100,0,5,1,5,1,1,105,55,250,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -926,7 +926,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                 f"{ass_time(start_time)},"
                 f"{ass_time(end_time)},"
                 "Arabic,,0,0,0,,"
-                f"{escape_ass_text(subtitle_text)}\n"
+                f"{chr(123)}\\an1\\pos(105,1670){chr(125)}{escape_ass_text(subtitle_text)}\n"
             )
 
 
@@ -1261,12 +1261,33 @@ def main():
     topic = select_new_topic(used_content)
     validate_topic_policy(topic)
 
+    # Reserve the topic BEFORE downloading or generating anything.
+    # This prevents the same topic from returning after a failed run.
+    reservation = {
+        "title": topic["title"],
+        "text": topic["text"],
+        "search": topic["search"],
+        "fingerprint": list(content_fingerprint(topic)),
+        "video_id": "PENDING",
+        "reserved_at": int(time.time()),
+    }
+    used_content.append(reservation)
+    save_used_content(used_content)
+    print("Content reserved before processing; it will not be reused if this run fails.")
+
     clean_previous_files()
 
     selected_videos = select_unique_videos(
         topic,
         used_clips,
     )
+
+    # Reserve Pexels IDs BEFORE downloading. This prevents clip reuse after
+    # a failed download, TTS failure, FFmpeg failure, or upload failure.
+    for item in selected_videos:
+        used_clips.add(str(item["id"]))
+    save_used_clips(used_clips)
+    print("Pexels clips reserved before processing; they will not be reused.")
 
     downloaded = []
 
@@ -1310,16 +1331,18 @@ def main():
     print("\nUploading...")
     video_id = upload_to_youtube(topic)
 
-    # Only remember the content and Pexels clips AFTER a successful upload.
-    for item in selected_videos:
-        used_clips.add(str(item["id"]))
-
-    save_used_clips(used_clips)
-    remember_content(
-        topic,
-        video_id,
-        used_content,
-    )
+    # The topic and clips were already reserved before processing.
+    # Update the pending content record with the real YouTube video ID.
+    for item in used_content:
+        if (
+            item.get("video_id") == "PENDING"
+            and item.get("title") == topic["title"]
+            and item.get("text") == topic["text"]
+        ):
+            item["video_id"] = video_id
+            item["uploaded_at"] = int(time.time())
+            break
+    save_used_content(used_content)
 
     print("\n========================================")
     print("DONE")
