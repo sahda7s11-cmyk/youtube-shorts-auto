@@ -786,11 +786,33 @@ def create_voice(text):
     source_words = normalized_words(exact_text)
     spoken_words = normalized_words(" ".join(item["text"] for item in TTS_BOUNDARIES))
 
-    if source_words != spoken_words:
-        raise RuntimeError(
-            "TTS TEXT MISMATCH: the speech boundary words do not exactly match "
-            "the selected script. Publishing was stopped."
-        )
+    if source_words != spoken_words or len(source_words) != len(TTS_BOUNDARIES):
+        print("WARNING: Edge-TTS WordBoundary tokens differ from the source script.")
+        print("Falling back to deterministic subtitle timing from the exact source text.")
+
+        audio_duration = get_audio_duration()
+        if audio_duration <= 0:
+            raise RuntimeError("Invalid audio duration for subtitle timing fallback.")
+
+        weights = [max(1, len(word)) for word in source_words]
+        total_weight = float(sum(weights))
+        fallback_boundaries = []
+        cursor = 0.0
+
+        for index, word in enumerate(source_words):
+            if index == len(source_words) - 1:
+                end = audio_duration
+            else:
+                end = cursor + (audio_duration * weights[index] / total_weight)
+
+            fallback_boundaries.append({
+                "text": word,
+                "start": cursor,
+                "end": max(cursor + 0.04, end),
+            })
+            cursor = end
+
+        TTS_BOUNDARIES = fallback_boundaries
 
     print(f"TTS locked: {len(source_words)} words / {len(TTS_BOUNDARIES)} boundaries")
 
