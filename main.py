@@ -48,40 +48,6 @@ VOICE_RATE = "+5%"
 VOICE_VOLUME = "+0%"
 VOICE_PITCH = "+0Hz"
 
-# =========================================================
-# STRICT CONTENT BLOCK
-# =========================================================
-# These filters are checked before content selection and again before upload.
-# They are intentionally conservative: the automation refuses to publish
-# instead of silently allowing a blocked topic.
-BLOCKED_CONTENT_TERMS = {
-    # Adult / sexual content
-    "porn", "pornography", "nude", "nudity", "sexual", "sex",
-    "adult", "erotic", "xxx",
-    "اباحي", "إباحي", "عري", "عارية", "جنسي", "جنس", "للكبار",
-    # Drugs / gambling / self-harm / dangerous challenges
-    "drug", "drugs", "cocaine", "heroin", "meth", "marijuana",
-    "gambling", "casino", "betting", "suicide", "self-harm",
-    "challenge dangerous",
-    "مخدر", "مخدرات", "قمار", "رهان", "انتحار", "إيذاء النفس",
-    # Female-person references requested to be excluded from this channel
-    "woman", "women", "woman's", "girl", "girls", "female",
-    "امرأة", "امرأه", "نساء", "مرأة", "بنت", "بنات", "أنثى",
-    # Rainbow / pride-related references requested to be excluded
-    "rainbow", "pride", "lgbt", "lgbtq",
-    "قوس قزح", "فخر",
-}
-
-BLOCKED_VIDEO_METADATA_TERMS = {
-    "woman", "women", "girl", "girls", "female",
-    "امرأة", "نساء", "بنت", "بنات", "أنثى",
-    "rainbow", "pride", "lgbt", "lgbtq",
-    "قوس قزح",
-}
-
-# Exact text used for TTS is locked to the selected topic.
-TTS_BOUNDARIES = []
-
 YOUTUBE_PRIVACY = "public"
 YOUTUBE_CATEGORY_ID = "17"
 YOUTUBE_MADE_FOR_KIDS = False
@@ -368,6 +334,157 @@ TOPICS = [
 
 
 # =========================================================
+# EXTRA UNIQUE CONTENT POOL
+# =========================================================
+# Additional topics are intentionally different from the original pool.
+# The memory system below prevents a topic from being published twice.
+EXTRA_TOPICS = [
+    {"search":"football offside technology","fallback_searches":["football offside","VAR offside","football technology"],"title":"كيف تساعد تقنية التسلل في كرة القدم على تحديد اللقطة بدقة؟","text":"تستخدم أنظمة التسلل الحديثة صورًا متعددة من كاميرات الملعب لتحديد مواقع اللاعبين والكرة في لحظة التمرير. ثم تُحلل البيانات لمساعدة الحكام على اتخاذ قرار أدق.","hashtags":["#Shorts","#كرة_القدم","#تقنية","#رياضة","#هل_تعلم"]},
+    {"search":"football goal net stadium","fallback_searches":["soccer goal net","football goal","stadium goal"],"title":"لماذا تتحرك شبكة المرمى عند تسجيل الهدف؟","text":"شبكة المرمى مصممة لتسمح للكرة بالدخول وتبطئ حركتها بدل أن ترتد بسرعة. كما تساعد مرونتها على امتصاص جزء من طاقة الكرة وتوضيح دخولها إلى المرمى.","hashtags":["#Shorts","#كرة_القدم","#رياضة","#هندسة","#هل_تعلم"]},
+    {"search":"football ball aerodynamics","fallback_searches":["soccer ball flight","football ball spin","soccer aerodynamics"],"title":"لماذا تنحرف كرة القدم عندما تدور في الهواء؟","text":"دوران الكرة يغير طريقة مرور الهواء حولها، وقد ينتج عن ذلك قوة جانبية تجعل مسارها ينحرف. وتظهر هذه الظاهرة بوضوح في بعض التسديدات والركلات الحرة.","hashtags":["#Shorts","#كرة_القدم","#فيزياء","#رياضة","#هل_تعلم"]},
+    {"search":"football stadium floodlights","fallback_searches":["soccer stadium lights","stadium lighting","football floodlights"],"title":"كيف تضيء الملاعب الكبيرة الملعب ليلًا؟","text":"تستخدم الملاعب أنظمة إضاءة قوية موزعة حول الملعب لتقليل الظلال وتحقيق إضاءة متقاربة في مختلف المناطق. وتُصمم هذه الأنظمة أيضًا لتناسب البث التلفزيوني عالي الدقة.","hashtags":["#Shorts","#ملاعب","#كرة_القدم","#هندسة","#هل_تعلم"]},
+    {"search":"football referee communication technology","fallback_searches":["referee communication","football referee headset","sports communication"],"title":"كيف يتواصل حكام كرة القدم أثناء المباراة؟","text":"يستخدم الحكام أنظمة اتصال لاسلكية تسمح لهم بتبادل المعلومات بسرعة أثناء اللعب. هذا يساعدهم على التنسيق ومتابعة الأحداث التي قد تحدث في أجزاء مختلفة من الملعب.","hashtags":["#Shorts","#كرة_القدم","#تقنية","#رياضة","#هل_تعلم"]},
+    {"search":"football goalkeeper gloves","fallback_searches":["soccer goalkeeper gloves","goalkeeper save","football goalkeeper"],"title":"لماذا تحتوي قفازات حارس المرمى على طبقة لاصقة؟","text":"تحتوي كثير من قفازات حراس المرمى على مادة تساعد على زيادة الاحتكاك بين القفاز والكرة. وهذا يمنح الحارس قبضة أفضل عند محاولة الإمساك بالكرة أو إبعادها.","hashtags":["#Shorts","#حارس_المرمى","#كرة_القدم","#رياضة","#هل_تعلم"]},
+    {"search":"football stadium grass pitch","fallback_searches":["soccer field grass","stadium turf","football pitch"],"title":"لماذا تُقص أعشاب ملاعب كرة القدم باتجاهات مختلفة؟","text":"تغيير اتجاه قص العشب يمكن أن يعطي الملعب مظهرًا مخططًا بسبب اختلاف اتجاه انعكاس الضوء عن أوراق العشب. ولا يعني ذلك بالضرورة اختلاف لون العشب نفسه.","hashtags":["#Shorts","#ملاعب","#كرة_القدم","#طبيعة","#هل_تعلم"]},
+    {"search":"sound wave physics","fallback_searches":["sound waves","acoustics science","sound vibration"],"title":"كيف يصل الصوت من شخص إلى أذنك؟","text":"عندما يهتز مصدر الصوت فإنه يسبب اهتزازات في الوسط المحيط، مثل الهواء. تنتقل هذه الاهتزازات على شكل موجات حتى تصل إلى الأذن التي تحولها إلى إشارات عصبية يفهمها الدماغ.","hashtags":["#Shorts","#صوت","#فيزياء","#علوم","#هل_تعلم"]},
+    {"search":"echo canyon sound","fallback_searches":["sound echo","echo canyon","acoustics echo"],"title":"لماذا نسمع الصدى في بعض الأماكن؟","text":"يحدث الصدى عندما تصل الموجات الصوتية إلى سطح بعيد ثم تنعكس وتعود إلى المستمع بعد فترة زمنية كافية. لذلك يكون الصدى أوضح في الأماكن الكبيرة ذات الأسطح الصلبة.","hashtags":["#Shorts","#صدى","#فيزياء","#علوم","#هل_تعلم"]},
+    {"search":"rain formation clouds","fallback_searches":["how rain forms","cloud precipitation","rain science"],"title":"كيف تتحول السحب إلى مطر؟","text":"داخل السحب تتجمع قطرات الماء أو بلورات الجليد وتنمو تدريجيًا. وعندما تصبح الجسيمات ثقيلة بما يكفي مقارنة بقدرة التيارات الهوائية على حملها، تهبط على شكل هطول.","hashtags":["#Shorts","#مطر","#طقس","#علوم","#هل_تعلم"]},
+    {"search":"lightning thunder storm","fallback_searches":["thunderstorm lightning","thunder sound","lightning science"],"title":"لماذا نرى البرق قبل أن نسمع الرعد؟","text":"الضوء ينتقل أسرع بكثير من الصوت. لذلك يصل ضوء البرق إلى أعيننا قبل وصول موجات الرعد إلى آذاننا، رغم أن الحدثين يحدثان في الوقت نفسه تقريبًا.","hashtags":["#Shorts","#برق","#رعد","#فيزياء","#هل_تعلم"]},
+    {"search":"rainbow sunlight water","fallback_searches":["rainbow formation","light refraction water","rainbow science"],"title":"كيف يظهر قوس قزح بعد المطر؟","text":"عندما يدخل ضوء الشمس إلى قطرات الماء يمكن أن ينكسر وينعكس ويتحلل إلى ألوان مختلفة. وعندما تصل هذه الأشعة إلى أعيننا من زوايا مناسبة يظهر قوس قزح.","hashtags":["#Shorts","#ضوء","#علوم","#طبيعة","#هل_تعلم"]},
+    {"search":"moon surface space","fallback_searches":["moon science","lunar surface","moon crater"],"title":"لماذا توجد حفر كثيرة على سطح القمر؟","text":"سطح القمر يحمل آثار اصطدامات كثيرة بأجسام فضائية عبر تاريخ طويل. وبسبب غياب الغلاف الجوي الكثيف والعمليات الجيولوجية المشابهة للأرض، تبقى كثير من آثار الاصطدام واضحة لفترات طويلة.","hashtags":["#Shorts","#قمر","#فضاء","#علوم","#هل_تعلم"]},
+    {"search":"earth rotation day night","fallback_searches":["earth rotation","day night earth","planet rotation"],"title":"كيف يتعاقب الليل والنهار على الأرض؟","text":"الأرض تدور حول محورها باستمرار. المنطقة المواجهة للشمس تكون في النهار، بينما تكون المنطقة البعيدة عنها في الليل، ومع استمرار الدوران تتغير هذه المناطق.","hashtags":["#Shorts","#الأرض","#فضاء","#علوم","#هل_تعلم"]},
+    {"search":"earth magnetic field","fallback_searches":["earth magnetosphere","magnetic field earth","compass earth"],"title":"كيف يساعد المجال المغناطيسي للأرض على حمايتها؟","text":"للأرض مجال مغناطيسي يمتد حولها ويؤثر في الجسيمات المشحونة القادمة من الشمس. هذا المجال جزء من البيئة الفضائية المحيطة بالأرض ويساعد على تقليل وصول بعض الجسيمات مباشرة إلى الغلاف الجوي.","hashtags":["#Shorts","#الأرض","#مغناطيسية","#فضاء","#هل_تعلم"]},
+    {"search":"volcano magma underground","fallback_searches":["magma volcano","volcanic eruption science","volcano inside"],"title":"من أين تأتي المواد المنصهرة في البركان؟","text":"توجد صخور منصهرة تسمى الصهارة في أجزاء من باطن الأرض. إذا صعدت هذه الصهارة إلى مناطق قريبة من السطح ثم خرجت أثناء ثوران بركاني، تُعرف المواد المنصهرة التي تصل إلى السطح باسم الحمم.","hashtags":["#Shorts","#براكين","#جيولوجيا","#علوم","#هل_تعلم"]},
+    {"search":"earthquake seismograph","fallback_searches":["earthquake waves","seismometer","earthquake science"],"title":"كيف يقيس العلماء الزلازل؟","text":"تستخدم أجهزة قياس الزلازل لتسجيل اهتزازات الأرض الناتجة عن الموجات الزلزالية. تساعد هذه التسجيلات العلماء على دراسة قوة الزلزال ومكانه وطبيعة الموجات التي انتشرت خلال الأرض.","hashtags":["#Shorts","#زلازل","#جيولوجيا","#علوم","#هل_تعلم"]},
+    {"search":"ocean waves beach physics","fallback_searches":["ocean wave formation","sea waves","wave physics"],"title":"لماذا تصل أمواج البحر إلى الشاطئ باستمرار؟","text":"تتولد كثير من أمواج البحر بسبب انتقال الطاقة عبر الماء بفعل الرياح. وعندما تقترب الموجة من المياه الضحلة يتغير سلوكها وتصبح أكثر ارتفاعًا قبل أن تصل إلى الشاطئ.","hashtags":["#Shorts","#أمواج","#محيط","#فيزياء","#هل_تعلم"]},
+    {"search":"coral reef underwater","fallback_searches":["coral reef ecosystem","coral underwater","marine reef"],"title":"لماذا تُعد الشعاب المرجانية مهمة للمحيطات؟","text":"الشعاب المرجانية توفر موائل لعدد كبير من الكائنات البحرية. كما أنها تشكل أنظمة بيئية معقدة ترتبط بها أنواع كثيرة، لذلك تؤدي دورًا مهمًا في التنوع الحيوي البحري.","hashtags":["#Shorts","#شعاب_مرجانية","#محيط","#طبيعة","#هل_تعلم"]},
+    {"search":"octopus underwater animal","fallback_searches":["octopus intelligence","octopus animal","octopus ocean"],"title":"لماذا يستطيع الأخطبوط تغيير مظهره؟","text":"يمتلك الأخطبوط خلايا متخصصة في الجلد تساعده على تغيير اللون والنقوش، ويمكن لبعض الأنواع أيضًا تغيير ملمس الجلد. تستخدم هذه القدرات في التواصل والتمويه والتفاعل مع البيئة.","hashtags":["#Shorts","#أخطبوط","#حيوانات","#محيط","#هل_تعلم"]},
+    {"search":"owl bird night vision","fallback_searches":["owl eyes night","owl hunting","owl bird"],"title":"كيف ترى البوم في الإضاءة الضعيفة؟","text":"عيون البوم كبيرة مقارنة بحجم الرأس، وتساعد بنيتها على جمع الضوء بكفاءة في ظروف الإضاءة المنخفضة. كما تمتلك البوم تكيفات أخرى تساعدها على الصيد في الليل.","hashtags":["#Shorts","#بوم","#حيوانات","#طبيعة","#هل_تعلم"]},
+    {"search":"camel desert adaptation","fallback_searches":["camel desert","camel biology","desert animal camel"],"title":"كيف يساعد الجمل جسمه على تحمل الصحراء؟","text":"يمتلك الجمل مجموعة من التكيفات التي تساعده في البيئة الصحراوية، منها القدرة على تحمل فقدان الماء لفترات وظروف الحرارة العالية. كما تساعده أقدامه وبنيته على الحركة فوق الرمال.","hashtags":["#Shorts","#جمل","#صحراء","#حيوانات","#هل_تعلم"]},
+    {"search":"dolphin echolocation ocean","fallback_searches":["dolphin sonar","dolphin sound","marine mammals"],"title":"كيف تستخدم الدلافين الأصوات لمعرفة ما حولها؟","text":"تستخدم الدلافين تحديد الموقع بالصدى، حيث تطلق أصواتًا وتستقبل صداها بعد انعكاسه عن الأجسام. تساعدها هذه المعلومات على تقدير موقع الأجسام والمسافات في الماء.","hashtags":["#Shorts","#دلافين","#محيط","#حيوانات","#هل_تعلم"]},
+    {"search":"bee pollination flower","fallback_searches":["bees flowers pollination","bee pollination","honeybee nature"],"title":"كيف تساعد النحل في تلقيح النباتات؟","text":"عندما ينتقل النحل بين الأزهار يلتصق حبوب اللقاح بجسمه ويمكن أن ينقل جزءًا منها إلى زهرة أخرى. هذه العملية تساعد كثيرًا من النباتات على التكاثر وإنتاج البذور.","hashtags":["#Shorts","#نحل","#نباتات","#طبيعة","#هل_تعلم"]},
+    {"search":"tree rings age","fallback_searches":["tree rings science","tree age rings","dendrochronology"],"title":"كيف يمكن معرفة عمر بعض الأشجار من حلقاتها؟","text":"تضيف كثير من الأشجار طبقات نمو جديدة مع مرور السنوات. وعند فحص الحلقات في مقطع جذع مناسب يمكن للعلماء استخدامها لتقدير عمر الشجرة ودراسة ظروف نموها عبر الزمن.","hashtags":["#Shorts","#أشجار","#طبيعة","#علوم","#هل_تعلم"]},
+    {"search":"photosynthesis leaf chlorophyll","fallback_searches":["chlorophyll plants","leaf photosynthesis","plant science"],"title":"لماذا تبدو أوراق النباتات خضراء؟","text":"تحتوي كثير من النباتات على صبغة تسمى الكلوروفيل تمتص أجزاء من الضوء وتشارك في البناء الضوئي. ويعكس الكلوروفيل جزءًا من الضوء الأخضر أكثر من بعض الألوان الأخرى، لذلك تبدو الأوراق خضراء.","hashtags":["#Shorts","#نباتات","#علوم","#طبيعة","#هل_تعلم"]},
+    {"search":"human skeleton xray bones","fallback_searches":["human bones","skeleton science","bone structure"],"title":"لماذا لا تكون عظام الإنسان صلبة بالكامل من الداخل؟","text":"العظم نسيج حي وله بنية داخلية معقدة. كثير من العظام تحتوي على جزء داخلي مسامي يساعد على تقليل الوزن مع المحافظة على قدر جيد من القوة، كما تحتوي العظام على خلايا وأنسجة حية.","hashtags":["#Shorts","#عظام","#علوم","#جسم_الإنسان","#هل_تعلم"]},
+    {"search":"human heartbeat heart anatomy","fallback_searches":["heart pumping blood","human heart","cardiovascular system"],"title":"كيف يدفع القلب الدم إلى أنحاء الجسم؟","text":"ينقبض القلب ويرتخي في دورة متكررة تدفع الدم عبر الأوعية الدموية. يعمل هذا النظام على نقل الأكسجين والمواد الغذائية إلى الأنسجة وإعادة بعض المواد إلى الأعضاء المسؤولة عن معالجتها.","hashtags":["#Shorts","#قلب","#علوم","#جسم_الإنسان","#هل_تعلم"]},
+    {"search":"human lungs breathing","fallback_searches":["lungs oxygen","respiratory system","lung anatomy"],"title":"كيف يصل الأكسجين من الهواء إلى الدم؟","text":"عند التنفس يصل الهواء إلى الرئتين، وهناك ينتقل الأكسجين عبر أسطح دقيقة جدًا إلى الدم، بينما ينتقل ثاني أكسيد الكربون من الدم إلى الهواء ليخرج أثناء الزفير.","hashtags":["#Shorts","#رئتان","#علوم","#جسم_الإنسان","#هل_تعلم"]},
+    {"search":"human skin temperature","fallback_searches":["skin body temperature","sweating cooling","human thermoregulation"],"title":"كيف يساعد التعرق الجسم على تبريد نفسه؟","text":"عندما يتبخر العرق من سطح الجلد فإنه يسحب جزءًا من الطاقة الحرارية من الجسم. لذلك يعد التعرق إحدى الطرق التي يستخدمها الجسم للمساعدة في تنظيم درجة حرارته.","hashtags":["#Shorts","#تعرق","#علوم","#جسم_الإنسان","#هل_تعلم"]},
+    {"search":"computer binary code technology","fallback_searches":["binary computing","computer bits","digital data"],"title":"لماذا تستخدم الحواسيب النظام الثنائي؟","text":"تعتمد الدوائر الرقمية على حالات كهربائية يمكن تمثيلها بصورة مبسطة بصفر وواحد. ومن خلال ترتيب هذه الحالات تستطيع الحواسيب تمثيل البيانات وتنفيذ العمليات المنطقية والحسابية.","hashtags":["#Shorts","#حاسوب","#تقنية","#برمجة","#هل_تعلم"]},
+    {"search":"computer RAM memory","fallback_searches":["RAM explained","computer memory","ram technology"],"title":"ما وظيفة ذاكرة RAM في الحاسوب؟","text":"تستخدم ذاكرة RAM لتخزين البيانات التي تحتاج إليها البرامج بسرعة أثناء عملها. وهي تختلف عن التخزين الدائم لأن محتوياتها لا تبقى عادة بعد انقطاع الطاقة.","hashtags":["#Shorts","#رام","#حاسوب","#تقنية","#هل_تعلم"]},
+    {"search":"SSD storage technology","fallback_searches":["solid state drive","SSD how works","computer SSD"],"title":"لماذا تكون أقراص SSD أسرع من الأقراص التقليدية؟","text":"تعتمد أقراص SSD على شرائح ذاكرة إلكترونية ولا تحتوي عادة على أجزاء ميكانيكية متحركة مثل الأقراص الصلبة التقليدية. هذا يساعدها على الوصول إلى البيانات بسرعة وتقليل زمن الانتظار في كثير من الاستخدامات.","hashtags":["#Shorts","#SSD","#حاسوب","#تقنية","#هل_تعلم"]},
+    {"search":"wifi router wireless signal","fallback_searches":["wifi technology","wireless router","wifi signal"],"title":"كيف ينتقل الإنترنت إلى هاتفك عبر Wi-Fi؟","text":"يرسل جهاز التوجيه البيانات عبر موجات راديوية باستخدام ترددات مخصصة للاتصالات اللاسلكية. يستقبل الهاتف هذه الإشارات ويحولها إلى بيانات يمكن للتطبيقات استخدامها.","hashtags":["#Shorts","#واي_فاي","#إنترنت","#تقنية","#هل_تعلم"]},
+    {"search":"fiber optic cable light internet","fallback_searches":["fiber optic internet","optical fiber","internet cables"],"title":"كيف تنقل الألياف الضوئية البيانات بالضوء؟","text":"تستخدم الألياف الضوئية خيوطًا دقيقة من الزجاج أو مواد مشابهة لنقل نبضات ضوئية. يمكن ترميز البيانات داخل هذه الإشارات ونقلها لمسافات طويلة بسرعات عالية.","hashtags":["#Shorts","#ألياف_ضوئية","#إنترنت","#تقنية","#هل_تعلم"]},
+    {"search":"gps satellite navigation phone","fallback_searches":["GPS technology","GPS satellites","phone navigation"],"title":"كيف يعرف هاتفك موقعك باستخدام GPS؟","text":"يستقبل الهاتف إشارات من عدة أقمار صناعية لنظام تحديد المواقع. وباستخدام فروق زمن وصول الإشارات يمكن للجهاز حساب موقع تقريبي على سطح الأرض.","hashtags":["#Shorts","#GPS","#جوال","#تقنية","#هل_تعلم"]},
+    {"search":"camera image sensor smartphone","fallback_searches":["camera sensor","phone camera technology","digital camera"],"title":"كيف تحول كاميرا الهاتف الضوء إلى صورة؟","text":"يصل الضوء إلى حساس الصورة داخل الكاميرا، حيث تحوله عناصر صغيرة إلى إشارات كهربائية. ثم تعالجها البرمجيات لتكوين ملف صورة رقمي يمكن حفظه ومشاركته.","hashtags":["#Shorts","#كاميرا","#جوال","#تقنية","#هل_تعلم"]},
+    {"search":"electric motor magnetic field","fallback_searches":["electric motor science","motor magnets","motor engineering"],"title":"كيف يحول المحرك الكهربائي الكهرباء إلى حركة؟","text":"يستخدم المحرك الكهربائي تفاعل المجالات المغناطيسية مع التيار الكهربائي لإنتاج قوة دوران. وتُرتب الملفات والمغناطيسات بحيث تستمر القوة في دفع الجزء الدوار.","hashtags":["#Shorts","#محرك","#كهرباء","#هندسة","#هل_تعلم"]},
+    {"search":"battery lithium ion charging","fallback_searches":["lithium ion battery","battery science","battery charging"],"title":"كيف تخزن البطارية الطاقة الكهربائية؟","text":"البطارية تحول الطاقة الكيميائية إلى طاقة كهربائية عند استخدامها، ويمكن عكس العملية في البطاريات القابلة لإعادة الشحن. داخل البطارية تتحرك الأيونات والإلكترونات عبر مواد ومسارات محددة.","hashtags":["#Shorts","#بطاريات","#كهرباء","#تقنية","#هل_تعلم"]},
+    {"search":"electricity power grid transmission","fallback_searches":["power grid","electric transmission","electricity network"],"title":"لماذا تُنقل الكهرباء بجهد عالٍ عبر الشبكات؟","text":"رفع جهد النقل يسمح بنقل قدرة كهربائية معينة بتيار أقل، وهذا يقلل الفاقد الحراري في خطوط النقل. لذلك تستخدم شبكات الكهرباء جهودًا عالية في مراحل النقل لمسافات طويلة.","hashtags":["#Shorts","#كهرباء","#هندسة","#طاقة","#هل_تعلم"]},
+    {"search":"wind turbine renewable energy","fallback_searches":["wind power turbine","wind energy","wind turbine blades"],"title":"كيف تحول توربينات الرياح حركة الهواء إلى كهرباء؟","text":"تحرك الرياح شفرات التوربين فتدور معها أجزاء ميكانيكية متصلة بمولد. يحول المولد الطاقة الميكانيكية الناتجة عن الدوران إلى طاقة كهربائية.","hashtags":["#Shorts","#طاقة_الرياح","#هندسة","#طاقة","#هل_تعلم"]},
+    {"search":"hydroelectric dam power","fallback_searches":["hydropower dam","hydroelectricity","water turbine"],"title":"كيف تنتج السدود الكهرومائية الكهرباء؟","text":"يمكن للمياه المخزنة على ارتفاع أن تمتلك طاقة وضع. عند مرورها عبر التوربينات تتحول هذه الطاقة إلى حركة دورانية، ثم يحول المولد الحركة إلى كهرباء.","hashtags":["#Shorts","#طاقة_مائية","#هندسة","#كهرباء","#هل_تعلم"]},
+    {"search":"skyscraper structural engineering","fallback_searches":["skyscraper engineering","tall building structure","building design"],"title":"كيف تقاوم ناطحات السحاب الرياح؟","text":"تُصمم الأبراج العالية بحيث توزع الأحمال على الهيكل والأساسات، وتستخدم أنظمة إنشائية تساعد على التحكم في الحركة الناتجة عن الرياح. ويأخذ المهندسون أيضًا تأثير الزلازل والوزن في الحسبان حسب الموقع.","hashtags":["#Shorts","#ناطحات_السحاب","#هندسة","#بناء","#هل_تعلم"]},
+    {"search":"airplane wing lift aerodynamics","fallback_searches":["airplane lift","aircraft wing","aerodynamics plane"],"title":"كيف تساعد أجنحة الطائرة على البقاء في الهواء؟","text":"عند حركة الطائرة خلال الهواء يتشكل توزيع للقوى حول الأجنحة ينتج عنه قوة رفع. يعتمد مقدار الرفع على سرعة الهواء وشكل الجناح وزاويته وعوامل أخرى.","hashtags":["#Shorts","#طائرات","#هندسة","#فيزياء","#هل_تعلم"]},
+    {"search":"airplane jet engine turbine","fallback_searches":["jet engine how works","aircraft engine","jet turbine"],"title":"كيف يدفع المحرك النفاث الطائرة إلى الأمام؟","text":"يسحب المحرك الهواء ثم يضغطه ويخلطه بالوقود ويحرق الخليط لإنتاج غازات ساخنة تتمدد وتندفع إلى الخلف. ينتج عن ذلك قوة دفع تدفع الطائرة إلى الأمام.","hashtags":["#Shorts","#محركات","#طائرات","#هندسة","#هل_تعلم"]},
+    {"search":"car airbags crash safety","fallback_searches":["airbag safety","car crash technology","vehicle safety"],"title":"كيف تعمل الوسائد الهوائية في السيارات؟","text":"عند اكتشاف تصادم قوي تستخدم السيارة حساسات ترسل بيانات إلى وحدة تحكم. إذا تحققت شروط معينة تنتفخ الوسادة الهوائية بسرعة لتوفير وسادة حماية إضافية للركاب.","hashtags":["#Shorts","#سيارات","#هندسة","#سلامة","#هل_تعلم"]},
+    {"search":"electric car regenerative braking","fallback_searches":["regenerative braking","electric vehicle braking","EV technology"],"title":"كيف تستعيد السيارات الكهربائية جزءًا من الطاقة أثناء التباطؤ؟","text":"عند التباطؤ يمكن للمحرك الكهربائي أن يعمل بطريقة مختلفة ليعمل كمولد. فتتحول بعض الطاقة الحركية إلى طاقة كهربائية تعود إلى البطارية بدل فقدها كلها على شكل حرارة في نظام الاحتكاك.","hashtags":["#Shorts","#سيارات_كهربائية","#هندسة","#طاقة","#هل_تعلم"]},
+    {"search":"robot sensors lidar camera","fallback_searches":["robot sensors","robot perception","robotics technology"],"title":"كيف تعرف الروبوتات ما يوجد حولها؟","text":"يمكن للروبوت استخدام كاميرات وحساسات مسافة ومستشعرات أخرى لجمع معلومات عن البيئة. ثم تعالج برمجياته هذه البيانات لتحديد مواقع الأشياء واتخاذ قرارات للحركة.","hashtags":["#Shorts","#روبوتات","#تقنية","#هندسة","#هل_تعلم"]},
+    {"search":"3d printer layer manufacturing","fallback_searches":["additive manufacturing","3d printing layers","3d printer technology"],"title":"لماذا تسمى الطباعة ثلاثية الأبعاد تصنيعًا إضافيًا؟","text":"في التصنيع الإضافي يُبنى الجسم بإضافة المادة تدريجيًا وفق نموذج رقمي، بدل إزالة المادة من كتلة كبيرة. هذا يسمح بإنتاج أشكال هندسية معقدة في بعض التطبيقات.","hashtags":["#Shorts","#طباعة_ثلاثية_الأبعاد","#هندسة","#تقنية","#هل_تعلم"]},
+    {"search":"bridge suspension cables engineering","fallback_searches":["suspension bridge","bridge cables","structural engineering"],"title":"لماذا تستخدم بعض الجسور كابلات ضخمة؟","text":"في الجسور المعلقة تحمل الكابلات الرئيسية جزءًا كبيرًا من الأحمال وتنقل القوى إلى الأبراج والمراسي. يساعد هذا النظام على تغطية مسافات واسعة دون الحاجة إلى دعامات كثيرة في المنتصف.","hashtags":["#Shorts","#جسور","#هندسة","#بناء","#هل_تعلم"]},
+    {"search":"tunnel boring machine underground","fallback_searches":["tunnel boring machine","underground construction","tunnel engineering"],"title":"كيف تحفر الآلات الأنفاق تحت الأرض؟","text":"تستخدم آلات حفر الأنفاق رأس قطع دوارًا لإزالة الصخور أو التربة تدريجيًا. وفي الوقت نفسه يمكن تركيب دعامات أو بطانات خلف الآلة للمساعدة على تثبيت النفق.","hashtags":["#Shorts","#أنفاق","#هندسة","#بناء","#هل_تعلم"]},
+    {"search":"dam engineering concrete water","fallback_searches":["dam structure","concrete dam","water engineering"],"title":"لماذا تكون بعض السدود سميكة جدًا عند قاعدتها؟","text":"ضغط المياه على السد يزداد مع العمق، لذلك تحتاج بعض تصميمات السدود إلى قاعدة قوية وعريضة لمقاومة القوى المؤثرة. يعتمد الشكل النهائي على نوع السد والمواد والظروف الجيولوجية.","hashtags":["#Shorts","#سدود","#هندسة","#مياه","#هل_تعلم"]},
+    {"search":"ancient roman roads engineering","fallback_searches":["roman roads","ancient roman engineering","roman infrastructure"],"title":"لماذا بقيت بعض الطرق الرومانية القديمة لقرون؟","text":"اعتمد الرومان في كثير من الطرق على طبقات متعددة من المواد وتصريف المياه وتنظيم مسار الطريق. ساعدت هذه الأساليب الهندسية على زيادة متانة بعض الطرق وتقليل تأثير تجمع المياه.","hashtags":["#Shorts","#رومان","#تاريخ","#هندسة","#هل_تعلم"]},
+    {"search":"ancient aqueduct engineering","fallback_searches":["roman aqueduct","ancient water systems","aqueduct engineering"],"title":"كيف نقلت القنوات الرومانية المياه لمسافات طويلة؟","text":"استخدم الرومان قنوات مصممة بانحدار مناسب لنقل المياه بفعل الجاذبية من مصادرها إلى المدن. وتضمنت بعض الأنظمة جسورًا وقنوات تحت الأرض وخزانات لتوزيع المياه.","hashtags":["#Shorts","#رومان","#مياه","#هندسة","#هل_تعلم"]},
+    {"search":"ancient compass navigation","fallback_searches":["magnetic compass history","compass navigation","ancient navigation"],"title":"كيف ساعدت البوصلة على تطوير الملاحة؟","text":"تعتمد البوصلة المغناطيسية على إبرة تتأثر بالمجال المغناطيسي للأرض. سمحت هذه الأداة للبحارة بتحديد اتجاهات عامة حتى عندما تكون المعالم المرئية محدودة.","hashtags":["#Shorts","#بوصلة","#ملاحة","#تاريخ","#هل_تعلم"]},
+    {"search":"printing press history books","fallback_searches":["printing press history","Gutenberg press","old printing"],"title":"كيف غيرت الطباعة انتشار الكتب؟","text":"سمحت تقنيات الطباعة بإنتاج نسخ كثيرة من النصوص بطريقة أسرع من نسخها يدويًا واحدة تلو الأخرى. ساعد ذلك على زيادة انتشار الكتب والمعلومات في المجتمعات التي استخدمت هذه التقنيات.","hashtags":["#Shorts","#طباعة","#تاريخ","#كتب","#هل_تعلم"]},
+    {"search":"ancient astronomy observatory stars","fallback_searches":["ancient astronomy","old observatory","star observation history"],"title":"لماذا راقب القدماء حركة النجوم والكواكب؟","text":"استخدمت حضارات قديمة مراقبة السماء لفهم دورات الزمن والمواسم والملاحة وبناء تقاويمها. وساعد تسجيل الحركات السماوية عبر فترات طويلة على تطوير المعرفة الفلكية.","hashtags":["#Shorts","#فلك","#تاريخ","#فضاء","#هل_تعلم"]},
+    {"search":"meteorite desert rock space","fallback_searches":["meteorite discovery","space rock desert","meteorite rock"],"title":"كيف يعرف العلماء أن بعض الصخور جاءت من الفضاء؟","text":"يمكن أن تحمل بعض النيازك خصائص وتركيبات معدنية تختلف عن الصخور الشائعة على الأرض. يدرس العلماء تركيبها ونظائرها وبنيتها للمساعدة على تحديد أصلها وتاريخها.","hashtags":["#Shorts","#نيازك","#فضاء","#جيولوجيا","#هل_تعلم"]},
+    {"search":"stars nuclear fusion space","fallback_searches":["star fusion","sun nuclear fusion","stellar energy"],"title":"من أين تحصل النجوم على طاقتها؟","text":"في النجوم تحدث تفاعلات اندماج نووي في درجات حرارة وضغوط هائلة. في نجوم مثل الشمس تتحول نوى الهيدروجين تدريجيًا إلى هيليوم وتتحرر طاقة كبيرة.","hashtags":["#Shorts","#نجوم","#فضاء","#فيزياء","#هل_تعلم"]},
+    {"search":"sunlight earth energy solar","fallback_searches":["sun energy earth","solar radiation","sun science"],"title":"لماذا تعد الشمس مصدر الطاقة الرئيسي لكثير من أنظمة الأرض؟","text":"تصل طاقة الشمس إلى الأرض على شكل إشعاع، وتستخدم النباتات جزءًا منها في البناء الضوئي. كما تسهم الطاقة الشمسية في تسخين سطح الأرض وتحريك دورة المياه والرياح.","hashtags":["#Shorts","#الشمس","#طاقة","#علوم","#هل_تعلم"]},
+    {"search":"ocean currents global circulation","fallback_searches":["ocean currents","sea circulation","ocean science"],"title":"كيف تتحرك التيارات البحرية لمسافات طويلة؟","text":"تتحرك مياه المحيطات بسبب الرياح واختلاف الكثافة الناتج عن الحرارة والملوحة وشكل الأحواض البحرية. وتساهم هذه الحركة في نقل الحرارة والمواد عبر أجزاء واسعة من المحيطات.","hashtags":["#Shorts","#محيطات","#تيارات_بحرية","#علوم","#هل_تعلم"]},
+    {"search":"water cycle evaporation clouds","fallback_searches":["water cycle","evaporation condensation","water science"],"title":"كيف تعود المياه من الأرض إلى السماء؟","text":"تتبخر المياه من البحار والأنهار والأسطح الرطبة، ثم يبرد بخار الماء ويتكاثف في الغلاف الجوي لتتكون السحب. بعد ذلك يعود الماء إلى السطح على شكل هطول.","hashtags":["#Shorts","#دورة_المياه","#علوم","#طقس","#هل_تعلم"]},
+    {"search":"snowflake formation microscope","fallback_searches":["snow crystal","snowflake science","ice crystal"],"title":"لماذا تختلف أشكال بلورات الثلج؟","text":"تتكون بلورات الثلج عندما يتجمد بخار الماء في ظروف جوية معينة. وتتأثر طريقة نمو البلورة بدرجة الحرارة والرطوبة أثناء سقوطها، لذلك يمكن أن تظهر أشكال كثيرة مختلفة.","hashtags":["#Shorts","#ثلج","#علوم","#طقس","#هل_تعلم"]},
+    {"search":"desert oasis water nature","fallback_searches":["oasis desert","desert water","oasis landscape"],"title":"كيف تتكون الواحات في بعض الصحارى؟","text":"تظهر الواحات في أماكن يصل فيها الماء الجوفي إلى قرب سطح الأرض أو يتوفر فيها مصدر مائي مستمر. وجود الماء يسمح بنمو النباتات وقيام تجمعات بشرية في مناطق صحراوية.","hashtags":["#Shorts","#واحات","#صحراء","#طبيعة","#هل_تعلم"]},
+    {"search":"mangrove forest coast roots","fallback_searches":["mangrove ecosystem","mangrove roots","coastal forest"],"title":"كيف تستطيع أشجار المانغروف النمو قرب مياه البحر؟","text":"تمتلك أشجار المانغروف تكيفات تساعدها على العيش في البيئات الساحلية المالحة والمغمورة دوريًا. وتشكل جذورها المعقدة موائل مهمة لكائنات كثيرة وتساعد في تثبيت الرواسب.","hashtags":["#Shorts","#مانغروف","#طبيعة","#محيط","#هل_تعلم"]},
+    {"search":"bamboo plant growth nature","fallback_searches":["bamboo growth","bamboo plant","fast growing plants"],"title":"لماذا يمكن لبعض أنواع الخيزران أن تنمو بسرعة كبيرة؟","text":"تمتلك بعض أنواع الخيزران مناطق نمو نشطة تسمح للساق بالاستطالة بسرعة خلال ظروف مناسبة. وتختلف سرعة النمو كثيرًا بين الأنواع والبيئات، لذلك لا تنطبق الأرقام نفسها على كل أنواع الخيزران.","hashtags":["#Shorts","#خيزران","#نباتات","#طبيعة","#هل_تعلم"]},
+    {"search":"ant colony insect teamwork","fallback_searches":["ants colony","ant teamwork","insect behavior"],"title":"كيف تتعاون مستعمرات النمل في العثور على الغذاء؟","text":"تستطيع بعض أنواع النمل ترك إشارات كيميائية على المسارات، ويمكن لغيرها تتبع هذه الإشارات للوصول إلى مصادر الغذاء. هذا السلوك يساعد المستعمرة على تنظيم البحث والنقل.","hashtags":["#Shorts","#نمل","#حشرات","#طبيعة","#هل_تعلم"]},
+    {"search":"spider web silk macro","fallback_searches":["spider silk","spider web science","spider web"],"title":"لماذا تتميز خيوط العنكبوت بقوة ملحوظة؟","text":"خيوط العنكبوت مصنوعة من بروتينات تنتجها الغدد الخاصة بالعنكبوت. تمتلك بعض أنواع الحرير توازنًا مميزًا بين القوة والمرونة، وتختلف خصائص الخيوط حسب نوع العنكبوت ووظيفتها.","hashtags":["#Shorts","#عناكب","#حشرات","#علوم","#هل_تعلم"]},
+    {"search":"butterfly metamorphosis life cycle","fallback_searches":["butterfly life cycle","metamorphosis butterfly","caterpillar butterfly"],"title":"كيف تتحول اليرقة إلى فراشة؟","text":"تمر الفراشات بمراحل مختلفة في دورة حياتها، تبدأ عادة بالبيضة ثم اليرقة فالطور العذري ثم الحشرة البالغة. خلال التحول تتغير بنية الجسم ووظائفه بشكل كبير.","hashtags":["#Shorts","#فراشات","#حشرات","#طبيعة","#هل_تعلم"]},
+    {"search":"penguin swimming underwater","fallback_searches":["penguin swimming","penguin feathers","penguin ocean"],"title":"لماذا تستطيع البطاريق السباحة بكفاءة رغم أنها طيور؟","text":"أجنحة البطاريق تحورت لتعمل بطريقة تشبه الزعانف أثناء السباحة، كما يساعد شكل الجسم والريش على الحركة في الماء. وهي لا تطير في الهواء مثل معظم الطيور لكنها متخصصة جدًا في السباحة.","hashtags":["#Shorts","#بطاريق","#حيوانات","#محيط","#هل_تعلم"]},
+    {"search":"elephant ears cooling","fallback_searches":["elephant ears temperature","elephant cooling","elephant biology"],"title":"كيف تساعد آذان الفيل الكبيرة على تبريد جسمه؟","text":"تحتوي آذان الفيل على شبكة واسعة من الأوعية الدموية. عندما يمر الدم بالقرب من سطح الأذن يمكن أن يفقد جزءًا من الحرارة، وتساعد حركة الأذن في زيادة تبادل الحرارة مع الهواء.","hashtags":["#Shorts","#فيل","#حيوانات","#علوم","#هل_تعلم"]},
+    {"search":"polar bear fur insulation","fallback_searches":["polar bear cold adaptation","polar bear fur","arctic animal"],"title":"كيف يحافظ الدب القطبي على حرارته في البرد؟","text":"يمتلك الدب القطبي طبقات من العزل تشمل الفراء والدهون، ما يقلل فقدان الحرارة في البيئة الباردة. كما يساعد شكل جسمه على تقليل مساحة السطح مقارنة بحجمه.","hashtags":["#Shorts","#دب_قطبي","#حيوانات","#طبيعة","#هل_تعلم"]},
+    {"search":"whale ocean breathing surface","fallback_searches":["whale breathing","whale ocean","marine mammal"],"title":"لماذا تصعد الحيتان إلى سطح الماء؟","text":"الحيتان ثدييات وتحتاج إلى تنفس الهواء من الغلاف الجوي، لذلك تصعد إلى السطح للتنفس. ثم تستطيع بعض الأنواع الغوص لفترات طويلة قبل العودة إلى السطح مرة أخرى.","hashtags":["#Shorts","#حيتان","#محيط","#حيوانات","#هل_تعلم"]},
+    {"search":"gecko feet adhesion macro","fallback_searches":["gecko feet science","gecko climbing","animal adhesion"],"title":"كيف تستطيع بعض الوزغات المشي على الأسطح الملساء؟","text":"تحتوي أقدام بعض الوزغات على ملايين التراكيب الدقيقة التي تزيد مساحة التلامس مع السطح. تنتج عن هذه البنية قوى سطحية تسمح لها بالالتصاق والتسلق دون مادة لاصقة سائلة.","hashtags":["#Shorts","#وزغ","#حيوانات","#علوم","#هل_تعلم"]},
+    {"search":"magnet attraction iron science","fallback_searches":["magnetism iron","magnetic field","magnet science"],"title":"لماذا يجذب المغناطيس الحديد ولا يجذب كل المعادن؟","text":"تتأثر المواد المختلفة بالمجالات المغناطيسية بدرجات مختلفة. الحديد وبعض المواد المشابهة تمتلك بنية تسمح باستجابة مغناطيسية قوية نسبيًا، بينما تكون استجابة كثير من المعادن الأخرى أضعف بكثير.","hashtags":["#Shorts","#مغناطيس","#فيزياء","#علوم","#هل_تعلم"]},
+    {"search":"prism light spectrum","fallback_searches":["prism rainbow light","light spectrum","refraction prism"],"title":"كيف يكشف المنشور الزجاجي ألوان الضوء؟","text":"عندما يمر الضوء عبر منشور زجاجي ينكسر، وتختلف زاوية الانحراف قليلًا بين الألوان المختلفة. لذلك يمكن فصل الضوء الأبيض إلى طيف من الألوان المرئية.","hashtags":["#Shorts","#ضوء","#فيزياء","#علوم","#هل_تعلم"]},
+    {"search":"laser beam technology","fallback_searches":["laser science","laser light","laser technology"],"title":"لماذا يكون ضوء الليزر مركزًا جدًا؟","text":"الليزر ينتج ضوءًا له خصائص مميزة من حيث الترابط والاتجاهية مقارنة بالضوء العادي. تسمح هذه الخصائص باستخدامه في الاتصالات والقياس والطب والصناعة وتطبيقات أخرى.","hashtags":["#Shorts","#ليزر","#فيزياء","#تقنية","#هل_تعلم"]},
+    {"search":"hydraulic pressure machine","fallback_searches":["hydraulic system","hydraulic press","fluid pressure"],"title":"كيف تستطيع الأنظمة الهيدروليكية رفع أوزان كبيرة؟","text":"تعتمد الأنظمة الهيدروليكية على ضغط سائل محصور. يمكن للقوة المؤثرة على مساحة صغيرة أن تنتج قوة أكبر على مساحة أكبر وفق مبدأ انتقال الضغط في السائل.","hashtags":["#Shorts","#هيدروليك","#هندسة","#فيزياء","#هل_تعلم"]},
+    {"search":"gear mechanism mechanical engineering","fallback_searches":["gears how work","gear ratio","mechanical gears"],"title":"لماذا تستخدم الآلات التروس بأحجام مختلفة؟","text":"تسمح نسب أحجام التروس بتغيير العلاقة بين السرعة وعزم الدوران. يمكن لنظام تروس مناسب أن يزيد العزم أو السرعة بحسب التصميم والوظيفة المطلوبة.","hashtags":["#Shorts","#تروس","#هندسة","#ميكانيكا","#هل_تعلم"]},
+    {"search":"crane construction lifting","fallback_searches":["tower crane","construction crane","crane engineering"],"title":"كيف ترفع الرافعات البرجية الأحمال إلى ارتفاعات كبيرة؟","text":"تستخدم الرافعات البرجية أذرعًا وأنظمة بكرات ومحركات لرفع الأحمال وتحريكها. ويُحسب توزيع الوزن ونصف قطر الحركة وحدود الرفع لضمان بقاء الرافعة مستقرة ضمن ظروف التشغيل.","hashtags":["#Shorts","#رافعات","#هندسة","#بناء","#هل_تعلم"]},
+    {"search":"escalator mechanism engineering","fallback_searches":["escalator how works","moving stairs mechanism","escalator technology"],"title":"كيف تتحرك درجات السلم الكهربائي باستمرار؟","text":"ترتبط درجات السلم الكهربائي بسلسلة متحركة تدور حول مسار مغلق. يحرك محرك كهربائي هذه السلسلة عبر نظام تروس، بينما توجه المسارات الدرجات للحفاظ على وضعها أثناء الحركة.","hashtags":["#Shorts","#سلالم_كهربائية","#هندسة","#تقنية","#هل_تعلم"]},
+    {"search":"elevator counterweight cable","fallback_searches":["elevator mechanism","lift counterweight","elevator engineering"],"title":"لماذا تحتوي المصاعد على ثقل موازن؟","text":"يساعد الثقل الموازن على موازنة جزء كبير من وزن الكابينة والحمل. هذا يقلل القوة التي يحتاج إليها المحرك لتحريك المصعد ويجعل النظام أكثر كفاءة.","hashtags":["#Shorts","#مصاعد","#هندسة","#بناء","#هل_تعلم"]},
+    {"search":"thermal insulation building wall","fallback_searches":["building insulation","thermal insulation","energy efficient building"],"title":"كيف تقلل العوازل الحرارية انتقال الحرارة في المباني؟","text":"تحتوي مواد العزل على بنية تقلل انتقال الحرارة مقارنة بمواد البناء الموصلة. وضع العزل في الجدران والأسقف والأرضيات يمكن أن يساعد على تقليل انتقال الحرارة إلى الداخل أو الخارج.","hashtags":["#Shorts","#عزل_حراري","#هندسة","#بناء","#هل_تعلم"]},
+    {"search":"refrigerator cooling cycle","fallback_searches":["refrigerator how works","refrigeration cycle","fridge technology"],"title":"كيف يحافظ الثلاجة على برودة الطعام؟","text":"تستخدم الثلاجات دورة تبريد تنقل الحرارة من داخل الحجرة إلى الخارج. يمر وسيط التبريد بمراحل ضغط وتمدد وتبادل حراري تسمح باستخراج الحرارة من الداخل.","hashtags":["#Shorts","#ثلاجة","#هندسة","#تقنية","#هل_تعلم"]},
+    {"search":"air conditioner cooling system","fallback_searches":["air conditioning cycle","AC how works","cooling technology"],"title":"كيف يبرد المكيف هواء الغرفة؟","text":"يسحب المكيف الحرارة من هواء الغرفة عبر دورة تبريد، ثم يطرح هذه الحرارة إلى الخارج. لذلك لا يختفي heat من الغرفة، بل تنتقل الطاقة الحرارية إلى مكان آخر.","hashtags":["#Shorts","#مكيف","#هندسة","#فيزياء","#هل_تعلم"]},
+    {"search":"microwave electromagnetic waves food","fallback_searches":["microwave oven science","microwave heating","microwave technology"],"title":"كيف يسخن الميكروويف الطعام؟","text":"يولد فرن الميكروويف موجات كهرومغناطيسية بتردد مناسب للتسخين. تتفاعل هذه الموجات مع الجزيئات القطبية في الطعام، ما يزيد حركة الجزيئات ويساهم في رفع درجة الحرارة.","hashtags":["#Shorts","#ميكروويف","#فيزياء","#تقنية","#هل_تعلم"]},
+    {"search":"induction cooker electromagnetic","fallback_searches":["induction cooking","induction stove science","electromagnetic cooking"],"title":"كيف يعمل موقد الحث الكهربائي؟","text":"ينتج موقد الحث مجالًا مغناطيسيًا متغيرًا يمكنه توليد تيارات كهربائية داخل أواني مناسبة. تتحول هذه الطاقة إلى حرارة داخل الوعاء نفسه، بدل تسخين سطح الموقد بالطريقة التقليدية.","hashtags":["#Shorts","#طبخ","#كهرباء","#فيزياء","#هل_تعلم"]},
+    {"search":"traffic roundabout engineering","fallback_searches":["roundabout traffic","road engineering","intersection design"],"title":"لماذا تستخدم بعض الطرق الدوارات بدل الإشارات؟","text":"الدوارات تغير طريقة تقاطع المركبات وتقلل نقاط التعارض المباشر في بعض أنواع التقاطعات. يعتمد نجاحها على التصميم وحجم الحركة وقواعد الأولوية وسلوك السائقين.","hashtags":["#Shorts","#طرق","#هندسة","#مرور","#هل_تعلم"]},
+    {"search":"airport runway engineering","fallback_searches":["airport runway","runway design","airport engineering"],"title":"لماذا تكون مدارج المطارات طويلة ومحددة الاتجاه؟","text":"طول المدرج يعتمد على نوع الطائرات ووزنها ودرجة الحرارة والارتفاع وعوامل أخرى. أما اتجاه المدرج فيرتبط جزئيًا بالرياح السائدة لتقليل تأثير الرياح الجانبية أثناء الإقلاع والهبوط.","hashtags":["#Shorts","#مطارات","#هندسة","#طيران","#هل_تعلم"]},
+    {"search":"satellite solar panels space","fallback_searches":["satellite solar panels","spacecraft power","satellite technology"],"title":"لماذا تحمل الأقمار الصناعية ألواحًا شمسية كبيرة؟","text":"تحتاج الأقمار الصناعية إلى مصدر كهرباء لتشغيل أجهزتها وأنظمة الاتصال والحاسوب. تستخدم كثير من الأقمار ألواحًا شمسية لتحويل ضوء الشمس إلى كهرباء، مع بطاريات للاستخدام عندما لا تكون الألواح مضاءة.","hashtags":["#Shorts","#أقمار_صناعية","#فضاء","#طاقة","#هل_تعلم"]},
+    {"search":"space telescope stars galaxy","fallback_searches":["space telescope","astronomy telescope","galaxy telescope"],"title":"لماذا توضع بعض التلسكوبات في الفضاء؟","text":"وجود التلسكوب فوق الغلاف الجوي يمكن أن يقلل تأثير بعض اضطرابات الغلاف الجوي على الرصد. كما يسمح لبعض التلسكوبات بدراسة أطوال موجية يحجبها الغلاف الجوي جزئيًا أو كليًا.","hashtags":["#Shorts","#تلسكوبات","#فضاء","#فلك","#هل_تعلم"]},
+    {"search":"mars rover wheels science","fallback_searches":["Mars rover","rover wheels","Mars exploration"],"title":"كيف تتحرك المركبات الجوالة على سطح المريخ؟","text":"تستخدم المركبات الجوالة عجلات وأنظمة تعليق مصممة للتعامل مع سطح غير مستوٍ. وتُرسل أوامر الحركة من الأرض، بينما تستخدم المركبة حساسات وكاميرات لمساعدتها على التنقل وجمع البيانات.","hashtags":["#Shorts","#المريخ","#فضاء","#هندسة","#هل_تعلم"]},
+    {"search":"rocket stages space launch","fallback_searches":["rocket staging","space rocket","launch vehicle"],"title":"لماذا تحتوي بعض الصواريخ على مراحل متعددة؟","text":"تفصل بعض الصواريخ أجزاءً من المركبة بعد استهلاك وقودها لتقليل الكتلة التي يجب دفعها لاحقًا. يسمح ذلك باستخدام الوقود المتبقي بكفاءة أكبر أثناء الصعود إلى المدار.","hashtags":["#Shorts","#صواريخ","#فضاء","#هندسة","#هل_تعلم"]},
+    {"search":"astronaut spacesuit technology","fallback_searches":["spacesuit technology","astronaut suit","space suit"],"title":"لماذا تحتاج بدلة رائد الفضاء إلى أنظمة كثيرة؟","text":"بدلة الفضاء تساعد على توفير ضغط مناسب وحماية حرارية ووسائل اتصال وإدارة للبيئة المحيطة بالرائد. تختلف وظائف البدلة حسب المهمة ومكان استخدامها داخل المركبة أو خارجها.","hashtags":["#Shorts","#رواد_الفضاء","#فضاء","#تقنية","#هل_تعلم"]},
+    {"search":"black hole gravity space","fallback_searches":["black hole science","event horizon","space black hole"],"title":"لماذا يصعب رؤية الثقب الأسود مباشرة؟","text":"الثقب الأسود لا يبعث ضوءًا يمكننا رؤيته بالطريقة المعتادة، لذلك يُدرس من خلال تأثيره في المادة والضوء المحيط به. يمكن لآثاره الجاذبية والقرائن الناتجة عن البيئة المحيطة أن تكشف وجوده.","hashtags":["#Shorts","#ثقوب_سوداء","#فضاء","#فيزياء","#هل_تعلم"]},
+    {"search":"neutron star dense space","fallback_searches":["neutron star","dense star","space physics"],"title":"لماذا تُعد النجوم النيوترونية شديدة الكثافة؟","text":"تتكون النجوم النيوترونية من بقايا نجم ضخم بعد حدث نجمي عنيف. تنهار مادتها تحت تأثير الجاذبية إلى حالة شديدة الكثافة، فتتركز كتلة كبيرة في جسم صغير نسبيًا.","hashtags":["#Shorts","#نجوم_نيوترونية","#فضاء","#فيزياء","#هل_تعلم"]},
+    {"search":"galaxy milky way stars space","fallback_searches":["Milky Way galaxy","galaxy structure","galaxy stars"],"title":"ما الذي يجعل مجرة درب التبانة تبدو كقرص ضخم؟","text":"تحتوي مجرة درب التبانة على عدد هائل من النجوم والغاز والغبار، وتدور مكوناتها ضمن بنية واسعة. يظهر جزء كبير من مادتها المرئية في قرص مجري مع مناطق أكثر كثافة في الوسط.","hashtags":["#Shorts","#درب_التبانة","#مجرة","#فضاء","#هل_تعلم"]},
+    {"search":"aurora northern lights atmosphere","fallback_searches":["aurora borealis","aurora science","polar lights"],"title":"كيف تتكون الأضواء القطبية في السماء؟","text":"تحدث الأضواء القطبية عندما تتفاعل جسيمات قادمة من الشمس مع الغازات في الغلاف الجوي العلوي قرب المناطق القطبية. ينتج عن هذه التفاعلات ضوء بألوان مختلفة حسب نوع الغاز والارتفاع.","hashtags":["#Shorts","#أضواء_قطبية","#فضاء","#علوم","#هل_تعلم"]},
+    {"search":"fossil rock paleontology","fallback_searches":["fossils science","fossil formation","paleontology"],"title":"كيف تتحول بقايا الكائنات إلى أحافير؟","text":"في ظروف مناسبة يمكن أن تُدفن بقايا الكائنات بسرعة داخل الرواسب، ثم تتغير تدريجيًا بفعل الضغط والعمليات الكيميائية. لا تتحول كل البقايا إلى أحافير، ولهذا تعد الأحافير سجلًا محدودًا لكنه مهم للحياة القديمة.","hashtags":["#Shorts","#أحافير","#جيولوجيا","#تاريخ_طبيعي","#هل_تعلم"]},
+    {"search":"cave stalactite stalagmite geology","fallback_searches":["cave formations","stalactite stalagmite","cave geology"],"title":"كيف تتكون التكوينات داخل الكهوف؟","text":"يمكن للمياه التي تمر عبر الصخور أن تحمل مواد مذابة، ثم تترسب هذه المواد تدريجيًا داخل الكهوف. ومع مرور زمن طويل قد تتشكل تراكيب مثل الهوابط والصواعد.","hashtags":["#Shorts","#كهوف","#جيولوجيا","#طبيعة","#هل_تعلم"]},
+    {"search":"mountain formation tectonic plates","fallback_searches":["mountain formation","tectonic plates mountains","geology mountains"],"title":"كيف تتكون بعض السلاسل الجبلية؟","text":"تتشكل بعض السلاسل الجبلية عندما تتحرك الصفائح التكتونية وتتقارب، فتتعرض الصخور للضغط والرفع والتشوه. وتختلف طريقة تشكل الجبال حسب نوع الحدود التكتونية والعمليات الجيولوجية.","hashtags":["#Shorts","#جبال","#جيولوجيا","#علوم","#هل_تعلم"]},
+    {"search":"river delta satellite","fallback_searches":["river delta formation","delta geography","river sediment"],"title":"كيف تتكون دلتا الأنهار عند السواحل؟","text":"عندما يصل النهر إلى منطقة أبطأ حركة مثل البحر أو بحيرة، يمكن أن تترسب بعض الرواسب التي يحملها. ومع تراكمها عبر الزمن قد تتكون منطقة دلتا بأشكال متعددة.","hashtags":["#Shorts","#أنهار","#دلتا","#جغرافيا","#هل_تعلم"]},
+    {"search":"sand dune wind desert","fallback_searches":["dune formation","wind sand dunes","desert dunes"],"title":"كيف تصنع الرياح أشكالًا مختلفة للكثبان الرملية؟","text":"تدفع الرياح حبيبات الرمل وتحركها بطرق تعتمد على سرعتها واتجاهها وكمية الرواسب. اختلاف هذه العوامل يؤدي إلى أشكال مختلفة من الكثبان واتجاهات متنوعة لحركتها.","hashtags":["#Shorts","#كثبان","#صحراء","#جيولوجيا","#هل_تعلم"]},
+    {"search":"iceberg ocean floating","fallback_searches":["iceberg science","iceberg floating","polar ocean"],"title":"لماذا تطفو الجبال الجليدية فوق الماء؟","text":"الجليد أقل كثافة من الماء السائل، لذلك يمكن لقطعة جليد كبيرة أن تطفو. يبقى جزء منها تحت سطح الماء لأن الطفو يعتمد على توازن وزن الجليد مع قوة دفع الماء.","hashtags":["#Shorts","#جبال_جليدية","#محيط","#فيزياء","#هل_تعلم"]},
+    {"search":"salt crystallization sea salt","fallback_searches":["salt crystals","salt evaporation","sea salt science"],"title":"كيف تتكون بلورات الملح عند تبخر الماء؟","text":"عندما يتبخر الماء من محلول ملحي ترتفع نسبة الملح فيه تدريجيًا. وعند الوصول إلى حالة مناسبة يمكن للأيونات أن تنتظم في بنية بلورية فتتكون بلورات الملح.","hashtags":["#Shorts","#ملح","#كيمياء","#علوم","#هل_تعلم"]},
+    {"search":"rust iron oxidation","fallback_searches":["iron rust science","rust oxidation","metal corrosion"],"title":"لماذا يصدأ الحديد عند تعرضه للهواء والرطوبة؟","text":"الصدأ ينتج عن تفاعلات كيميائية بين الحديد والأكسجين والماء. تتغير بنية الحديد تدريجيًا وتتكون مركبات أكسدة على سطحه، وتسرع الرطوبة بعض عمليات التآكل.","hashtags":["#Shorts","#صدأ","#كيمياء","#علوم","#هل_تعلم"]},
+    {"search":"vinegar baking soda reaction","fallback_searches":["acid base reaction","baking soda chemistry","chemical reaction"],"title":"لماذا يحدث فوران عند خلط الخل مع بيكربونات الصوديوم؟","text":"الخل يحتوي على حمض الأسيتيك، وبيكربونات الصوديوم تتفاعل معه في تفاعل ينتج غاز ثاني أكسيد الكربون. فقاعات الغاز هي السبب الرئيسي في ظهور الفوران.","hashtags":["#Shorts","#كيمياء","#تجارب","#علوم","#هل_تعلم"]},
+    {"search":"soap bubbles surface tension","fallback_searches":["soap bubble science","surface tension bubbles","bubble physics"],"title":"لماذا تأخذ فقاعات الصابون شكلًا قريبًا من الكرة؟","text":"تحاول طبقة الصابون تقليل مساحة سطحها قدر الإمكان بسبب التوتر السطحي. الشكل الكروي يحقق مساحة سطح صغيرة مقارنة بالحجم، لذلك تميل الفقاعة الحرة إلى هذا الشكل.","hashtags":["#Shorts","#فقاعات","#فيزياء","#علوم","#هل_تعلم"]},
+    {"search":"oil water separation chemistry","fallback_searches":["oil and water","density oil water","liquids chemistry"],"title":"لماذا لا يمتزج الزيت بالماء بسهولة؟","text":"تختلف طبيعة الجزيئات في الماء والزيت، لذلك لا تتوزع جزيئات الزيت داخل الماء بالطريقة نفسها التي تتوزع بها جزيئات الماء. كما أن كثافة كثير من الزيوت أقل من كثافة الماء، فتتجمع عادة في طبقة أعلى.","hashtags":["#Shorts","#كيمياء","#ماء","#علوم","#هل_تعلم"]},
+    {"search":"ice melting temperature physics","fallback_searches":["melting ice","phase change water","ice physics"],"title":"لماذا يبقى الجليد باردًا أثناء ذوبانه؟","text":"أثناء تغير الحالة من صلب إلى سائل تُستخدم الطاقة الحرارية الداخلة في عملية الانصهار بدل رفع درجة الحرارة مباشرة. لذلك يمكن أن تبقى درجة حرارة خليط الجليد والماء قريبة من درجة الانصهار حتى يذوب جزء كبير من الجليد.","hashtags":["#Shorts","#جليد","#فيزياء","#علوم","#هل_تعلم"]},
+]
+
+TOPICS.extend(EXTRA_TOPICS)
+
+
+def validate_topic_pool():
+    seen_titles = set()
+    seen_texts = set()
+    seen_searches = set()
+    duplicates = []
+
+    for index, topic in enumerate(TOPICS, start=1):
+        title = normalize_content(topic.get("title", ""))
+        text = normalize_content(topic.get("text", ""))
+        search = normalize_content(topic.get("search", ""))
+
+        if title and title in seen_titles:
+            duplicates.append(f"duplicate title at #{index}: {topic.get('title', '')}")
+        if text and text in seen_texts:
+            duplicates.append(f"duplicate text at #{index}: {topic.get('title', '')}")
+        if search and search in seen_searches:
+            duplicates.append(f"duplicate search at #{index}: {topic.get('title', '')}")
+
+        seen_titles.add(title)
+        seen_texts.add(text)
+        seen_searches.add(search)
+
+    if duplicates:
+        raise RuntimeError(
+            "DUPLICATE TOPICS FOUND IN TOPICS: " + " | ".join(duplicates)
+        )
+
+    print(f"Unique content pool verified: {len(TOPICS)} topics")
+
+
+# =========================================================
 # GENERAL HELPERS
 # =========================================================
 
@@ -507,57 +624,17 @@ def content_already_used(topic, used_content):
     return False
 
 
-def normalized_words(text):
-    text = str(text).lower()
-    text = re.sub(r"[\u064B-\u065F\u0670]", "", text)
-    text = re.sub(r"[^\w\s\u0600-\u06FF]", " ", text)
-    return re.sub(r"\s+", " ", text).strip().split()
-
-
-def contains_blocked_content(topic):
-    fields = [
-        topic.get("title", ""),
-        topic.get("text", ""),
-        topic.get("search", ""),
-        " ".join(topic.get("fallback_searches", [])),
-        " ".join(topic.get("hashtags", [])),
-    ]
-    haystack = normalize_content(" ".join(fields))
-    hits = [term for term in BLOCKED_CONTENT_TERMS if normalize_content(term) in haystack]
-    return sorted(set(hits))
-
-
-def validate_topic_policy(topic):
-    blocked = contains_blocked_content(topic)
-    if blocked:
-        raise RuntimeError(
-            "BLOCKED CONTENT POLICY: selected topic contains forbidden content: "
-            + ", ".join(blocked)
-        )
-
-
-def video_metadata_is_blocked(video):
-    try:
-        metadata = json.dumps(video, ensure_ascii=False).lower()
-    except Exception:
-        metadata = str(video).lower()
-
-    return any(
-        normalize_content(term) in normalize_content(metadata)
-        for term in BLOCKED_VIDEO_METADATA_TERMS
-    )
-
-
 def select_new_topic(used_content):
+    # Never reuse a published topic. The comparison checks the title, full
+    # script, and Pexels search phrase, including legacy memory records.
     available = [
         topic for topic in TOPICS
         if not content_already_used(topic, used_content)
-        and not contains_blocked_content(topic)
     ]
 
     if not available:
         raise RuntimeError(
-            "ALL CONTENT TOPICS HAVE BEEN USED. Add more unique topics to TOPICS."
+            "ALL UNIQUE CONTENT TOPICS HAVE BEEN USED. Add new genuinely different topics to TOPICS."
         )
 
     topic = random.choice(available)
@@ -669,10 +746,6 @@ def select_unique_videos(topic, used_clips):
                 if not video_id or video_id in used_clips:
                     continue
 
-                if video_metadata_is_blocked(video):
-                    print(f"Skipping blocked Pexels video: {video_id}")
-                    continue
-
                 video_file = choose_video_file(video)
                 if not video_file:
                     continue
@@ -728,93 +801,20 @@ def download_video(url, destination):
 # =========================================================
 
 def create_voice(text):
-    """Generate audio and capture Edge-TTS word boundaries in the same pass.
-
-    The exact same source string is used for both the audio and subtitles.
-    If Edge-TTS returns boundaries that do not match the source words, the
-    pipeline stops instead of publishing a potentially mismatched video.
-    """
-    global TTS_BOUNDARIES
-    TTS_BOUNDARIES = []
-
-    exact_text = str(text).strip()
-    if not exact_text:
-        raise RuntimeError("TTS source text is empty.")
-
     async def generate():
         communicate = edge_tts.Communicate(
-            exact_text,
+            text,
             VOICE_NAME,
             rate=VOICE_RATE,
             volume=VOICE_VOLUME,
             pitch=VOICE_PITCH,
-            boundary="WordBoundary",
         )
-
-        with open(VOICE_FILE, "wb") as audio_file:
-            async for chunk in communicate.stream():
-                chunk_type = chunk.get("type")
-
-                if chunk_type == "audio":
-                    data = chunk.get("data", b"")
-                    if data:
-                        audio_file.write(data)
-
-                elif chunk_type == "WordBoundary":
-                    data = chunk.get("offset")
-                    duration = chunk.get("duration")
-                    word = chunk.get("text", "")
-
-                    if data is not None and duration is not None and word:
-                        TTS_BOUNDARIES.append({
-                            "text": str(word),
-                            "start": float(data) / 10_000_000.0,
-                            "end": float(data + duration) / 10_000_000.0,
-                        })
+        await communicate.save(str(VOICE_FILE))
 
     asyncio.run(generate())
 
     if not VOICE_FILE.exists() or VOICE_FILE.stat().st_size < 1000:
         raise RuntimeError("Voice file was not created correctly.")
-
-    if not TTS_BOUNDARIES:
-        raise RuntimeError(
-            "TTS word boundaries were not returned. "
-            "Publishing was stopped to prevent subtitle/audio mismatch."
-        )
-
-    source_words = normalized_words(exact_text)
-    spoken_words = normalized_words(" ".join(item["text"] for item in TTS_BOUNDARIES))
-
-    if source_words != spoken_words or len(source_words) != len(TTS_BOUNDARIES):
-        print("WARNING: Edge-TTS WordBoundary tokens differ from the source script.")
-        print("Falling back to deterministic subtitle timing from the exact source text.")
-
-        audio_duration = get_audio_duration()
-        if audio_duration <= 0:
-            raise RuntimeError("Invalid audio duration for subtitle timing fallback.")
-
-        weights = [max(1, len(word)) for word in source_words]
-        total_weight = float(sum(weights))
-        fallback_boundaries = []
-        cursor = 0.0
-
-        for index, word in enumerate(source_words):
-            if index == len(source_words) - 1:
-                end = audio_duration
-            else:
-                end = cursor + (audio_duration * weights[index] / total_weight)
-
-            fallback_boundaries.append({
-                "text": word,
-                "start": cursor,
-                "end": max(cursor + 0.04, end),
-            })
-            cursor = end
-
-        TTS_BOUNDARIES = fallback_boundaries
-
-    print(f"TTS locked: {len(source_words)} words / {len(TTS_BOUNDARIES)} boundaries")
 
 
 def get_audio_duration():
@@ -883,17 +883,13 @@ def escape_ass_text(text):
 
 
 def create_subtitle_file(text, duration):
-    """Create subtitles from the exact TTS word-boundary timings."""
-    if not TTS_BOUNDARIES:
-        raise RuntimeError("No TTS word boundaries available for subtitles.")
+    parts = split_text_for_subtitles(text)
 
-    source_words = normalized_words(text)
-    boundary_words = normalized_words(" ".join(item["text"] for item in TTS_BOUNDARIES))
+    if not parts:
+        raise RuntimeError("Subtitle text is empty.")
 
-    if source_words != boundary_words:
-        raise RuntimeError(
-            "Subtitle source does not match the exact TTS word sequence."
-        )
+    total_characters = sum(max(1, len(part)) for part in parts)
+    current_time = 0.0
 
     ass_header = """[Script Info]
 ScriptType: v4.00+
@@ -903,53 +899,35 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Arabic,Arial,64,&H00FFFFFF,&H00FFFFFF,&H00000000,&H99000000,-1,0,0,0,100,100,0,5,1,5,1,1,105,55,250,1
+Style: Arabic,Arial,64,&H00FFFFFF,&H00FFFFFF,&H00000000,&H99000000,-1,0,0,0,100,100,0,5,1,5,2,2,60,60,270,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
 
-    # Group words into readable subtitle chunks while preserving exact word timing.
-    groups = []
-    current = []
-    current_chars = 0
-
-    for item in TTS_BOUNDARIES:
-        word = str(item["text"]).strip()
-        if not word:
-            continue
-
-        proposed_chars = current_chars + (1 if current else 0) + len(word)
-        if current and (len(current) >= 6 or proposed_chars > 27):
-            groups.append(current)
-            current = []
-            current_chars = 0
-
-        current.append(item)
-        current_chars += (1 if current_chars else 0) + len(word)
-
-    if current:
-        groups.append(current)
-
     with open(SUBTITLE_FILE, "w", encoding="utf-8-sig") as file:
         file.write(ass_header)
 
-        for group in groups:
-            start_time = max(0.0, group[0]["start"])
-            end_time = min(duration, group[-1]["end"] + 0.04)
-            words = [str(item["text"]).strip() for item in group]
-            subtitle_text = " ".join(words)
+        for index, part in enumerate(parts):
+            part_duration = (
+                max(1, len(part)) / total_characters
+            ) * duration
 
-            if end_time <= start_time:
-                end_time = min(duration, start_time + 0.20)
+            start = current_time
+            end = duration if index == len(parts) - 1 else min(
+                duration,
+                current_time + part_duration,
+            )
 
             file.write(
                 "Dialogue: 0,"
-                f"{ass_time(start_time)},"
-                f"{ass_time(end_time)},"
+                f"{ass_time(start)},"
+                f"{ass_time(end)},"
                 "Arabic,,0,0,0,,"
-                f"{chr(123)}\\an1\\pos(105,1670){chr(125)}{escape_ass_text(subtitle_text)}\n"
+                f"{escape_ass_text(part)}\n"
             )
+
+            current_time = end
 
 
 # =========================================================
@@ -1276,26 +1254,12 @@ def main():
     print("========================================\n")
 
     check_environment()
+    validate_topic_pool()
 
     used_content = load_used_content()
     used_clips = load_used_clips()
 
     topic = select_new_topic(used_content)
-    validate_topic_policy(topic)
-
-    # Reserve the topic BEFORE downloading or generating anything.
-    # This prevents the same topic from returning after a failed run.
-    reservation = {
-        "title": topic["title"],
-        "text": topic["text"],
-        "search": topic["search"],
-        "fingerprint": list(content_fingerprint(topic)),
-        "video_id": "PENDING",
-        "reserved_at": int(time.time()),
-    }
-    used_content.append(reservation)
-    save_used_content(used_content)
-    print("Content reserved before processing; it will not be reused if this run fails.")
 
     clean_previous_files()
 
@@ -1303,13 +1267,6 @@ def main():
         topic,
         used_clips,
     )
-
-    # Reserve Pexels IDs BEFORE downloading. This prevents clip reuse after
-    # a failed download, TTS failure, FFmpeg failure, or upload failure.
-    for item in selected_videos:
-        used_clips.add(str(item["id"]))
-    save_used_clips(used_clips)
-    print("Pexels clips reserved before processing; they will not be reused.")
 
     downloaded = []
 
@@ -1348,23 +1305,20 @@ def main():
     )
 
     validate_final_video()
-    validate_topic_policy(topic)
 
     print("\nUploading...")
     video_id = upload_to_youtube(topic)
 
-    # The topic and clips were already reserved before processing.
-    # Update the pending content record with the real YouTube video ID.
-    for item in used_content:
-        if (
-            item.get("video_id") == "PENDING"
-            and item.get("title") == topic["title"]
-            and item.get("text") == topic["text"]
-        ):
-            item["video_id"] = video_id
-            item["uploaded_at"] = int(time.time())
-            break
-    save_used_content(used_content)
+    # Only remember the content and Pexels clips AFTER a successful upload.
+    for item in selected_videos:
+        used_clips.add(str(item["id"]))
+
+    save_used_clips(used_clips)
+    remember_content(
+        topic,
+        video_id,
+        used_content,
+    )
 
     print("\n========================================")
     print("DONE")
