@@ -843,6 +843,7 @@ def clean_text(text):
 
 
 def split_text_for_subtitles(text):
+    """Split Arabic captions into balanced 1-2 line blocks like modern Shorts captions."""
     words = clean_text(text).split()
     parts = []
     current = []
@@ -850,7 +851,7 @@ def split_text_for_subtitles(text):
     for word in words:
         candidate = " ".join(current + [word])
 
-        if len(candidate) <= 27:
+        if len(candidate) <= 23:
             current.append(word)
         else:
             if current:
@@ -860,7 +861,76 @@ def split_text_for_subtitles(text):
     if current:
         parts.append(" ".join(current))
 
-    return parts
+    # Merge very short neighboring blocks when the result still fits.
+    merged = []
+    for part in parts:
+        if merged and len(merged[-1]) + 1 + len(part) <= 23:
+            merged[-1] = merged[-1] + " " + part
+        else:
+            merged.append(part)
+
+    return merged
+
+
+def make_caption_lines(text):
+    """Create a balanced two-line caption without awkwardly splitting words."""
+    text = clean_text(text)
+    if len(text) <= 23:
+        return text
+
+    words = text.split()
+    best = None
+    best_score = None
+
+    for i in range(1, len(words)):
+        left = " ".join(words[:i])
+        right = " ".join(words[i:])
+
+        if len(left) > 23 or len(right) > 23:
+            continue
+
+        # Prefer two lines with similar visual length.
+        score = abs(len(left) - len(right))
+        if best_score is None or score < best_score:
+            best = left + r"\N" + right
+            best_score = score
+
+    if best:
+        return best
+
+    # Fallback for unusually long text.
+    return text
+
+
+def highlight_caption(text):
+    """Emphasize the final meaningful phrase in yellow, matching the reference style."""
+    plain = text.replace(r"\N", " ")
+    words = plain.split()
+    if len(words) < 3:
+        return text
+
+    # Highlight the final 1-3 words; keep punctuation attached naturally.
+    count = 2 if len(words) >= 4 else 1
+    prefix = " ".join(words[:-count])
+    emphasis = " ".join(words[-count:])
+
+    if r"\N" in text:
+        # Prefer highlighting the final line when it is already split.
+        lines = text.split(r"\N", 1)
+        last_line = lines[1].strip()
+        last_words = last_line.split()
+        if len(last_words) >= 2:
+            count = min(2, len(last_words))
+            normal_last = " ".join(last_words[:-count])
+            yellow_last = " ".join(last_words[-count:])
+            lines[1] = (
+                normal_last + " " if normal_last else ""
+            ) + r"{\c&H0000FFFF&}" + yellow_last + r"{\c&H00FFFFFF&}"
+            return r"\N".join(lines)
+
+    return (
+        prefix + " " if prefix else ""
+    ) + r"{\c&H0000FFFF&}" + emphasis + r"{\c&H00FFFFFF&}"
 
 
 def ass_time(seconds):
@@ -889,8 +959,10 @@ def create_subtitle_file(text, duration):
         raise RuntimeError("Subtitle text is empty.")
 
     total_characters = sum(max(1, len(part)) for part in parts)
-    current_time = 0.0
 
+    # Modern Arabic Shorts caption style:
+    # bold, large white text, thick black outline, subtle shadow,
+    # semi-transparent black caption box, centered in the lower-safe area.
     ass_header = """[Script Info]
 ScriptType: v4.00+
 PlayResX: 1080
@@ -899,7 +971,7 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Arabic,Arial,64,&H00FFFFFF,&H00FFFFFF,&H00000000,&H99000000,-1,0,0,0,100,100,0,5,1,5,2,2,60,60,270,1
+Style: Arabic,Noto Sans Arabic,72,&H00FFFFFF,&H00FFFFFF,&H00000000,&H99000000,-1,0,0,0,100,100,0,0,3,0,2,2,80,80,360,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -908,10 +980,10 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     with open(SUBTITLE_FILE, "w", encoding="utf-8-sig") as file:
         file.write(ass_header)
 
+        current_time = 0.0
+
         for index, part in enumerate(parts):
-            part_duration = (
-                max(1, len(part)) / total_characters
-            ) * duration
+            part_duration = (max(1, len(part)) / total_characters) * duration
 
             start = current_time
             end = duration if index == len(parts) - 1 else min(
@@ -919,12 +991,15 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                 current_time + part_duration,
             )
 
+            caption = make_caption_lines(part)
+            caption = highlight_caption(caption)
+
             file.write(
                 "Dialogue: 0,"
                 f"{ass_time(start)},"
                 f"{ass_time(end)},"
                 "Arabic,,0,0,0,,"
-                f"{escape_ass_text(part)}\n"
+                f"{caption}\n"
             )
 
             current_time = end
