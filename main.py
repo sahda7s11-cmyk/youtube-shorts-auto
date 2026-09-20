@@ -39,14 +39,20 @@ USED_CONTENT_FILE = Path("used_content.json")
 VIDEO_WIDTH = 1080
 VIDEO_HEIGHT = 1920
 
-NUMBER_OF_CLIPS = 7
-CLIP_DURATION = 3.2
+NUMBER_OF_CLIPS = 9
+CLIP_DURATION = 2.8
 FPS = 30
 
 VOICE_NAME = "ar-SA-HamedNeural"
-VOICE_RATE = "+5%"
+VOICE_RATE = "+0%"
 VOICE_VOLUME = "+0%"
 VOICE_PITCH = "+0Hz"
+
+# Optional professional voice. If these two secrets exist, Azure Neural Speech
+# is used directly; otherwise the existing Edge-TTS voice remains the fallback.
+AZURE_SPEECH_KEY = os.getenv("AZURE_SPEECH_KEY")
+AZURE_SPEECH_REGION = os.getenv("AZURE_SPEECH_REGION")
+AZURE_VOICE_NAME = os.getenv("AZURE_VOICE_NAME", "ar-SA-HamedNeural")
 
 YOUTUBE_PRIVACY = "public"
 YOUTUBE_CATEGORY_ID = "17"
@@ -451,15 +457,7 @@ EXTRA_TOPICS = [
     {"search":"ice melting temperature physics","fallback_searches":["melting ice","phase change water","ice physics"],"title":"لماذا يبقى الجليد باردًا أثناء ذوبانه؟","text":"أثناء تغير الحالة من صلب إلى سائل تُستخدم الطاقة الحرارية الداخلة في عملية الانصهار بدل رفع درجة الحرارة مباشرة. لذلك يمكن أن تبقى درجة حرارة خليط الجليد والماء قريبة من درجة الانصهار حتى يذوب جزء كبير من الجليد.","hashtags":["#Shorts","#جليد","#فيزياء","#علوم","#هل_تعلم"]},
 ]
 
-# =========================================================
-# EXPANDED UNIQUE CONTENT POOL
-# =========================================================
-# Added to prevent the automation from stopping after the original 149 topics.
-# These topics use distinct titles, scripts, and Pexels search identities.
-EXPANDED_TOPICS = [{'search': 'physics science 1', 'fallback_searches': ['physics science', 'physics experiment', 'science educational'], 'title': 'لماذا يطفو الخشب على الماء؟', 'text': 'كثافة كثير من أنواع الخشب أقل من كثافة الماء، لذلك تستطيع قوة الطفو موازنة وزن القطعة وإبقائها على السطح.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#physics']}, {'search': 'physics experiment 2', 'fallback_searches': ['physics experiment', 'physics motion', 'science educational'], 'title': 'لماذا تسقط قطرات المطر بسرعات مختلفة؟', 'text': 'تتأثر سرعة القطرة بحجمها وشكلها ومقاومة الهواء. القطرة الكبيرة قد تتسارع أكثر قبل أن تصل إلى سرعة تحدها مقاومة الهواء.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#physics']}, {'search': 'physics motion 3', 'fallback_searches': ['physics motion', 'physics light', 'science educational'], 'title': 'كيف تعمل الساعة الرملية؟', 'text': 'تتدفق حبيبات الرمل عبر فتحة صغيرة بمعدل يعتمد على حجم الحبيبات وشكلها والفتحة. لذلك يمكن معايرة الساعة لقياس فترة زمنية محددة.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#physics']}, {'search': 'physics light 4', 'fallback_searches': ['physics light', 'physics energy', 'science educational'], 'title': 'لماذا ينعكس الصوت في الجبال؟', 'text': 'الأسطح الصلبة الكبيرة يمكن أن تعكس الموجات الصوتية، وعندما يعود الصوت بعد تأخير كافٍ نسمعه كصدى.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#physics']}, {'search': 'physics energy 5', 'fallback_searches': ['physics energy', 'physics science', 'science educational'], 'title': 'لماذا يصبح البالون أصغر في البرد؟', 'text': 'عندما يبرد الغاز داخل البالون تقل حركة جزيئاته ويميل الغاز إلى الانكماش إذا كان الضغط الخارجي يسمح بذلك، فينخفض حجم البالون.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#physics']}, {'search': 'physics science 6', 'fallback_searches': ['physics science', 'physics experiment', 'science educational'], 'title': 'كيف يعمل ميزان الحرارة الزئبقي القديم؟', 'text': 'يتمدد الزئبق عند ارتفاع الحرارة وينكمش عند انخفاضها، ويُقاس هذا التغير على تدريج لتحديد درجة الحرارة.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#physics']}, {'search': 'physics experiment 7', 'fallback_searches': ['physics experiment', 'physics motion', 'science educational'], 'title': 'لماذا تنزلق السيارة على الطريق المبلل بسهولة أكبر؟', 'text': 'وجود طبقة ماء بين الإطار والطريق قد يقلل التلامس الفعال والاحتكاك، خصوصًا إذا كان الماء كثيرًا، لذلك يصبح التحكم أصعب.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#physics']}, {'search': 'physics motion 8', 'fallback_searches': ['physics motion', 'physics light', 'science educational'], 'title': 'كيف تعمل العدسة المكبرة؟', 'text': 'العدسة المحدبة تكسر الأشعة الضوئية بطريقة تجعل الجسم القريب يبدو أكبر عندما يكون داخل مسافة بؤرية معينة.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#physics']}, {'search': 'physics light 9', 'fallback_searches': ['physics light', 'physics energy', 'science educational'], 'title': 'لماذا يبدو القلم مكسورًا داخل كوب الماء؟', 'text': 'ينكسر الضوء عند انتقاله بين الماء والهواء، فيتغير اتجاه الأشعة التي تصل إلى العين ويظهر الجزء المغمور في موضع ظاهري مختلف.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#physics']}, {'search': 'physics energy 10', 'fallback_searches': ['physics energy', 'physics science', 'science educational'], 'title': 'لماذا يلتصق الشريط اللاصق بالأسطح؟', 'text': 'تزيد المادة اللاصقة مساحة التلامس على السطح وتنتج قوى بين جزيئاتها وبين المادة المقابلة، لذلك يصعب فصلها بسهولة.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#physics']}, {'search': 'physics science 11', 'fallback_searches': ['physics science', 'physics experiment', 'science educational'], 'title': 'لماذا يختلف وزن الجسم قليلًا من مكان لآخر؟', 'text': 'تختلف شدة الجاذبية قليلًا على سطح الأرض بسبب دوران الكوكب وتوزيع الكتلة والارتفاع، لذلك يتغير الوزن قليلًا بينما تبقى الكتلة نفسها.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#physics']}, {'search': 'physics experiment 12', 'fallback_searches': ['physics experiment', 'physics motion', 'science educational'], 'title': 'كيف تعمل البكرة في علم الميكانيكا؟', 'text': 'تغير البكرة اتجاه القوة، ويمكن لمجموعة بكرات أن توزع الحمل على عدة أجزاء من الحبل فتقل القوة اللازمة للرفع.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#physics']}, {'search': 'physics motion 13', 'fallback_searches': ['physics motion', 'physics light', 'science educational'], 'title': 'لماذا ترتفع الطائرة الورقية عندما تهب الرياح؟', 'text': 'تدفع الرياح الهواء حول سطح الطائرة الورقية فتتولد قوى هوائية يمكن أن تتغلب على وزنها عندما تكون الزاوية والسرعة مناسبتين.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#physics']}, {'search': 'physics light 14', 'fallback_searches': ['physics light', 'physics energy', 'science educational'], 'title': 'كيف يعمل الترمومتر بالأشعة تحت الحمراء؟', 'text': 'يقيس الجهاز الإشعاع الحراري الصادر من الجسم ويستخدمه لتقدير درجة حرارة السطح دون الحاجة إلى ملامسته.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#physics']}, {'search': 'physics energy 15', 'fallback_searches': ['physics energy', 'physics science', 'science educational'], 'title': 'لماذا لا يسقط القمر مباشرة على الأرض؟', 'text': 'جاذبية الأرض تسحب القمر نحوها، لكن القمر يمتلك سرعة جانبية تجعله في سقوط مستمر حول الأرض بدل الاصطدام بها.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#physics']}, {'search': 'chemistry materials 16', 'fallback_searches': ['chemistry materials', 'chemistry laboratory', 'science educational'], 'title': 'لماذا يتغير لون النحاس إلى الأخضر؟', 'text': 'يتفاعل سطح النحاس مع الأكسجين والماء ومكونات أخرى في الهواء فتتكون طبقات كيميائية جديدة قد يكون لونها أخضر.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#chemistry']}, {'search': 'chemistry laboratory 17', 'fallback_searches': ['chemistry laboratory', 'chemistry reaction', 'science educational'], 'title': 'لماذا يذوب السكر أسرع في الماء الساخن؟', 'text': 'زيادة الحرارة ترفع حركة الجزيئات وتسرع انتقال جزيئات السكر إلى الماء، لذلك يزداد معدل الذوبان عادة.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#chemistry']}, {'search': 'chemistry reaction 18', 'fallback_searches': ['chemistry reaction', 'chemistry molecules', 'science educational'], 'title': 'كيف يعمل الخل في إزالة بعض الترسبات؟', 'text': 'يحتوي الخل على حمض الأسيتيك، ويمكن للحمض أن يتفاعل مع بعض الترسبات المعدنية ويحولها إلى مواد أسهل في الإزالة.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#chemistry']}, {'search': 'chemistry molecules 19', 'fallback_searches': ['chemistry molecules', 'chemistry materials', 'science educational'], 'title': 'لماذا تتكون فقاعات عند فتح بعض المشروبات؟', 'text': 'يكون ثاني أكسيد الكربون مذابًا تحت ضغط داخل المشروب، وعند فتح العبوة ينخفض الضغط فتخرج الغازات على شكل فقاعات.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#chemistry']}, {'search': 'chemistry materials 20', 'fallback_searches': ['chemistry materials', 'chemistry laboratory', 'science educational'], 'title': 'لماذا يتغير لون الموز عندما ينضج؟', 'text': 'تتحلل بعض المركبات ويتغير نشاط الإنزيمات أثناء النضج، فتتغير صلابة القشرة ولونها وتتحول النشويات داخل الثمرة إلى سكريات أكثر.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#chemistry']}, {'search': 'chemistry laboratory 21', 'fallback_searches': ['chemistry laboratory', 'chemistry reaction', 'science educational'], 'title': 'كيف تعمل بلورات السكر؟', 'text': 'عندما يصبح محلول السكر مركزًا جدًا ثم يفقد الماء، تبدأ جزيئات السكر في الانتظام وتكوين بلورات صلبة.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#chemistry']}, {'search': 'chemistry reaction 22', 'fallback_searches': ['chemistry reaction', 'chemistry molecules', 'science educational'], 'title': 'لماذا يحفظ الملح بعض الأطعمة؟', 'text': 'الملح يقلل كمية الماء المتاح للكائنات الدقيقة ويغير البيئة الأسموزية، ما يبطئ نمو كثير من الميكروبات.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#chemistry']}, {'search': 'chemistry molecules 23', 'fallback_searches': ['chemistry molecules', 'chemistry materials', 'science educational'], 'title': 'كيف يعمل الكربون النشط في بعض الفلاتر؟', 'text': 'يمتلك الكربون النشط مساحة سطحية كبيرة جدًا تساعده على امتزاز بعض الجزيئات والمواد العضوية من الماء أو الهواء.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#chemistry']}, {'search': 'chemistry materials 24', 'fallback_searches': ['chemistry materials', 'chemistry laboratory', 'science educational'], 'title': 'لماذا يتغير لون التفاحة بعد تقطيعها؟', 'text': 'عند قطع التفاحة يصل الأكسجين إلى أنسجة كانت محمية، فتحدث تفاعلات إنزيمية تنتج مركبات بنية على السطح.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#chemistry']}, {'search': 'chemistry laboratory 25', 'fallback_searches': ['chemistry laboratory', 'chemistry reaction', 'science educational'], 'title': 'كيف يمنع عصير الليمون اسمرار بعض الفواكه؟', 'text': 'الحموضة ومضادات الأكسدة في الليمون يمكن أن تبطئ بعض التفاعلات الإنزيمية المسؤولة عن الاسمرار بعد تعرض الثمرة للهواء.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#chemistry']}, {'search': 'chemistry reaction 26', 'fallback_searches': ['chemistry reaction', 'chemistry molecules', 'science educational'], 'title': 'لماذا لا يختلط الزيت بالماء؟', 'text': 'جزيئات الماء قطبية بينما كثير من جزيئات الزيت غير قطبية، لذلك لا تتفاعل معها بالطريقة نفسها وتميل السوائل إلى الانفصال إلى طبقات.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#chemistry']}, {'search': 'chemistry molecules 27', 'fallback_searches': ['chemistry molecules', 'chemistry materials', 'science educational'], 'title': 'كيف تعمل البطارية القابلة للشحن؟', 'text': 'تخزن البطارية الطاقة على هيئة طاقة كيميائية وتحوّلها إلى كهرباء عند الاستخدام، ويمكن عكس التفاعل الكيميائي في البطاريات المصممة لإعادة الشحن.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#chemistry']}, {'search': 'river nature 28', 'fallback_searches': ['river nature', 'desert landscape', 'science educational'], 'title': 'لماذا تتحرك الرمال في الصحراء؟', 'text': 'عندما تتجاوز قوة الرياح قدرة سطح الأرض على تثبيت الحبيبات، تبدأ الرمال بالتحرك بالقفز أو الزحف وتتشكل الكثبان تدريجيًا.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#earth']}, {'search': 'desert landscape 29', 'fallback_searches': ['desert landscape', 'mountain geology', 'science educational'], 'title': 'كيف تتكون الوديان؟', 'text': 'يمكن للأنهار والجليد والرياح والتعرية أن تنحت الصخور والتربة عبر فترات طويلة، فتتكون أودية تختلف أشكالها بحسب العامل المؤثر.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#earth']}, {'search': 'mountain geology 30', 'fallback_searches': ['mountain geology', 'earth geology', 'science educational'], 'title': 'لماذا توجد صخور حمراء في بعض الصحارى؟', 'text': 'قد تحتوي الصخور أو الرواسب على معادن الحديد التي تتأكسد وتمنح السطح لونًا أحمر أو بنيًا مميزًا.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#earth']}, {'search': 'earth geology 31', 'fallback_searches': ['earth geology', 'rock landscape', 'science educational'], 'title': 'كيف تتكون الشلالات؟', 'text': 'تتشكل الشلالات عندما يمر النهر فوق فرق مفاجئ في الارتفاع، وقد ينشأ ذلك من اختلاف مقاومة الصخور أو الحركات الجيولوجية أو التعرية.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#earth']}, {'search': 'rock landscape 32', 'fallback_searches': ['rock landscape', 'river nature', 'science educational'], 'title': 'لماذا توجد مياه جوفية تحت الأرض؟', 'text': 'تتسرب مياه الأمطار والأنهار إلى مسام وشقوق الصخور والتربة، ويمكن أن تتجمع فوق طبقات قليلة النفاذية لتشكل خزانات جوفية.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#earth']}, {'search': 'river nature 33', 'fallback_searches': ['river nature', 'desert landscape', 'science educational'], 'title': 'كيف تتكون الكهوف الجليدية؟', 'text': 'يمكن أن تتشكل تجاويف داخل الجليد بسبب مرور المياه أو الهواء وتغير درجات الحرارة، فتظهر أشكال وأنفاق جليدية مؤقتة.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#earth']}, {'search': 'desert landscape 34', 'fallback_searches': ['desert landscape', 'mountain geology', 'science educational'], 'title': 'لماذا توجد ينابيع في الجبال؟', 'text': 'يمكن للمياه التي تتسرب في المرتفعات أن تتحرك داخل الصخور ثم تخرج عند تقاطع مسار المياه مع سطح الأرض أو طبقة غير منفذة.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#earth']}, {'search': 'mountain geology 35', 'fallback_searches': ['mountain geology', 'earth geology', 'science educational'], 'title': 'كيف تتشكل الشواطئ الرملية؟', 'text': 'تتجمع حبيبات ناتجة عن تآكل الصخور أو مصادر أخرى وتنقلها الأمواج والتيارات حتى تترسب في مناطق ساحلية مناسبة.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#earth']}, {'search': 'earth geology 36', 'fallback_searches': ['earth geology', 'rock landscape', 'science educational'], 'title': 'لماذا تتغير أشكال الأنهار؟', 'text': 'تنحت الأنهار ضفافها وتنقل الرواسب وتعيد ترسيبها، لذلك يمكن أن تتحرك القنوات وتتغير الانحناءات مع مرور الوقت.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#earth']}, {'search': 'rock landscape 37', 'fallback_searches': ['rock landscape', 'river nature', 'science educational'], 'title': 'كيف تتكون البحيرات داخل الفوهات؟', 'text': 'إذا امتلأت فوهة بركانية أو فوهة اصطدام بالماء، يمكن أن تتشكل بحيرة داخلها ما دام معدل وصول المياه أكبر من فقدها.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#earth']}, {'search': 'river nature 38', 'fallback_searches': ['river nature', 'desert landscape', 'science educational'], 'title': 'لماذا تحدث الانهيارات الصخرية؟', 'text': 'يمكن للمياه والتجوية والزلازل والجاذبية أن تضعف المنحدرات الصخرية. عندما تتجاوز القوى المؤثرة مقاومة الصخور قد تسقط كتل إلى أسفل.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#earth']}, {'search': 'desert landscape 39', 'fallback_searches': ['desert landscape', 'mountain geology', 'science educational'], 'title': 'كيف تتكون الكثبان قرب السواحل؟', 'text': 'تنقل الرياح الرمال الجافة من الشاطئ إلى الداخل، وإذا اعترضتها نباتات أو عوائق تتراكم الحبيبات وتبدأ كثبان جديدة بالتشكل.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#earth']}, {'search': 'galaxy space 40', 'fallback_searches': ['galaxy space', 'space planet', 'science educational'], 'title': 'لماذا يبدو المريخ أحمر؟', 'text': 'تحتوي تربة المريخ على معادن غنية بالحديد تعرضت للأكسدة، وتنتشر هذه المواد في الغبار السطحي فتمنح الكوكب لونه المحمر.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#space']}, {'search': 'space planet 41', 'fallback_searches': ['space planet', 'astronomy stars', 'science educational'], 'title': 'لماذا كوكب عطارد شديد الحرارة نهارًا؟', 'text': 'عطارد قريب من الشمس ولا يملك غلافًا جويًا كثيفًا يحتفظ بالحرارة، لذلك تتغير درجات حرارته بين النهار والليل بشكل كبير.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#space']}, {'search': 'astronomy stars 42', 'fallback_searches': ['astronomy stars', 'solar system', 'science educational'], 'title': 'كيف تتكون حلقات زحل؟', 'text': 'تتكون حلقات زحل من أعداد هائلة من قطع الجليد والصخور والغبار التي تدور حول الكوكب ضمن مدارات مختلفة.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#space']}, {'search': 'solar system 43', 'fallback_searches': ['solar system', 'moon space', 'science educational'], 'title': 'لماذا يستغرق ضوء الشمس دقائق للوصول إلى الأرض؟', 'text': 'الضوء سريع جدًا لكنه يحتاج إلى وقت لقطع المسافة بين الشمس والأرض، وتبلغ المسافة في المتوسط نحو ثماني دقائق ضوئية.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#space']}, {'search': 'moon space 44', 'fallback_searches': ['moon space', 'galaxy space', 'science educational'], 'title': 'كيف يعرف العلماء وجود كواكب حول نجوم بعيدة؟', 'text': 'يمكن اكتشاف بعض الكواكب عندما تحجب جزءًا صغيرًا من ضوء نجمها أثناء مرورها أمامه، أو عندما تسبب جاذبيتها حركة طفيفة في النجم.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#space']}, {'search': 'galaxy space 45', 'fallback_searches': ['galaxy space', 'space planet', 'science educational'], 'title': 'لماذا لا نرى الوجه الآخر للقمر من الأرض؟', 'text': 'يدور القمر حول محوره في الفترة نفسها تقريبًا التي يحتاجها للدوران حول الأرض، لذلك يبقى الجانب نفسه مواجهًا للأرض معظم الوقت.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#space']}, {'search': 'space planet 46', 'fallback_searches': ['space planet', 'astronomy stars', 'science educational'], 'title': 'كيف تتكون الشهب في الغلاف الجوي؟', 'text': 'عندما يدخل جسم صغير من الفضاء الغلاف الجوي بسرعة عالية يسخن الهواء حوله وتتوهج المادة والغازات، فنرى خطًا مضيئًا يسمى شهابًا.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#space']}, {'search': 'astronomy stars 47', 'fallback_searches': ['astronomy stars', 'solar system', 'science educational'], 'title': 'لماذا تبدو النجوم وكأنها تومض؟', 'text': 'تتحرك أشعة النجوم عبر طبقات هواء ذات درجات حرارة وكثافات مختلفة، فتتغير مسارات الضوء قليلًا ويظهر النجم وكأنه يومض.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#space']}, {'search': 'solar system 48', 'fallback_searches': ['solar system', 'moon space', 'science educational'], 'title': 'كيف تتكون العواصف على كوكب المشتري؟', 'text': 'يمتلك المشتري غلافًا جويًا كثيفًا وتيارات هوائية قوية، وتؤدي فروق الحرارة والضغط إلى أنظمة عاصفة ضخمة تدوم لفترات طويلة.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#space']}, {'search': 'moon space 49', 'fallback_searches': ['moon space', 'galaxy space', 'science educational'], 'title': 'لماذا يمتلك أورانوس فصولًا غريبة؟', 'text': 'يميل محور أورانوس بدرجة كبيرة مقارنة بمستوى مداره، لذلك تتعرض مناطقه لفترات طويلة من الإضاءة أو الظلام خلال دورته حول الشمس.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#space']}, {'search': 'computer technology 50', 'fallback_searches': ['computer technology', 'smartphone technology', 'science educational'], 'title': 'كيف يعمل البلوتوث منخفض الطاقة؟', 'text': 'يستخدم Bluetooth Low Energy اتصالات قصيرة ومصممة لاستهلاك طاقة منخفض، لذلك يناسب أجهزة مثل الساعات والحساسات التي تحتاج للعمل لفترات طويلة.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#technology']}, {'search': 'smartphone technology 51', 'fallback_searches': ['smartphone technology', 'digital technology', 'science educational'], 'title': 'كيف يعمل شاحن الهاتف اللاسلكي؟', 'text': 'ينقل الشاحن الطاقة عبر مجال مغناطيسي متغير بين ملف في قاعدة الشحن وملف داخل الهاتف، ثم تحول الدائرة الطاقة إلى كهرباء لشحن البطارية.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#technology']}, {'search': 'digital technology 52', 'fallback_searches': ['digital technology', 'technology device', 'science educational'], 'title': 'كيف تعرف السيارة ضغط الإطارات؟', 'text': 'تستخدم بعض السيارات حساسات داخل العجلات تقيس الضغط وترسل البيانات لاسلكيًا إلى وحدة التحكم، بينما تستنتج أنظمة أخرى الضغط من سرعة دوران العجلات.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#technology']}, {'search': 'technology device 53', 'fallback_searches': ['technology device', 'computer technology', 'science educational'], 'title': 'كيف تعمل كاميرا المراقبة الليلية؟', 'text': 'يمكن للكاميرات الليلية استخدام حساسات حساسة للضوء أو إضاءة بالأشعة تحت الحمراء لتكوين صورة عندما تكون الإضاءة المرئية ضعيفة.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#technology']}, {'search': 'computer technology 54', 'fallback_searches': ['computer technology', 'smartphone technology', 'science educational'], 'title': 'كيف يعمل قارئ الباركود؟', 'text': 'يقرأ الجهاز نمط الخطوط أو المربعات ويحوله إلى رقم أو سلسلة بيانات. يستخدم النظام هذه البيانات للعثور على المنتج أو المعلومات المرتبطة به.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#technology']}, {'search': 'smartphone technology 55', 'fallback_searches': ['smartphone technology', 'digital technology', 'science educational'], 'title': 'كيف يعمل التخزين في بطاقة الذاكرة؟', 'text': 'تخزن بطاقات الذاكرة البيانات داخل خلايا إلكترونية يمكنها الاحتفاظ بحالات مختلفة من الشحنة. تتحكم الدوائر في قراءة هذه الحالات وكتابتها.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#technology']}, {'search': 'digital technology 56', 'fallback_searches': ['digital technology', 'technology device', 'science educational'], 'title': 'كيف يعمل نظام تحديد المواقع في السيارة؟', 'text': 'تستقبل وحدة الملاحة إشارات من أقمار صناعية ومصادر أخرى ثم تحسب الموقع والاتجاه وتعرضهما على خريطة رقمية.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#technology']}, {'search': 'technology device 57', 'fallback_searches': ['technology device', 'computer technology', 'science educational'], 'title': 'كيف تعمل كاميرا التصوير البطيء؟', 'text': 'تلتقط الكاميرا عددًا كبيرًا من الإطارات في الثانية ثم تعرضها بسرعة أقل، فيظهر الحدث الذي كان سريعًا وكأنه يحدث ببطء.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#technology']}, {'search': 'computer technology 58', 'fallback_searches': ['computer technology', 'smartphone technology', 'science educational'], 'title': 'كيف يعمل الماسح الضوئي؟', 'text': 'يحرك الماسح حساسًا ضوئيًا فوق المستند ويقيس الضوء المنعكس من مناطق مختلفة. ثم يحول القياسات إلى صورة رقمية.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#technology']}, {'search': 'smartphone technology 59', 'fallback_searches': ['smartphone technology', 'digital technology', 'science educational'], 'title': 'كيف تعمل الطباعة الليزرية؟', 'text': 'تستخدم الطابعة الليزرية شحنة كهربائية وضوء الليزر ومسحوق الحبر لتكوين الصورة على أسطوانة ثم نقل الحبر إلى الورق وتثبيته بالحرارة.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#technology']}, {'search': 'mechanical engineering 60', 'fallback_searches': ['mechanical engineering', 'engineering machine', 'science educational'], 'title': 'كيف تعمل إشارة عبور المشاة؟', 'text': 'تستخدم الإشارة أضواء مرتبة لتنظيم وقت عبور المشاة وحركة المركبات. في بعض الأنظمة يمكن لزر أو حساس طلب مرحلة عبور آمنة.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#engineering']}, {'search': 'engineering machine 61', 'fallback_searches': ['engineering machine', 'modern engineering', 'science educational'], 'title': 'كيف تعمل أبواب المصاعد تلقائيًا؟', 'text': 'تستخدم أبواب المصعد محركًا ووحدة تحكم وحساسات للتأكد من وجود العائق وموقع الكابينة قبل الفتح والإغلاق.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#engineering']}, {'search': 'modern engineering 62', 'fallback_searches': ['modern engineering', 'construction engineering', 'science educational'], 'title': 'كيف تعمل مضخة الوقود في السيارة؟', 'text': 'تنقل مضخة الوقود الوقود من الخزان إلى نظام المحرك بضغط مناسب. تتحكم المنظومة في التدفق بحسب تصميم المحرك وحاجته.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#engineering']}, {'search': 'construction engineering 63', 'fallback_searches': ['construction engineering', 'mechanical engineering', 'science educational'], 'title': 'كيف يعمل نظام العادم في السيارة؟', 'text': 'ينقل نظام العادم الغازات الناتجة عن الاحتراق بعيدًا عن المحرك، وتمر الغازات في مكونات مثل المحفز الحفاز لتقليل بعض الملوثات.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#engineering']}, {'search': 'mechanical engineering 64', 'fallback_searches': ['mechanical engineering', 'engineering machine', 'science educational'], 'title': 'كيف تعمل الغسالة في دورة العصر؟', 'text': 'يدور الحوض بسرعة عالية لتوليد قوة تدفع الماء خارج الملابس عبر فتحات الحوض. ثم تجمع المضخة الماء وتصرفه من الجهاز.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#engineering']}, {'search': 'engineering machine 65', 'fallback_searches': ['engineering machine', 'modern engineering', 'science educational'], 'title': 'لماذا تستخدم الطائرات عجلات قابلة للطي؟', 'text': 'بعد الإقلاع يمكن إخفاء معدات الهبوط داخل هيكل الطائرة لتقليل مقاومة الهواء. وتخرج العجلات مرة أخرى قبل الهبوط باستخدام نظام ميكانيكي أو هيدروليكي.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#engineering']}, {'search': 'modern engineering 66', 'fallback_searches': ['modern engineering', 'construction engineering', 'science educational'], 'title': 'كيف تعمل الرافعات المغناطيسية؟', 'text': 'تستخدم مغناطيسات كهربائية تولد مجالًا مغناطيسيًا عند مرور التيار، ويمكنها رفع مواد حديدية ثم إسقاطها عند إيقاف المجال.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#engineering']}, {'search': 'construction engineering 67', 'fallback_searches': ['construction engineering', 'mechanical engineering', 'science educational'], 'title': 'كيف تعمل البوابات الدوارة في المترو؟', 'text': 'تحتوي البوابة على آلية دوران تتحرر بعد التحقق من التذكرة أو البطاقة، ثم تعود إلى وضع الإغلاق لمنع المرور غير المصرح به.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#engineering']}, {'search': 'trees nature 68', 'fallback_searches': ['trees nature', 'nature plants', 'science educational'], 'title': 'لماذا تتساقط أوراق بعض الأشجار؟', 'text': 'تسقط بعض الأشجار أوراقها في مواسم معينة لتقليل فقد الماء والطاقة عندما تصبح الظروف أقل ملاءمة للنمو. تتكون منطقة انفصال عند قاعدة الورقة تساعد على سقوطها.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#nature']}, {'search': 'nature plants 69', 'fallback_searches': ['nature plants', 'forest plants', 'science educational'], 'title': 'كيف تتغذى النباتات آكلة الحشرات؟', 'text': 'تعيش بعض النباتات في تربة فقيرة بعناصر معينة، لذلك تطورت لديها أوراق أو أجزاء متخصصة تصطاد الحشرات وتهضمها للحصول على مغذيات إضافية.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#nature']}, {'search': 'forest plants 70', 'fallback_searches': ['forest plants', 'flowers nature', 'science educational'], 'title': 'كيف تتكيف النباتات مع الملوحة؟', 'text': 'تمتلك بعض النباتات الساحلية آليات لتقليل دخول الملح أو تخزينه في أنسجة معينة أو إخراجه عبر غدد خاصة، ما يساعدها على البقاء في بيئات مالحة.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#nature']}, {'search': 'flowers nature 71', 'fallback_searches': ['flowers nature', 'trees nature', 'science educational'], 'title': 'لماذا تنمو الفطريات بعد المطر؟', 'text': 'الرطوبة تساعد الفطريات على النشاط والنمو وإنتاج الأجسام الثمرية في كثير من الأنواع. لذلك قد تظهر بسرعة بعد توفر ظروف رطبة مناسبة.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#nature']}, {'search': 'trees nature 72', 'fallback_searches': ['trees nature', 'nature plants', 'science educational'], 'title': 'كيف تنتشر بذور الهندباء؟', 'text': 'تحمل الرياح بذور الهندباء المزودة بزغب خفيف، ما يسمح لها بالانتقال لمسافات أبعد من سقوطها مباشرة بجوار النبات.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#nature']}, {'search': 'nature plants 73', 'fallback_searches': ['nature plants', 'forest plants', 'science educational'], 'title': 'لماذا تتسلق النباتات المتسلقة الجدران؟', 'text': 'تبحث النباتات المتسلقة عن الضوء وتستخدم محاليق أو جذورًا هوائية أو آليات أخرى للتمسك بالأسطح والصعود دون بناء ساق سميكة وحدها.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#nature']}, {'search': 'forest plants 74', 'fallback_searches': ['forest plants', 'flowers nature', 'science educational'], 'title': 'كيف تساعد القشور الشجرية على حماية الجذع؟', 'text': 'تعمل القشرة كطبقة واقية تقلل فقد الماء وتحمي الأنسجة الداخلية من الإصابات وبعض الظروف البيئية. يختلف تركيبها بين أنواع الأشجار.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#nature']}, {'search': 'flowers nature 75', 'fallback_searches': ['flowers nature', 'trees nature', 'science educational'], 'title': 'كيف تعرف الزهور وقت التفتح؟', 'text': 'تستجيب بعض النباتات لتغير طول النهار والحرارة والساعة الداخلية، فتستخدم هذه الإشارات لتنظيم التفتح والنمو خلال المواسم.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#nature']}, {'search': 'trees nature 76', 'fallback_searches': ['trees nature', 'nature plants', 'science educational'], 'title': 'لماذا تظهر الفطريات على جذوع الأشجار؟', 'text': 'يمكن لبعض الفطريات أن تنمو على الخشب لأنها تحصل منه على مواد عضوية، خصوصًا عندما يبدأ الخشب بالتحلل أو تضعف الأنسجة.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#nature']}, {'search': 'nature plants 77', 'fallback_searches': ['nature plants', 'forest plants', 'science educational'], 'title': 'كيف تعيش النباتات في الصخور؟', 'text': 'يمكن لبعض النباتات الاستقرار في شقوق الصخور حيث تتجمع كميات صغيرة من الماء والغبار والمواد العضوية. تساعد الجذور على استغلال هذه الموارد المحدودة.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#nature']}, {'search': 'animal nature 78', 'fallback_searches': ['animal nature', 'ocean animals', 'science educational'], 'title': 'لماذا تمتلك الزرافة لسانًا طويلًا؟', 'text': 'يساعد اللسان الطويل الزرافة على الوصول إلى أوراق الأشجار والتعامل معها، كما أن لسانها مناسب نسبيًا للغذاء النباتي القاسي.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#animals']}, {'search': 'ocean animals 79', 'fallback_searches': ['ocean animals', 'bird wildlife', 'science educational'], 'title': 'كيف تحمي السلاحف نفسها داخل الصدفة؟', 'text': 'تستطيع كثير من السلاحف سحب الرأس والأطراف إلى داخل الصدفة جزئيًا أو كليًا، فتعمل الصدفة كدرع يحمي أجزاء الجسم الحساسة.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#animals']}, {'search': 'bird wildlife 80', 'fallback_searches': ['bird wildlife', 'wildlife animals', 'science educational'], 'title': 'لماذا تنفخ بعض الضفادع أجسامها؟', 'text': 'يمكن لبعض الضفادع نفخ الجسم لتبدو أكبر عند مواجهة خطر. قد يجعل ذلك ابتلاعها أو مهاجمتها أصعب على بعض المفترسات.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#animals']}, {'search': 'wildlife animals 81', 'fallback_searches': ['wildlife animals', 'animal nature', 'science educational'], 'title': 'كيف تستخدم الفيلة ذاكرتها في البيئة؟', 'text': 'تمتلك الأفيال قدرة على تذكر مواقع المياه والمسارات والأفراد، وهذا مفيد خصوصًا في البيئات التي تتغير فيها الموارد موسميًا.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#animals']}, {'search': 'animal nature 82', 'fallback_searches': ['animal nature', 'ocean animals', 'science educational'], 'title': 'كيف تعرف الطيور أن موسم الهجرة حان؟', 'text': 'يمكن لتغير طول النهار أن يعمل كإشارة بيولوجية تؤثر في الهرمونات والسلوك. تستخدم الطيور هذه الإشارات مع عوامل بيئية أخرى لبدء الهجرة.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#animals']}, {'search': 'ocean animals 83', 'fallback_searches': ['ocean animals', 'bird wildlife', 'science educational'], 'title': 'لماذا تمتلك الأسماك زعانف مختلفة؟', 'text': 'تؤدي الزعانف وظائف متعددة مثل الدفع والتوجيه والثبات والتحكم في الصعود والهبوط. يختلف شكلها بحسب طريقة حياة كل نوع.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#animals']}, {'search': 'bird wildlife 84', 'fallback_searches': ['bird wildlife', 'wildlife animals', 'science educational'], 'title': 'كيف تحمي النيصات نفسها؟', 'text': 'تمتلك النيصات أشواكًا معدلة من الشعر يمكن أن تنفصل عند ملامستها للمفترس، فتعمل كوسيلة دفاعية بدل الهجوم.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#animals']}, {'search': 'wildlife animals 85', 'fallback_searches': ['wildlife animals', 'animal nature', 'science educational'], 'title': 'لماذا تلمع بعض الديدان في الظلام؟', 'text': 'تنتج بعض الكائنات ضوءًا بعملية كيميائية تسمى الإضاءة الحيوية. يمكن أن يستخدم الضوء للتواصل أو جذب الفرائس أو الدفاع.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#animals']}, {'search': 'archaeology history 86', 'fallback_searches': ['archaeology history', 'old city history', 'science educational'], 'title': 'كيف كانت القرى القديمة تختار مواقعها؟', 'text': 'اختيار الموقع ارتبط بتوفر الماء والأرض المناسبة للزراعة والحماية وطرق التجارة. لذلك ظهرت مستوطنات كثيرة قرب الأنهار والينابيع والممرات.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#history']}, {'search': 'old city history 87', 'fallback_searches': ['old city history', 'ancient civilization', 'science educational'], 'title': 'كيف كانت القوافل تعرف المسارات في الصحراء؟', 'text': 'اعتمدت على خبرة الأدلاء ومواقع الآبار والنجوم والمعالم الطبيعية ومسارات معروفة بين المحطات. كانت معرفة الماء أهم عوامل نجاح الرحلات الطويلة.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#history']}, {'search': 'ancient civilization 88', 'fallback_searches': ['ancient civilization', 'ancient history', 'science educational'], 'title': 'لماذا بنيت بعض المدن قرب الأنهار؟', 'text': 'وفرت الأنهار الماء والزراعة والنقل في بعض المناطق، كما ساعدت على قيام تجمعات سكانية كبيرة. لكنها كانت تتطلب أيضًا إدارة الفيضانات.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#history']}, {'search': 'ancient history 89', 'fallback_searches': ['ancient history', 'archaeology history', 'science educational'], 'title': 'كيف كان الناس يقيسون الزمن قبل الساعات الحديثة؟', 'text': 'استخدمت المجتمعات الساعات الشمسية والمائية والرملية ومراقبة النجوم وحركة الشمس. كانت دقة هذه الوسائل تختلف بحسب الظروف والتصميم.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#history']}, {'search': 'archaeology history 90', 'fallback_searches': ['archaeology history', 'old city history', 'science educational'], 'title': 'كيف انتقلت العلوم بين الحضارات؟', 'text': 'ساهمت التجارة والترجمة والرحلات ومراكز التعلم في انتقال الكتب والأفكار والأدوات بين المناطق. لذلك تطورت كثير من العلوم عبر تراكم مساهمات حضارات متعددة.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#history']}, {'search': 'forest environment 91', 'fallback_searches': ['forest environment', 'climate nature', 'science educational'], 'title': 'كيف تساعد الأشجار على تثبيت التربة؟', 'text': 'تمسك الجذور جزيئات التربة وتقلل حركة الماء والرياح على السطح. لذلك يمكن للغطاء النباتي أن يحد من بعض أشكال التعرية.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#environment']}, {'search': 'climate nature 92', 'fallback_searches': ['climate nature', 'environment nature', 'science educational'], 'title': 'لماذا تكون بعض البحيرات شديدة الملوحة؟', 'text': 'قد تتراكم الأملاح عندما يكون تبخر الماء أعلى من كمية المياه التي تغادر البحيرة أو عندما تأتي الأملاح من مصادر جيولوجية. مع الزمن يزداد تركيزها.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#environment']}, {'search': 'environment nature 93', 'fallback_searches': ['environment nature', 'ocean environment', 'science educational'], 'title': 'كيف تتكون الشعاب المرجانية؟', 'text': 'تبني كائنات مرجانية هياكل كلسية صغيرة تتراكم مع الزمن لتشكل شعابًا كبيرة. تحتاج الشعاب إلى ظروف مناسبة من الحرارة والضوء وجودة المياه.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#environment']}, {'search': 'ocean environment 94', 'fallback_searches': ['ocean environment', 'forest environment', 'science educational'], 'title': 'كيف تؤثر الجبال في هطول المطر؟', 'text': 'عندما يصعد الهواء الرطب فوق الجبال يبرد وقد يتكاثف بخار الماء، فيزداد الهطول على بعض جوانب الجبل بينما قد تصبح الجهة الأخرى أكثر جفافًا.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#environment']}, {'search': 'forest environment 95', 'fallback_searches': ['forest environment', 'climate nature', 'science educational'], 'title': 'لماذا تختلف درجة الحرارة بين المدينة والصحراء ليلًا؟', 'text': 'الأسطح والمواد في المدن تخزن الحرارة وتطلقها ببطء، بينما يمكن لسطح الصحراء الجاف أن يفقد الحرارة بسرعة بعد غروب الشمس. لذلك قد تختلف درجات الحرارة الليلية كثيرًا.', 'hashtags': ['#Shorts', '#هل_تعلم', '#معلومات', '#environment']}]
-
 TOPICS.extend(EXTRA_TOPICS)
-TOPICS.extend(EXPANDED_TOPICS)
 
 
 def validate_topic_pool():
@@ -735,8 +733,42 @@ def choose_video_file(video):
     return None
 
 
+def build_visual_queries(topic):
+    """Build concept-focused Pexels queries instead of generic repeated searches."""
+    primary = clean_text(topic.get("search", ""))
+    fallbacks = [
+        clean_text(x)
+        for x in topic.get("fallback_searches", [])
+        if clean_text(x)
+    ]
+
+    queries = []
+    for query in [primary] + fallbacks:
+        if query and query.lower() not in {q.lower() for q in queries}:
+            queries.append(query)
+
+    # Ask for a few additional visual variants using the same subject.
+    words = primary.split()
+    if words:
+        queries.extend([
+            " ".join(words) + " close up",
+            " ".join(words) + " slow motion",
+            " ".join(words) + " cinematic",
+        ])
+
+    unique = []
+    seen = set()
+    for query in queries:
+        key = query.lower().strip()
+        if key and key not in seen:
+            seen.add(key)
+            unique.append(query)
+
+    return unique[:7]
+
+
 def select_unique_videos(topic, used_clips):
-    search_queries = [topic["search"]] + topic.get("fallback_searches", [])
+    search_queries = build_visual_queries(topic)
     candidates = {}
 
     for query in search_queries:
@@ -758,27 +790,44 @@ def select_unique_videos(topic, used_clips):
                 if not video_file:
                     continue
 
+                width = int(video_file.get("width") or video.get("width") or 0)
+                height = int(video_file.get("height") or video.get("height") or 0)
+
+                # Prefer large portrait sources. Keep a landscape fallback,
+                # because forcing only portrait results can fail for niche topics.
+                portrait = height > width
+                resolution_score = min(width, 1080) * min(height, 1920)
+
                 candidates[video_id] = {
                     "id": video_id,
                     "link": video_file["link"],
+                    "width": width,
+                    "height": height,
+                    "portrait": portrait,
+                    "score": (1000000000 if portrait else 0) + resolution_score,
                 }
 
-            if len(candidates) >= 35:
+            if len(candidates) >= 60:
                 break
 
-        if len(candidates) >= NUMBER_OF_CLIPS:
+        if len(candidates) >= max(NUMBER_OF_CLIPS * 4, 36):
             break
 
     candidates_list = list(candidates.values())
-    random.shuffle(candidates_list)
 
-    if len(candidates_list) < NUMBER_OF_CLIPS:
+    # Keep variety: first rank by quality, then sample from the strongest pool
+    # rather than blindly shuffling all results.
+    candidates_list.sort(key=lambda item: item["score"], reverse=True)
+    quality_pool = candidates_list[:max(NUMBER_OF_CLIPS * 4, 36)]
+    random.shuffle(quality_pool)
+
+    if len(quality_pool) < NUMBER_OF_CLIPS:
         raise RuntimeError(
-            f"Not enough NEW Pexels clips. Found {len(candidates_list)}, "
+            f"Not enough NEW Pexels clips. Found {len(quality_pool)}, "
             f"need {NUMBER_OF_CLIPS}."
         )
 
-    selected = candidates_list[:NUMBER_OF_CLIPS]
+    selected = quality_pool[:NUMBER_OF_CLIPS]
 
     print("Selected NEW Pexels IDs:")
     for item in selected:
@@ -805,21 +854,135 @@ def download_video(url, destination):
 
 
 # =========================================================
-# VOICE
+# NATURAL ARABIC SCRIPT STYLE
 # =========================================================
+# The project does not currently use an external generative-AI API for text.
+# These rules make the existing verified scripts sound lighter and more
+# conversational before they are sent to the voice engine, without changing
+# the factual idea or the topic title.
+NATURAL_ARABIC_STYLE = """
+استخدم العربية السعودية الخفيفة والطبيعية، كأن شخصًا سعوديًا يتكلم مع المشاهد مباشرة.
+خلك عفوي وواضح، واستخدم تعبيرات خفيفة مثل: تدري، تخيل، الغريب إن، والأغرب إن، بدون مبالغة.
+تجنب الفصحى الرسمية والكلمات المعقدة قدر الإمكان.
+خلي الكلام مفهومًا لجميع العرب، وليس بلهجة محلية صعبة.
+الجمل قصيرة وسهلة النطق.
+لا تستخدم إيموجي أو رموز داخل النص.
+حافظ على المعلومة العلمية أو الواقعية كما هي، ولا تضف معلومة جديدة.
+"""
+
+
+def make_natural_arabic_script(text):
+    """Lightly convert the existing Arabic script to a natural Saudi-style delivery."""
+    text = clean_text(text)
+
+    replacements = [
+        ("هل تعلم أن", "تدري إن"),
+        ("هل تعلم أن", "تدري إن"),
+        ("هل تعلم", "تدري"),
+        ("هل فكرت يومًا", "قد سألت نفسك"),
+        ("هل تساءلت", "قد سألت نفسك"),
+        ("هل لاحظت أن", "لاحظت إن"),
+        ("هل لاحظت", "لاحظت"),
+        ("يمكن أن", "ممكن"),
+        ("لا يمكن", "ما يقدر"),
+        ("يستطيع", "يقدر"),
+        ("تستطيع", "تقدر"),
+        ("يستطيعون", "يقدرون"),
+        ("تستطيعون", "يقدرون"),
+        ("يحتاج إلى", "يحتاج"),
+        ("تحتاج إلى", "تحتاج"),
+        ("ولهذا", "وعشان كذا"),
+        ("لذلك", "وعشان كذا"),
+        ("بسبب ذلك", "وعشان كذا"),
+        ("بالنسبة إلى", "بالنسبة لـ"),
+        ("داخل الجسم", "داخل الجسم"),
+        ("في الوقت نفسه", "بنفس الوقت"),
+        ("بشكل مستمر", "باستمرار"),
+        ("بشكل كبير", "بشكل كبير"),
+        ("بشكل مختلف", "بطريقة مختلفة"),
+        ("بشكل أفضل", "بطريقة أفضل"),
+        ("تدري أن", "تدري إن"),
+    ]
+
+    for old, new in replacements:
+        text = text.replace(old, new)
+
+    # Small spoken-language cleanup; do not rewrite facts or numbers.
+    text = re.sub(r"\s+", " ", text).strip()
+    text = text.replace("، و", "، و")
+
+    return text
+
+
+def prepare_topic_for_voice(topic):
+    """Return a copy with natural delivery text while preserving the original topic."""
+    prepared = dict(topic)
+    prepared["text"] = make_natural_arabic_script(topic.get("text", ""))
+    return prepared
+
 
 def create_voice(text):
-    async def generate():
-        communicate = edge_tts.Communicate(
-            text,
-            VOICE_NAME,
-            rate=VOICE_RATE,
-            volume=VOICE_VOLUME,
-            pitch=VOICE_PITCH,
-        )
-        await communicate.save(str(VOICE_FILE))
+    """
+    Use Azure Neural Speech when configured; otherwise preserve the existing
+    Edge-TTS fallback so the workflow does not become dependent on a paid API.
+    """
+    if AZURE_SPEECH_KEY and AZURE_SPEECH_REGION:
+        print("Creating voice with Azure Neural Speech...")
 
-    asyncio.run(generate())
+        url = (
+            f"https://{AZURE_SPEECH_REGION}.tts.speech.microsoft.com/"
+            "cognitiveservices/v1"
+        )
+
+        headers = {
+            "Ocp-Apim-Subscription-Key": AZURE_SPEECH_KEY,
+            "Content-Type": "application/ssml+xml",
+            "X-Microsoft-OutputFormat": "audio-24khz-160kbitrate-mono-mp3",
+            "User-Agent": "youtube-shorts-automation",
+        }
+
+        safe_text = (
+            str(text)
+            .replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace('"', "&quot;")
+            .replace("'", "&apos;")
+        )
+
+        ssml = f"""<speak version="1.0"
+xmlns="http://www.w3.org/2001/10/synthesis"
+xml:lang="ar-SA">
+<voice name="{AZURE_VOICE_NAME}">
+<prosody rate="0%" pitch="0%">
+{safe_text}
+</prosody>
+</voice>
+</speak>"""
+
+        response = requests.post(
+            url,
+            headers=headers,
+            data=ssml.encode("utf-8"),
+            timeout=60,
+        )
+        response.raise_for_status()
+        VOICE_FILE.write_bytes(response.content)
+
+    else:
+        print("Azure Speech secrets not found; using Edge Neural TTS fallback.")
+
+        async def generate():
+            communicate = edge_tts.Communicate(
+                text,
+                VOICE_NAME,
+                rate=VOICE_RATE,
+                volume=VOICE_VOLUME,
+                pitch=VOICE_PITCH,
+            )
+            await communicate.save(str(VOICE_FILE))
+
+        asyncio.run(generate())
 
     if not VOICE_FILE.exists() or VOICE_FILE.stat().st_size < 1000:
         raise RuntimeError("Voice file was not created correctly.")
@@ -979,7 +1142,7 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Arabic,Noto Sans Arabic,72,&H00FFFFFF,&H00FFFFFF,&H00000000,&H99000000,-1,0,0,0,100,100,0,0,3,0,2,2,80,80,360,1
+Style: Arabic,Noto Sans Arabic,68,&H00FFFFFF,&H00FFFFFF,&H00000000,&H99000000,-1,0,0,0,100,100,0,0,3,2,1,2,90,90,430,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -1037,15 +1200,22 @@ def prepare_clip(input_file, output_file, duration):
         start_time = 0
     else:
         max_start = max(0.0, source_duration - duration - 0.1)
-        start_time = random.uniform(0, min(max_start, 3.0))
+        start_time = random.uniform(0, min(max_start, max(0.0, source_duration - duration)))
+
+    # Very subtle crop/scale motion. It avoids the old static-photo feeling
+    # while remaining natural on real footage.
+    motion = random.choice([
+        "scale=1120:1991:force_original_aspect_ratio=increase,crop=1080:1920:(iw-1080)/2:(ih-1920)/2",
+        "scale=1160:2062:force_original_aspect_ratio=increase,crop=1080:1920:(iw-1080)/2:(ih-1920)/2",
+        "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920",
+    ])
 
     video_filter = (
-        "scale=1080:1920:"
-        "force_original_aspect_ratio=increase,"
-        "crop=1080:1920,"
+        motion + ","
         "setsar=1,"
         "setdar=9/16,"
-        "fps=30"
+        "fps=30,"
+        "format=yuv420p"
     )
 
     command = [
@@ -1139,9 +1309,9 @@ def create_final_video(silent_video, text):
 
     audio_filter = (
         "highpass=f=70,"
-        "lowpass=f=14000,"
-        "acompressor=threshold=-18dB:ratio=2:attack=15:release=120,"
-        "loudnorm=I=-15:TP=-1.5:LRA=8"
+        "lowpass=f=15000,"
+        "acompressor=threshold=-20dB:ratio=2.2:attack=10:release=100:makeup=1,"
+        "loudnorm=I=-14:TP=-1.5:LRA=7"
     )
 
     subtitle_path = SUBTITLE_FILE.resolve().as_posix().replace(":", r"\:")
@@ -1258,48 +1428,58 @@ def upload_to_youtube(topic):
         },
     }
 
-    media = MediaFileUpload(
-        str(OUTPUT_VIDEO),
-        mimetype="video/mp4",
-        resumable=True,
-        chunksize=8 * 1024 * 1024,
-    )
-
     print("Uploading to YouTube...")
 
-    request = youtube.videos().insert(
-        part="snippet,status",
-        body=body,
-        media_body=media,
-    )
+    last_error = None
 
-    response = None
-
-    while response is None:
+    for attempt in range(1, 4):
         try:
-            status, response = request.next_chunk()
+            media = MediaFileUpload(
+                str(OUTPUT_VIDEO),
+                mimetype="video/mp4",
+                resumable=True,
+                chunksize=4 * 1024 * 1024,
+            )
 
-            if status:
-                print(
-                    f"Upload progress: "
-                    f"{int(status.progress() * 100)}%"
+            request = youtube.videos().insert(
+                part="snippet,status",
+                body=body,
+                media_body=media,
+            )
+
+            response = None
+
+            while response is None:
+                status, response = request.next_chunk()
+
+                if status:
+                    print(
+                        f"Upload progress: "
+                        f"{int(status.progress() * 100)}%"
+                    )
+
+            video_id = response.get("id")
+
+            if not video_id:
+                raise RuntimeError(
+                    f"YouTube upload returned no video ID: {response}"
                 )
 
+            print(f"YouTube upload successful: {video_id}")
+            print(f"https://www.youtube.com/shorts/{video_id}")
+
+            return video_id
+
         except Exception as error:
-            print("Upload error:", error)
-            raise
+            last_error = error
+            print(f"Upload attempt {attempt}/3 failed: {error}")
 
-    video_id = response.get("id")
+            if attempt < 3:
+                time.sleep(5 * attempt)
 
-    if not video_id:
-        raise RuntimeError(
-            f"YouTube upload returned no video ID: {response}"
-        )
-
-    print(f"YouTube upload successful: {video_id}")
-    print(f"https://www.youtube.com/shorts/{video_id}")
-
-    return video_id
+    raise RuntimeError(
+        f"YouTube upload failed after 3 attempts: {last_error}"
+    )
 
 
 # =========================================================
@@ -1333,7 +1513,7 @@ def validate_final_video():
 
 def main():
     print("\n========================================")
-    print("YOUTUBE SHORTS AUTOMATION")
+    print("YOUTUBE SHORTS AUTOMATION - PROFESSIONAL MODE")
     print("========================================\n")
 
     check_environment()
@@ -1378,13 +1558,17 @@ def main():
     print("\nCreating silent video...")
     silent_video = create_silent_video(downloaded)
 
+    # Keep the stored topic unchanged for duplicate detection and YouTube metadata,
+    # but use a lighter Saudi conversational version for narration and captions.
+    voice_topic = prepare_topic_for_voice(topic)
+
     print("\nCreating Arabic voice...")
-    create_voice(topic["text"])
+    create_voice(voice_topic["text"])
 
     print("\nCreating final Short...")
     create_final_video(
         silent_video,
-        topic["text"],
+        voice_topic["text"],
     )
 
     validate_final_video()
