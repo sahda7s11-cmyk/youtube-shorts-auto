@@ -44,15 +44,10 @@ CLIP_DURATION = 2.8
 FPS = 30
 
 VOICE_NAME = "ar-SA-HamedNeural"
-VOICE_RATE = "+0%"
+VOICE_RATE = "+2%"
 VOICE_VOLUME = "+0%"
 VOICE_PITCH = "+0Hz"
 
-# Optional professional voice. If these two secrets exist, Azure Neural Speech
-# is used directly; otherwise the existing Edge-TTS voice remains the fallback.
-AZURE_SPEECH_KEY = os.getenv("AZURE_SPEECH_KEY")
-AZURE_SPEECH_REGION = os.getenv("AZURE_SPEECH_REGION")
-AZURE_VOICE_NAME = os.getenv("AZURE_VOICE_NAME", "ar-SA-HamedNeural")
 
 YOUTUBE_PRIVACY = "public"
 YOUTUBE_CATEGORY_ID = "17"
@@ -457,7 +452,1443 @@ EXTRA_TOPICS = [
     {"search":"ice melting temperature physics","fallback_searches":["melting ice","phase change water","ice physics"],"title":"لماذا يبقى الجليد باردًا أثناء ذوبانه؟","text":"أثناء تغير الحالة من صلب إلى سائل تُستخدم الطاقة الحرارية الداخلة في عملية الانصهار بدل رفع درجة الحرارة مباشرة. لذلك يمكن أن تبقى درجة حرارة خليط الجليد والماء قريبة من درجة الانصهار حتى يذوب جزء كبير من الجليد.","hashtags":["#Shorts","#جليد","#فيزياء","#علوم","#هل_تعلم"]},
 ]
 
+
+
+# =========================================================
+# EXPANDED CONTENT POOL
+# 95 additional genuinely different topics (244 total)
+# =========================================================
+
+EXTRA_TOPICS_2 = [
+    {
+        "search": "moon reflected sunlight physics",
+        "fallback_searches": [
+            "moon reflected sunlight physics",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا تتأخر صورة القمر عن لحظة التقاط الضوء؟",
+        "text": "ضوء القمر الذي نراه هو ضوء الشمس المنعكس، ويحتاج هذا الضوء إلى وقت قصير جدًا ليصل من القمر إلى الأرض.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "ship navigation ocean compass",
+        "fallback_searches": [
+            "ship navigation ocean compass",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تعرف السفن اتجاهها في البحر؟",
+        "text": "تستخدم السفن أنظمة ملاحة متعددة مثل الأقمار الصناعية والبوصلة والأنظمة بالقصور الذاتي، وتجمع البيانات لتحديد الاتجاه والموقع.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "satellite orbit earth physics",
+        "fallback_searches": [
+            "satellite orbit earth physics",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا لا تسقط الأقمار الصناعية مباشرة على الأرض؟",
+        "text": "القمر الصناعي يملك سرعة أفقية كبيرة، لذلك يستمر في السقوط نحو الأرض بينما ينحني سطح الأرض بعيدًا تحته، فتتكون مدارات حولها.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "aircraft altimeter cockpit",
+        "fallback_searches": [
+            "aircraft altimeter cockpit",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تقيس الطائرة ارتفاعها؟",
+        "text": "يستخدم مقياس الارتفاع الجوي ضغط الهواء لحساب الارتفاع التقريبي، وتستخدم الطائرات أيضًا أنظمة أخرى للملاحة والتحقق.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "airplane contrail sky",
+        "fallback_searches": [
+            "airplane contrail sky",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا تترك الطائرة أثرًا أبيض خلفها؟",
+        "text": "في ظروف جوية مناسبة يتكاثف بخار الماء الخارج من محركات الطائرة في الهواء البارد ويتحول إلى بلورات جليد دقيقة تظهر كخط أبيض.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "traffic lights control intersection",
+        "fallback_searches": [
+            "traffic lights control intersection",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تعمل إشارات المرور بتوقيت منظم؟",
+        "text": "تستخدم إشارات المرور وحدات تحكم تضبط مراحل الإشارة وفق جداول أو بيانات حساسات وحركة المركبات، حسب تصميم التقاطع.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "speed bumps road safety",
+        "fallback_searches": [
+            "speed bumps road safety",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا توجد مطبات السرعة على بعض الطرق؟",
+        "text": "تُستخدم مطبات السرعة لتقليل سرعة المركبات في مناطق تحتاج إلى حركة أبطأ، مثل قرب المدارس أو الممرات.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "metro ticket gate technology",
+        "fallback_searches": [
+            "metro ticket gate technology",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تعمل بوابات المترو الإلكترونية؟",
+        "text": "تتحقق البوابات من تذكرة أو بطاقة إلكترونية ثم تسمح بالمرور إذا كانت البيانات صالحة، مع تسجيل العملية في النظام.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "train steel wheels railway",
+        "fallback_searches": [
+            "train steel wheels railway",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا تستخدم القطارات عجلات معدنية بدل المطاط؟",
+        "text": "العجلات والقضبان المعدنية تقلل مقاومة التدحرج وتسمح للقطارات الثقيلة بالحركة بكفاءة، مع تصميمات خاصة للتحكم والثبات.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "car abs braking system",
+        "fallback_searches": [
+            "car abs braking system",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف يوقف نظام ABS انغلاق عجلات السيارة؟",
+        "text": "يراقب النظام سرعة دوران العجلات ويعدل ضغط الفرامل بسرعة عندما يكتشف اقتراب عجلة من الانغلاق، للمساعدة في الحفاظ على التحكم.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "car airbag safety",
+        "fallback_searches": [
+            "car airbag safety",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تعمل الوسائد الهوائية في السيارة؟",
+        "text": "تكتشف حساسات التسارع تباطؤًا شديدًا في حادث، ثم يفعّل النظام الوسادة بسرعة كبيرة لتوفير وسادة حماية للراكب.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "car radiator engine cooling",
+        "fallback_searches": [
+            "car radiator engine cooling",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا تحتوي السيارات على مبرد أمامي؟",
+        "text": "يساعد المبرد على نقل الحرارة من سائل التبريد إلى الهواء الخارجي، فيحافظ على درجة حرارة المحرك ضمن نطاق التشغيل المناسب.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "power grid transformer electricity",
+        "fallback_searches": [
+            "power grid transformer electricity",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تنتقل الطاقة من محطة الكهرباء إلى المنزل؟",
+        "text": "ترفع المحولات الجهد للنقل لمسافات طويلة لتقليل الفاقد، ثم تخفضه المحطات والمحولات المحلية إلى مستويات مناسبة للاستخدام.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "electrical transformer grid",
+        "fallback_searches": [
+            "electrical transformer grid",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا تستخدم محطات الكهرباء محولات؟",
+        "text": "المحول يغير مستوى الجهد الكهربائي للتيار المتردد، ما يسمح باستخدام جهد مرتفع للنقل ثم خفضه للتوزيع والاستخدام.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "solar panel photovoltaic effect",
+        "fallback_searches": [
+            "solar panel photovoltaic effect",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تنتج الألواح الشمسية الكهرباء؟",
+        "text": "الخلايا الشمسية تحول جزءًا من طاقة الضوء إلى كهرباء عبر التأثير الكهروضوئي داخل مادة شبه موصلة.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "wind turbine tall tower",
+        "fallback_searches": [
+            "wind turbine tall tower",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا تكون توربينات الرياح مرتفعة؟",
+        "text": "الرياح غالبًا تكون أقوى وأكثر انتظامًا على ارتفاعات أعلى من سطح الأرض، لذلك يساعد ارتفاع البرج على تحسين ظروف تشغيل التوربين.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "battery electrochemistry energy",
+        "fallback_searches": [
+            "battery electrochemistry energy",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تخزن البطاريات الطاقة؟",
+        "text": "تخزن البطاريات الطاقة كطاقة كيميائية، وعند توصيلها بدائرة تحدث تفاعلات تسمح بانتقال الإلكترونات وتوليد تيار كهربائي.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "phone charger heat electricity",
+        "fallback_searches": [
+            "phone charger heat electricity",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا تسخن الشواحن أحيانًا؟",
+        "text": "جزء من الطاقة الكهربائية يتحول إلى حرارة بسبب المقاومة والخسائر داخل الدوائر والمكونات، لذلك ترتفع حرارة الشاحن أثناء العمل.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "smartphone gyroscope accelerometer",
+        "fallback_searches": [
+            "smartphone gyroscope accelerometer",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف يعرف الهاتف أنه يدور؟",
+        "text": "يستخدم الهاتف مستشعرات مثل الجيروسكوب ومقياس التسارع لقياس الدوران والتسارع وتحديد اتجاه الجهاز وحركته.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "capacitive touchscreen technology",
+        "fallback_searches": [
+            "capacitive touchscreen technology",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تعمل شاشة اللمس بالسعة؟",
+        "text": "تستشعر الشاشة تغيرات صغيرة في المجال الكهربائي عند لمسها بإصبع موصل، ثم تحدد موقع اللمسة.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "phone display rgb pixels",
+        "fallback_searches": [
+            "phone display rgb pixels",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا تظهر ألوان مختلفة على شاشة الهاتف؟",
+        "text": "تستخدم الشاشة وحدات بكسل تحتوي عادة على مكونات حمراء وخضراء وزرقاء، وتغيير شدة هذه المكونات ينتج ألوانًا كثيرة.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "digital camera image sensor",
+        "fallback_searches": [
+            "digital camera image sensor",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تخزن الكاميرا الصورة الرقمية؟",
+        "text": "يحوّل حساس الصورة الضوء إلى إشارات كهربائية، ثم يعالجها الهاتف أو الكاميرا ويخزنها كبيانات رقمية.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "low light photography camera",
+        "fallback_searches": [
+            "low light photography camera",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا تكون صور الليل أصعب من صور النهار؟",
+        "text": "الإضاءة المنخفضة تعطي الحساس ضوءًا أقل، لذلك تحتاج الكاميرا إلى زمن تعريض أطول أو حساسية أعلى، وقد تظهر ضوضاء أكثر.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "microphone sound transducer",
+        "fallback_searches": [
+            "microphone sound transducer",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف يعمل الميكروفون؟",
+        "text": "يحوّل الميكروفون اهتزازات الصوت في الهواء إلى إشارة كهربائية، ثم يمكن تحويلها إلى بيانات رقمية للتسجيل أو المعالجة.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "speaker sound vibration",
+        "fallback_searches": [
+            "speaker sound vibration",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تتحول السماعة إلى مصدر صوت؟",
+        "text": "تحرك السماعة غشاءً بسرعة استجابة لإشارة كهربائية، فينتج عن حركة الغشاء تغيرات في ضغط الهواء نسمعها كصوت.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "sound speed water air",
+        "fallback_searches": [
+            "sound speed water air",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا تختلف سرعة الصوت في الماء والهواء؟",
+        "text": "سرعة الصوت تعتمد على خصائص الوسط مثل الكثافة والمرونة، ولهذا ينتقل الصوت بسرعة مختلفة في الماء مقارنة بالهواء.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "active noise cancellation headphones",
+        "fallback_searches": [
+            "active noise cancellation headphones",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تعمل سماعات عزل الضوضاء النشط؟",
+        "text": "تلتقط الميكروفونات الضوضاء المحيطة وتولد السماعة موجة صوتية معاكسة لها جزئيًا، فتقل بعض الأصوات عند الأذن.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "diffusion perfume molecules air",
+        "fallback_searches": [
+            "diffusion perfume molecules air",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تنتشر رائحة العطر في الغرفة؟",
+        "text": "تتحرك جزيئات العطر في الهواء وتنتشر من المناطق الأعلى تركيزًا إلى المناطق الأقل تركيزًا عبر حركة الجزيئات.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "water evaporation molecular physics",
+        "fallback_searches": [
+            "water evaporation molecular physics",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا يتبخر الماء حتى قبل الغليان؟",
+        "text": "بعض جزيئات الماء على السطح تمتلك طاقة حركية كافية للهروب إلى الهواء، لذلك يحدث التبخر عند درجات حرارة مختلفة.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "dew condensation morning",
+        "fallback_searches": [
+            "dew condensation morning",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تتكون قطرات الندى صباحًا؟",
+        "text": "عندما يبرد سطح ما إلى درجة مناسبة، يمكن أن يتكاثف بخار الماء من الهواء على سطحه مكونًا قطرات صغيرة.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "mirror reflection optics",
+        "fallback_searches": [
+            "mirror reflection optics",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا تكون المرآة عاكسة؟",
+        "text": "سطح المرآة الأملس والمغطى بطبقة عاكسة يعيد جزءًا كبيرًا من الضوء في اتجاه منظم، فتتكون صورة واضحة.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "magnifying glass convex lens",
+        "fallback_searches": [
+            "magnifying glass convex lens",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تعمل العدسة المكبرة؟",
+        "text": "العدسة المحدبة تكسر الضوء بطريقة تجعل الأشعة تتقارب، وعند وضع الجسم في موضع مناسب تظهر صورة مكبرة.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "refraction pencil water",
+        "fallback_searches": [
+            "refraction pencil water",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا يبدو القلم مكسورًا داخل الماء؟",
+        "text": "ينكسر الضوء عند انتقاله بين الماء والهواء بسبب اختلاف سرعة الضوء في الوسطين، فيتغير موقع الصورة الظاهر.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "fiber optic total internal reflection",
+        "fallback_searches": [
+            "fiber optic total internal reflection",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تعمل الألياف البصرية؟",
+        "text": "تحبس الألياف الضوء داخل قلبها بظاهرة الانعكاس الكلي الداخلي، ما يسمح بنقل البيانات لمسافات طويلة بخسائر منخفضة.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "ice density water structure",
+        "fallback_searches": [
+            "ice density water structure",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا يكون الثلج أقل كثافة من الماء؟",
+        "text": "عند تجمد الماء ترتب الروابط بين الجزيئات في بنية مفتوحة نسبيًا، فتزداد المسافات بينها مقارنة بالماء السائل.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "water cycle cloud formation",
+        "fallback_searches": [
+            "water cycle cloud formation",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف يتحول الماء إلى بخار داخل السحب؟",
+        "text": "يتبخر الماء من البحار والتربة والنباتات، ثم يصعد بخار الماء ويبرد ويتكاثف حول جسيمات دقيقة في الجو لتتكون السحب.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "plants gas exchange photosynthesis",
+        "fallback_searches": [
+            "plants gas exchange photosynthesis",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تتنفس النباتات؟",
+        "text": "تبادل النباتات الغازات عبر فتحات دقيقة في الأوراق، وتستخدم ثاني أكسيد الكربون في البناء الضوئي بينما يخرج الأكسجين كناتج لهذه العملية.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "chlorophyll leaves green light",
+        "fallback_searches": [
+            "chlorophyll leaves green light",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا تبدو الأوراق خضراء؟",
+        "text": "صبغة الكلوروفيل تمتص أطوالًا موجية معينة من الضوء وتعيد أو تعكس جزءًا أكبر من الضوء الأخضر، لذلك تبدو الأوراق خضراء.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "tree water transport xylem",
+        "fallback_searches": [
+            "tree water transport xylem",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تنقل الأشجار الماء إلى أعلى؟",
+        "text": "يساهم تبخر الماء من الأوراق وقوى التماسك والتوتر السطحي داخل أوعية الخشب في سحب الماء من الجذور إلى أعلى النبات.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "plant phototropism sunlight",
+        "fallback_searches": [
+            "plant phototropism sunlight",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا تتجه بعض النباتات نحو الضوء؟",
+        "text": "تستجيب أجزاء من النبات للضوء عبر تغيرات في نمو الخلايا، فينحني الساق تدريجيًا باتجاه مصدر الضوء في ظاهرة تسمى الانتحاء الضوئي.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "honeybee navigation hive",
+        "fallback_searches": [
+            "honeybee navigation hive",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تعرف النحل طريق العودة للخلية؟",
+        "text": "يستخدم النحل إشارات بصرية ومعالم في البيئة وقد يستفيد من الشمس ونمط الاستقطاب في السماء للملاحة.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "seed dispersal wind animals",
+        "fallback_searches": [
+            "seed dispersal wind animals",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تنتقل بذور بعض النباتات لمسافات بعيدة؟",
+        "text": "تستخدم النباتات وسائل مختلفة لنقل البذور، مثل الرياح والماء والحيوانات، وقد تمتلك البذور تراكيب تساعدها على الانتشار.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "insect sound communication",
+        "fallback_searches": [
+            "insect sound communication",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا تصدر بعض الحشرات أصواتًا عالية؟",
+        "text": "تستخدم بعض الحشرات اهتزاز أجزاء من أجسامها أو احتكاكها لإنتاج أصوات تساعدها في التواصل أو جذب الشريك أو الدفاع.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "fish gills oxygen water",
+        "fallback_searches": [
+            "fish gills oxygen water",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تتنفس الأسماك تحت الماء؟",
+        "text": "تستخرج الأسماك الأكسجين الذائب في الماء عبر الخياشيم، حيث يمر الماء على أسطح رقيقة تسمح بتبادل الغازات.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "fish buoyancy swim bladder",
+        "fallback_searches": [
+            "fish buoyancy swim bladder",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا تطفو بعض الأسماك وتغوص أخرى؟",
+        "text": "تستطيع كثير من الأسماك التحكم في الطفو باستخدام مثانة هوائية، بينما تعتمد أنواع أخرى على تكوين الجسم والزيوت والحركة.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "bird migration navigation",
+        "fallback_searches": [
+            "bird migration navigation",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تعرف الطيور طريق الهجرة؟",
+        "text": "تستخدم الطيور مجموعة من الإشارات للملاحة، منها الشمس والنجوم والمعالم وربما المجال المغناطيسي للأرض، بحسب النوع والظروف.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "camel desert water adaptation",
+        "fallback_searches": [
+            "camel desert water adaptation",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا تستطيع الجمال تحمل العطش؟",
+        "text": "تتكيف الجمال مع ظروف الصحراء عبر تقليل فقد الماء وتحمل تغيرات أكبر في توازن السوائل ودرجة حرارة الجسم مقارنة بكثير من الحيوانات.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "bear hibernation metabolism",
+        "fallback_searches": [
+            "bear hibernation metabolism",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تحافظ الدببة على الطاقة في الشتاء؟",
+        "text": "خلال السبات تنخفض معدلات الأيض والنشاط ودرجة حرارة الجسم بدرجات تختلف حسب النوع، ما يقلل استهلاك الطاقة.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "chameleon color change skin",
+        "fallback_searches": [
+            "chameleon color change skin",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا تتغير ألوان الحرباء؟",
+        "text": "تتغير ألوان الحرباء بسبب تفاعلات بين أصباغ وخلايا متخصصة في الجلد، ويمكن أن ترتبط بالتواصل والحرارة والحالة المحيطة.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "fingerprint formation biology",
+        "fallback_searches": [
+            "fingerprint formation biology",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تعمل بصمة الإصبع؟",
+        "text": "تتشكل خطوط بصمة الإصبع قبل الولادة نتيجة عوامل وراثية وبيئية أثناء نمو الجلد، وتبقى أنماطها مستقرة نسبيًا طوال الحياة.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "eye color melanin genetics",
+        "fallback_searches": [
+            "eye color melanin genetics",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا يختلف لون العينين بين الناس؟",
+        "text": "يرتبط لون القزحية بكمية ونوع الميلانين وتوزيعه داخل أنسجة العين، إضافة إلى عوامل وراثية متعددة.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "bone fracture healing biology",
+        "fallback_searches": [
+            "bone fracture healing biology",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تلتئم العظام بعد الكسر؟",
+        "text": "يبدأ الجسم بتكوين نسيج إصلاحي حول منطقة الكسر، ثم يتشكل عظم جديد ويعاد تنظيمه تدريجيًا مع مرور الوقت.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "calcium body bones muscles",
+        "fallback_searches": [
+            "calcium body bones muscles",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا يحتاج الجسم إلى الكالسيوم؟",
+        "text": "الكالسيوم ضروري لبناء العظام والأسنان، وله أدوار مهمة أيضًا في انقباض العضلات ونقل الإشارات العصبية وتجلط الدم.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "red blood cells hemoglobin",
+        "fallback_searches": [
+            "red blood cells hemoglobin",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تعمل كريات الدم الحمراء؟",
+        "text": "تنقل كريات الدم الحمراء الأكسجين بفضل الهيموغلوبين، وتساعد أيضًا في نقل جزء من ثاني أكسيد الكربون من الأنسجة.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "blood hemoglobin red color",
+        "fallback_searches": [
+            "blood hemoglobin red color",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا يكون الدم أحمر؟",
+        "text": "يحتوي الهيموغلوبين على الحديد ويمتص الضوء بطريقة تجعل الدم يبدو أحمر، وتختلف درجة اللون مع حالة الأكسجة.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "human thermoregulation body temperature",
+        "fallback_searches": [
+            "human thermoregulation body temperature",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف يحافظ الجسم على درجة حرارته؟",
+        "text": "ينظم الجسم حرارته عبر آليات مثل التعرق وتغير تدفق الدم في الجلد والارتعاش وتعديل إنتاج الحرارة.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "sweating evaporation cooling body",
+        "fallback_searches": [
+            "sweating evaporation cooling body",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا نتعرق عند الحرارة؟",
+        "text": "تبخر العرق من سطح الجلد يستهلك طاقة حرارية، ويساعد ذلك على تبريد الجسم عندما تكون الظروف مناسبة للتبخر.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "skeletal muscles movement tendons",
+        "fallback_searches": [
+            "skeletal muscles movement tendons",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تعمل العضلات على تحريك الجسم؟",
+        "text": "تنقبض العضلات الهيكلية عندما تصلها إشارات عصبية، فتولد قوة تنتقل عبر الأوتار وتحرك العظام والمفاصل.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "heart rate exercise physiology",
+        "fallback_searches": [
+            "heart rate exercise physiology",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا يزداد النبض أثناء الرياضة؟",
+        "text": "تحتاج العضلات أثناء النشاط إلى مزيد من الأكسجين والمواد الغذائية، فيزيد القلب معدل ضخ الدم لتلبية هذا الطلب.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "digestive system peristalsis",
+        "fallback_searches": [
+            "digestive system peristalsis",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف ينتقل الطعام عبر الجهاز الهضمي؟",
+        "text": "تدفع انقباضات عضلية متتابعة تسمى الحركة الدودية الطعام عبر أجزاء الجهاز الهضمي، حيث يحدث الهضم والامتصاص تدريجيًا.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "plants nitrogen nutrient",
+        "fallback_searches": [
+            "plants nitrogen nutrient",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا تحتاج النباتات إلى النيتروجين؟",
+        "text": "النيتروجين يدخل في تكوين البروتينات والأحماض النووية وجزيئات مهمة للنمو، لذلك يعد عنصرًا غذائيًا أساسيًا للنبات.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "soil formation geology",
+        "fallback_searches": [
+            "soil formation geology",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تتكون التربة؟",
+        "text": "تتكون التربة عبر تفتت الصخور وتراكم المادة العضوية وتأثير الماء والهواء والكائنات الحية عبر فترات طويلة.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "soil types climate geology",
+        "fallback_searches": [
+            "soil types climate geology",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا تختلف التربة من مكان لآخر؟",
+        "text": "تختلف التربة بحسب نوع الصخور والمناخ والكائنات الحية والتضاريس والزمن، لذلك تختلف خصائصها حتى بين المناطق القريبة.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "high clouds atmosphere",
+        "fallback_searches": [
+            "high clouds atmosphere",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تتشكل السحب العالية؟",
+        "text": "عندما يصعد الهواء الرطب ويبرد، يمكن أن يتكاثف بخار الماء أو يتجمد في الارتفاعات العالية، فتتكون سحب من بلورات جليد وقطرات دقيقة.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "mountain temperature atmospheric pressure",
+        "fallback_searches": [
+            "mountain temperature atmospheric pressure",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا يكون الهواء أبرد على قمم الجبال؟",
+        "text": "ينخفض الضغط الجوي مع الارتفاع، ويتمدد الهواء الصاعد ويبرد، كما تؤثر ظروف الإشعاع والرياح في درجات الحرارة.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "anemometer weather station",
+        "fallback_searches": [
+            "anemometer weather station",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تقيس محطات الطقس سرعة الرياح؟",
+        "text": "تستخدم محطات الطقس أجهزة مثل مقياس شدة الرياح الذي يدور مع حركة الهواء ويحول سرعة الدوران إلى قيمة لسرعة الرياح.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "barometer atmospheric pressure",
+        "fallback_searches": [
+            "barometer atmospheric pressure",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تقيس محطات الطقس الضغط الجوي؟",
+        "text": "يستخدم البارومتر لقياس ضغط الهواء، ويمكن أن تتغير القراءات مع الارتفاع وحالة الطقس والكتل الهوائية.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "fog formation ground atmosphere",
+        "fallback_searches": [
+            "fog formation ground atmosphere",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا تتكون الضبابات قرب الأرض؟",
+        "text": "يتكون الضباب عندما يبرد الهواء القريب من سطح الأرض إلى درجة تسمح بتكاثف بخار الماء إلى قطرات صغيرة معلقة.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "snow formation clouds",
+        "fallback_searches": [
+            "snow formation clouds",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف يتكون الثلج داخل السحب؟",
+        "text": "في السحب الباردة يمكن أن تتكون بلورات جليد وتنمو عندما تتجمع جزيئات الماء أو بخار الماء حولها، ثم تهبط إذا أصبحت ثقيلة.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "storm strong winds pressure",
+        "fallback_searches": [
+            "storm strong winds pressure",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا تكون بعض العواصف مصحوبة برياح قوية؟",
+        "text": "تنتج الرياح القوية عن فروق الضغط وحركة الهواء داخل أنظمة الطقس، وقد تزداد سرعتها قرب الجبهات والعواصف النشطة.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "earthquake seismic waves fault",
+        "fallback_searches": [
+            "earthquake seismic waves fault",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تعمل الزلازل على تحريك الأرض؟",
+        "text": "عندما تتحرر طاقة متراكمة في الصخور على طول صدع تنتشر موجات زلزالية عبر الأرض، فتسبب اهتزاز سطحها.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "seismometer earthquake measurement",
+        "fallback_searches": [
+            "seismometer earthquake measurement",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف يقيس العلماء قوة الزلازل؟",
+        "text": "تستخدم مقاييس الزلازل لتسجيل حركة الأرض، ثم تُحلل البيانات لتحديد خصائص الزلزال مثل موقعه وحجمه.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "volcano tectonic plates magma",
+        "fallback_searches": [
+            "volcano tectonic plates magma",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا تحدث البراكين عند بعض حدود الصفائح؟",
+        "text": "تسمح بعض البيئات التكتونية بصعود الصهارة إلى السطح، مثل مناطق الاندساس وبعض مناطق تباعد الصفائح، لكن البراكين توجد أيضًا في أماكن أخرى.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "volcanic island formation ocean",
+        "fallback_searches": [
+            "volcanic island formation ocean",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تتكون الجزر البركانية؟",
+        "text": "يمكن أن تتراكم الحمم البركانية عبر ثورات متكررة حتى ترتفع البنية البركانية فوق سطح البحر، فتتشكل جزيرة.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "coral reef formation marine biology",
+        "fallback_searches": [
+            "coral reef formation marine biology",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تتكون الشعاب المرجانية؟",
+        "text": "تبني كائنات مرجانية هياكل من كربونات الكالسيوم، ومع تراكمها عبر أجيال طويلة يمكن أن تتكون شعاب كبيرة في ظروف بحرية مناسبة.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "ocean salinity water cycle",
+        "fallback_searches": [
+            "ocean salinity water cycle",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا يكون البحر مالحًا؟",
+        "text": "تحمل الأنهار والمصادر الجيولوجية أيونات وأملاحًا إلى البحار، بينما يتبخر الماء ويترك معظم الأملاح، فتتراكم عبر الزمن.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "ocean currents circulation",
+        "fallback_searches": [
+            "ocean currents circulation",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تتحرك التيارات البحرية؟",
+        "text": "تتأثر التيارات البحرية بالرياح ودوران الأرض واختلاف الكثافة الناتج عن الحرارة والملوحة وتوزيع القارات.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "sea temperature climate ocean",
+        "fallback_searches": [
+            "sea temperature climate ocean",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا تختلف حرارة مياه البحر من منطقة لأخرى؟",
+        "text": "تتأثر حرارة البحر بكمية الإشعاع الشمسي وخط العرض والفصول والتيارات والعمق وتبادل الحرارة مع الغلاف الجوي.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "hydroelectric dam turbine",
+        "fallback_searches": [
+            "hydroelectric dam turbine",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف يعمل السد الكهرومائي؟",
+        "text": "يخزن السد الماء على ارتفاع، وعند تمريره عبر التوربينات تتحول طاقة الماء إلى حركة ثم إلى كهرباء بواسطة المولد.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "dam water storage engineering",
+        "fallback_searches": [
+            "dam water storage engineering",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا تبنى السدود الكبيرة؟",
+        "text": "يمكن للسدود تخزين المياه وتنظيم تدفق الأنهار وتوفير مياه للاستخدامات المختلفة، وبعضها يستخدم أيضًا لإنتاج الكهرباء.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "water pump fluid mechanics",
+        "fallback_searches": [
+            "water pump fluid mechanics",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تعمل مضخة الماء؟",
+        "text": "تستخدم المضخة طاقة ميكانيكية لتغيير ضغط السائل ودفعه من منطقة إلى أخرى عبر الأنابيب.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "pipe valves fluid control",
+        "fallback_searches": [
+            "pipe valves fluid control",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا تستخدم الأنابيب صمامات؟",
+        "text": "تتحكم الصمامات في اتجاه تدفق السوائل أو الغازات ومعدل مرورها، ويمكن استخدامها للعزل أو التنظيم أو الحماية.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "hydraulic jack pressure",
+        "fallback_searches": [
+            "hydraulic jack pressure",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تعمل الرافعة الهيدروليكية؟",
+        "text": "تنقل السوائل المحصورة الضغط بين مكابس مختلفة المساحة، ما يسمح بتكبير القوة الميكانيكية في بعض التطبيقات.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "tower crane construction",
+        "fallback_searches": [
+            "tower crane construction",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا تستخدم الرافعات البرجية في البناء؟",
+        "text": "تسمح الرافعات البرجية برفع ونقل أحمال كبيرة إلى ارتفاعات ومسافات مناسبة داخل مواقع البناء، مع الاستفادة من مبدأ العزم وتوزيع الأحمال.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "skyscraper wind structural engineering",
+        "fallback_searches": [
+            "skyscraper wind structural engineering",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تتحمل الأبراج العالية الرياح؟",
+        "text": "تصمم الأبراج بصلابة وتوزيع كتلة وأنظمة إنشائية تقلل الاهتزازات وتنقل الأحمال الجانبية إلى الأساسات.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "bridge expansion joints engineering",
+        "fallback_searches": [
+            "bridge expansion joints engineering",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا تحتوي الجسور على فواصل تمدد؟",
+        "text": "تتحرك أجزاء الجسر قليلًا بسبب تغير الحرارة والانكماش والزحف والأحمال، وتسمح فواصل التمدد بهذه الحركة دون تلف غير ضروري.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "thermal insulation heat transfer",
+        "fallback_searches": [
+            "thermal insulation heat transfer",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف يمنع العزل الحراري انتقال الحرارة؟",
+        "text": "يحتوي العزل على مواد أو فراغات تقلل انتقال الحرارة بالتوصيل، وقد تقلل بعض الأنواع أيضًا انتقالها بالحمل والإشعاع.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "double glazing window insulation",
+        "fallback_searches": [
+            "double glazing window insulation",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف يعمل الزجاج العازل في النوافذ؟",
+        "text": "تحتوي بعض النوافذ على طبقتين أو أكثر مع فراغ أو غاز بينهما، ما يقلل انتقال الحرارة مقارنة بالزجاج المفرد.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "electric oven heating",
+        "fallback_searches": [
+            "electric oven heating",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف يعمل الفرن الكهربائي؟",
+        "text": "يمر التيار في عنصر مقاوم فيتحول جزء من الطاقة الكهربائية إلى حرارة، ثم تنتقل الحرارة إلى الطعام بالإشعاع والحمل والتوصيل.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "led semiconductor light",
+        "fallback_searches": [
+            "led semiconductor light",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا يضيء المصباح LED بكفاءة؟",
+        "text": "يصدر الصمام الثنائي الباعث للضوء ضوءًا عند مرور التيار عبر مادة شبه موصلة، ويمكنه تحويل جزء كبير من الطاقة إلى ضوء مقارنة بمصادر أقدم.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "laser printer technology",
+        "fallback_searches": [
+            "laser printer technology",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تعمل الطابعة الليزرية؟",
+        "text": "تستخدم الطابعة الليزرية شحنة كهربائية وضوء الليزر ومسحوق الحبر لنقل صورة رقمية إلى الورق ثم تثبيت الحبر بالحرارة والضغط.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "thermal printer paper",
+        "fallback_searches": [
+            "thermal printer paper",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تعمل الطباعة الحرارية؟",
+        "text": "تستخدم بعض الطابعات الحرارية ورقًا حساسًا للحرارة يتغير لونه عند تسخينه في نقاط محددة لتكوين النص أو الصورة.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "wifi scanning smartphone",
+        "fallback_searches": [
+            "wifi scanning smartphone",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف يحدد الهاتف شبكات Wi-Fi القريبة؟",
+        "text": "يمسح الهاتف نطاقات الراديو بحثًا عن إشارات نقاط الوصول، ثم يعرض الشبكات التي يلتقطها مع معلومات تعريفية عنها.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "wifi radio data transmission",
+        "fallback_searches": [
+            "wifi radio data transmission",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "كيف تنتقل البيانات عبر Wi-Fi؟",
+        "text": "تحول أجهزة Wi-Fi البيانات إلى إشارات راديوية وفق بروتوكولات اتصال، ثم تستقبلها نقطة الوصول أو الجهاز الآخر وتعيد تحويلها إلى بيانات.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    },
+    {
+        "search": "internet speed bandwidth latency",
+        "fallback_searches": [
+            "internet speed bandwidth latency",
+            "science technology",
+            "educational facts"
+        ],
+        "title": "لماذا تكون سرعة الإنترنت الفعلية أقل من الرقم المعلن أحيانًا؟",
+        "text": "تتأثر السرعة الفعلية بالازدحام وجودة الإشارة والمسافة والعتاد والبروتوكولات ومصادر أخرى، لذلك قد تختلف عن السرعة النظرية.",
+        "hashtags": [
+            "#Shorts",
+            "#هل_تعلم",
+            "#معلومات"
+        ]
+    }
+]
+
 TOPICS.extend(EXTRA_TOPICS)
+TOPICS.extend(EXTRA_TOPICS_2)
 
 
 def validate_topic_pool():
@@ -907,703 +2338,5 @@ def make_natural_arabic_script(text):
     for old, new in replacements:
         text = text.replace(old, new)
 
-    # Small spoken-language cleanup; do not rewrite facts or numbers.
-    text = re.sub(r"\s+", " ", text).strip()
-    text = text.replace("، و", "، و")
-
-    return text
-
-
-def prepare_topic_for_voice(topic):
-    """Return a copy with natural delivery text while preserving the original topic."""
-    prepared = dict(topic)
-    prepared["text"] = make_natural_arabic_script(topic.get("text", ""))
-    return prepared
-
-
-def create_voice(text):
-    """
-    Use Azure Neural Speech when configured; otherwise preserve the existing
-    Edge-TTS fallback so the workflow does not become dependent on a paid API.
-    """
-    if AZURE_SPEECH_KEY and AZURE_SPEECH_REGION:
-        print("Creating voice with Azure Neural Speech...")
-
-        url = (
-            f"https://{AZURE_SPEECH_REGION}.tts.speech.microsoft.com/"
-            "cognitiveservices/v1"
-        )
-
-        headers = {
-            "Ocp-Apim-Subscription-Key": AZURE_SPEECH_KEY,
-            "Content-Type": "application/ssml+xml",
-            "X-Microsoft-OutputFormat": "audio-24khz-160kbitrate-mono-mp3",
-            "User-Agent": "youtube-shorts-automation",
-        }
-
-        safe_text = (
-            str(text)
-            .replace("&", "&amp;")
-            .replace("<", "&lt;")
-            .replace(">", "&gt;")
-            .replace('"', "&quot;")
-            .replace("'", "&apos;")
-        )
-
-        ssml = f"""<speak version="1.0"
-xmlns="http://www.w3.org/2001/10/synthesis"
-xml:lang="ar-SA">
-<voice name="{AZURE_VOICE_NAME}">
-<prosody rate="0%" pitch="0%">
-{safe_text}
-</prosody>
-</voice>
-</speak>"""
-
-        response = requests.post(
-            url,
-            headers=headers,
-            data=ssml.encode("utf-8"),
-            timeout=60,
-        )
-        response.raise_for_status()
-        VOICE_FILE.write_bytes(response.content)
-
-    else:
-        print("Azure Speech secrets not found; using Edge Neural TTS fallback.")
-
-        async def generate():
-            communicate = edge_tts.Communicate(
-                text,
-                VOICE_NAME,
-                rate=VOICE_RATE,
-                volume=VOICE_VOLUME,
-                pitch=VOICE_PITCH,
-            )
-            await communicate.save(str(VOICE_FILE))
-
-        asyncio.run(generate())
-
-    if not VOICE_FILE.exists() or VOICE_FILE.stat().st_size < 1000:
-        raise RuntimeError("Voice file was not created correctly.")
-
-
-def get_audio_duration():
-    result = command_output([
-        "ffprobe",
-        "-v", "error",
-        "-show_entries", "format=duration",
-        "-of", "default=noprint_wrappers=1:nokey=1",
-        str(VOICE_FILE),
-    ])
-
-    duration = float(result)
-    if duration <= 0:
-        raise RuntimeError("Invalid audio duration.")
-
-    return duration
-
-
-# =========================================================
-# SUBTITLES
-# =========================================================
-
-def clean_text(text):
-    text = re.sub(r"\s+", " ", str(text))
-    return text.strip()
-
-
-def split_text_for_subtitles(text):
-    """Split Arabic captions into balanced 1-2 line blocks like modern Shorts captions."""
-    words = clean_text(text).split()
-    parts = []
-    current = []
-
-    for word in words:
-        candidate = " ".join(current + [word])
-
-        if len(candidate) <= 23:
-            current.append(word)
-        else:
-            if current:
-                parts.append(" ".join(current))
-            current = [word]
-
-    if current:
-        parts.append(" ".join(current))
-
-    # Merge very short neighboring blocks when the result still fits.
-    merged = []
-    for part in parts:
-        if merged and len(merged[-1]) + 1 + len(part) <= 23:
-            merged[-1] = merged[-1] + " " + part
-        else:
-            merged.append(part)
-
-    return merged
-
-
-def make_caption_lines(text):
-    """Create a balanced two-line caption without awkwardly splitting words."""
-    text = clean_text(text)
-    if len(text) <= 23:
-        return text
-
-    words = text.split()
-    best = None
-    best_score = None
-
-    for i in range(1, len(words)):
-        left = " ".join(words[:i])
-        right = " ".join(words[i:])
-
-        if len(left) > 23 or len(right) > 23:
-            continue
-
-        # Prefer two lines with similar visual length.
-        score = abs(len(left) - len(right))
-        if best_score is None or score < best_score:
-            best = left + r"\N" + right
-            best_score = score
-
-    if best:
-        return best
-
-    # Fallback for unusually long text.
-    return text
-
-
-def highlight_caption(text):
-    """Emphasize the final meaningful phrase in yellow, matching the reference style."""
-    plain = text.replace(r"\N", " ")
-    words = plain.split()
-    if len(words) < 3:
-        return text
-
-    # Highlight the final 1-3 words; keep punctuation attached naturally.
-    count = 2 if len(words) >= 4 else 1
-    prefix = " ".join(words[:-count])
-    emphasis = " ".join(words[-count:])
-
-    if r"\N" in text:
-        # Prefer highlighting the final line when it is already split.
-        lines = text.split(r"\N", 1)
-        last_line = lines[1].strip()
-        last_words = last_line.split()
-        if len(last_words) >= 2:
-            count = min(2, len(last_words))
-            normal_last = " ".join(last_words[:-count])
-            yellow_last = " ".join(last_words[-count:])
-            lines[1] = (
-                normal_last + " " if normal_last else ""
-            ) + r"{\c&H0000FFFF&}" + yellow_last + r"{\c&H00FFFFFF&}"
-            return r"\N".join(lines)
-
-    return (
-        prefix + " " if prefix else ""
-    ) + r"{\c&H0000FFFF&}" + emphasis + r"{\c&H00FFFFFF&}"
-
-
-def ass_time(seconds):
-    total_cs = max(0, int(round(seconds * 100)))
-    hours, remainder = divmod(total_cs, 360000)
-    minutes, remainder = divmod(remainder, 6000)
-    seconds_value, centiseconds = divmod(remainder, 100)
-
-    return f"{hours}:{minutes:02d}:{seconds_value:02d}.{centiseconds:02d}"
-
-
-def escape_ass_text(text):
-    return (
-        str(text)
-        .replace("\\", r"\\")
-        .replace("{", r"\{")
-        .replace("}", r"\}")
-        .replace("\n", " ")
-    )
-
-
-def create_subtitle_file(text, duration):
-    parts = split_text_for_subtitles(text)
-
-    if not parts:
-        raise RuntimeError("Subtitle text is empty.")
-
-    total_characters = sum(max(1, len(part)) for part in parts)
-
-    # Modern Arabic Shorts caption style:
-    # bold, large white text, thick black outline, subtle shadow,
-    # semi-transparent black caption box, centered in the lower-safe area.
-    ass_header = """[Script Info]
-ScriptType: v4.00+
-PlayResX: 1080
-PlayResY: 1920
-ScaledBorderAndShadow: yes
-
-[V4+ Styles]
-Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Arabic,Noto Sans Arabic,68,&H00FFFFFF,&H00FFFFFF,&H00000000,&H99000000,-1,0,0,0,100,100,0,0,3,2,1,2,90,90,430,1
-
-[Events]
-Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
-"""
-
-    with open(SUBTITLE_FILE, "w", encoding="utf-8-sig") as file:
-        file.write(ass_header)
-
-        current_time = 0.0
-
-        for index, part in enumerate(parts):
-            part_duration = (max(1, len(part)) / total_characters) * duration
-
-            start = current_time
-            end = duration if index == len(parts) - 1 else min(
-                duration,
-                current_time + part_duration,
-            )
-
-            caption = make_caption_lines(part)
-            caption = highlight_caption(caption)
-
-            file.write(
-                "Dialogue: 0,"
-                f"{ass_time(start)},"
-                f"{ass_time(end)},"
-                "Arabic,,0,0,0,,"
-                f"{caption}\n"
-            )
-
-            current_time = end
-
-
-# =========================================================
-# VIDEO PROCESSING
-# =========================================================
-
-def probe_video_duration(path):
-    try:
-        return float(command_output([
-            "ffprobe",
-            "-v", "error",
-            "-show_entries", "format=duration",
-            "-of", "default=noprint_wrappers=1:nokey=1",
-            str(path),
-        ]))
-    except Exception:
-        return 0.0
-
-
-def prepare_clip(input_file, output_file, duration):
-    source_duration = probe_video_duration(input_file)
-
-    if source_duration <= duration + 0.2:
-        start_time = 0
-    else:
-        max_start = max(0.0, source_duration - duration - 0.1)
-        start_time = random.uniform(0, min(max_start, max(0.0, source_duration - duration)))
-
-    # Very subtle crop/scale motion. It avoids the old static-photo feeling
-    # while remaining natural on real footage.
-    motion = random.choice([
-        "scale=1120:1991:force_original_aspect_ratio=increase,crop=1080:1920:(iw-1080)/2:(ih-1920)/2",
-        "scale=1160:2062:force_original_aspect_ratio=increase,crop=1080:1920:(iw-1080)/2:(ih-1920)/2",
-        "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920",
-    ])
-
-    video_filter = (
-        motion + ","
-        "setsar=1,"
-        "setdar=9/16,"
-        "fps=30,"
-        "format=yuv420p"
-    )
-
-    command = [
-        "ffmpeg",
-        "-y",
-        "-ss", f"{start_time:.3f}",
-        "-i", str(input_file),
-        "-t", str(duration),
-        "-vf", video_filter,
-        "-an",
-        "-r", str(FPS),
-        "-c:v", "libx264",
-        "-preset", "medium",
-        "-crf", "18",
-        "-pix_fmt", "yuv420p",
-        "-movflags", "+faststart",
-        str(output_file),
-    ]
-
-    run_command(command)
-
-
-def create_concat_file(clips):
-    concat_file = WORK_DIR / "concat.txt"
-
-    with open(concat_file, "w", encoding="utf-8") as file:
-        for clip in clips:
-            path = clip.resolve()
-            path_string = str(path).replace("'", "'\\''")
-            file.write(f"file '{path_string}'\n")
-
-    return concat_file
-
-
-def create_silent_video(clips):
-    concat_file = create_concat_file(clips)
-    silent_video = WORK_DIR / "silent.mp4"
-
-    command = [
-        "ffmpeg",
-        "-y",
-        "-f", "concat",
-        "-safe", "0",
-        "-i", str(concat_file),
-        "-c:v", "libx264",
-        "-preset", "medium",
-        "-crf", "18",
-        "-pix_fmt", "yuv420p",
-        "-r", str(FPS),
-        "-an",
-        "-movflags", "+faststart",
-        str(silent_video),
-    ]
-
-    run_command(command)
-    return silent_video
-
-
-def create_final_video(silent_video, text):
-    audio_duration = get_audio_duration()
-
-    print(f"Audio duration: {audio_duration:.2f}s")
-
-    # Make sure the visual track is never shorter than the voice.
-    silent_duration = probe_video_duration(silent_video)
-
-    if silent_duration < audio_duration:
-        extra = audio_duration - silent_duration + 0.2
-        print(f"Extending visual track by {extra:.2f}s")
-
-        extended = WORK_DIR / "silent_extended.mp4"
-
-        command = [
-            "ffmpeg",
-            "-y",
-            "-stream_loop", "-1",
-            "-i", str(silent_video),
-            "-t", f"{audio_duration + 0.2:.3f}",
-            "-c:v", "libx264",
-            "-preset", "medium",
-            "-crf", "18",
-            "-pix_fmt", "yuv420p",
-            "-r", str(FPS),
-            str(extended),
-        ]
-
-        run_command(command)
-        silent_video = extended
-
-    create_subtitle_file(text, audio_duration)
-
-    audio_filter = (
-        "highpass=f=70,"
-        "lowpass=f=15000,"
-        "acompressor=threshold=-20dB:ratio=2.2:attack=10:release=100:makeup=1,"
-        "loudnorm=I=-14:TP=-1.5:LRA=7"
-    )
-
-    subtitle_path = SUBTITLE_FILE.resolve().as_posix().replace(":", r"\:")
-    subtitle_filter = f"ass='{subtitle_path}'"
-
-    final_command = [
-        "ffmpeg",
-        "-y",
-        "-i", str(silent_video),
-        "-i", str(VOICE_FILE),
-        "-map", "0:v:0",
-        "-map", "1:a:0",
-        "-vf", subtitle_filter,
-        "-af", audio_filter,
-        "-c:v", "libx264",
-        "-preset", "medium",
-        "-crf", "18",
-        "-pix_fmt", "yuv420p",
-        "-c:a", "aac",
-        "-b:a", "160k",
-        "-ar", "48000",
-        "-shortest",
-        "-movflags", "+faststart",
-        str(OUTPUT_VIDEO),
-    ]
-
-    run_command(final_command)
-
-    if not OUTPUT_VIDEO.exists() or OUTPUT_VIDEO.stat().st_size < 10000:
-        raise RuntimeError("Final video was not created correctly.")
-
-    print(f"Final video created: {OUTPUT_VIDEO}")
-
-
-# =========================================================
-# YOUTUBE AUTHENTICATION
-# =========================================================
-
-YOUTUBE_SCOPES = [
-    "https://www.googleapis.com/auth/youtube.upload",
-]
-
-
-def get_youtube_credentials():
-    credentials = Credentials(
-        token=None,
-        refresh_token=YOUTUBE_REFRESH_TOKEN,
-        token_uri="https://oauth2.googleapis.com/token",
-        client_id=YOUTUBE_CLIENT_ID,
-        client_secret=YOUTUBE_CLIENT_SECRET,
-        scopes=YOUTUBE_SCOPES,
-    )
-
-    try:
-        credentials.refresh(Request())
-    except Exception as error:
-        raise RuntimeError(
-            "YouTube OAuth refresh failed. "
-            "The refresh token may be expired/revoked or belong to a different OAuth client. "
-            f"Original error: {error}"
-        ) from error
-
-    return credentials
-
-
-def get_youtube_service():
-    credentials = get_youtube_credentials()
-
-    return build(
-        "youtube",
-        "v3",
-        credentials=credentials,
-        cache_discovery=False,
-    )
-
-
-# =========================================================
-# YOUTUBE UPLOAD
-# =========================================================
-
-def build_video_title(topic):
-    return topic["title"]
-
-
-def build_video_description(topic):
-    hashtags = " ".join(topic.get("hashtags", []))
-
-    return (
-        f"{topic['text']}\n\n"
-        f"{hashtags}\n\n"
-        "معلومات قصيرة وحقائق متنوعة بشكل مبسط.\n"
-        "اشترك للمزيد من المقاطع."
-    )
-
-
-def upload_to_youtube(topic):
-    if not OUTPUT_VIDEO.exists():
-        raise RuntimeError("Output video does not exist.")
-
-    youtube = get_youtube_service()
-
-    title = build_video_title(topic)
-    description = build_video_description(topic)
-
-    body = {
-        "snippet": {
-            "title": title[:100],
-            "description": description[:5000],
-            "categoryId": YOUTUBE_CATEGORY_ID,
-        },
-        "status": {
-            "privacyStatus": YOUTUBE_PRIVACY,
-            "selfDeclaredMadeForKids": YOUTUBE_MADE_FOR_KIDS,
-        },
-    }
-
-    print("Uploading to YouTube...")
-
-    last_error = None
-
-    for attempt in range(1, 4):
-        try:
-            media = MediaFileUpload(
-                str(OUTPUT_VIDEO),
-                mimetype="video/mp4",
-                resumable=True,
-                chunksize=4 * 1024 * 1024,
-            )
-
-            request = youtube.videos().insert(
-                part="snippet,status",
-                body=body,
-                media_body=media,
-            )
-
-            response = None
-
-            while response is None:
-                status, response = request.next_chunk()
-
-                if status:
-                    print(
-                        f"Upload progress: "
-                        f"{int(status.progress() * 100)}%"
-                    )
-
-            video_id = response.get("id")
-
-            if not video_id:
-                raise RuntimeError(
-                    f"YouTube upload returned no video ID: {response}"
-                )
-
-            print(f"YouTube upload successful: {video_id}")
-            print(f"https://www.youtube.com/shorts/{video_id}")
-
-            return video_id
-
-        except Exception as error:
-            last_error = error
-            print(f"Upload attempt {attempt}/3 failed: {error}")
-
-            if attempt < 3:
-                time.sleep(5 * attempt)
-
-    raise RuntimeError(
-        f"YouTube upload failed after 3 attempts: {last_error}"
-    )
-
-
-# =========================================================
-# VALIDATION
-# =========================================================
-
-def validate_final_video():
-    if not OUTPUT_VIDEO.exists():
-        raise RuntimeError("short.mp4 does not exist.")
-
-    duration = probe_video_duration(OUTPUT_VIDEO)
-
-    if duration <= 0:
-        raise RuntimeError("Could not read final video duration.")
-
-    size_mb = OUTPUT_VIDEO.stat().st_size / (1024 * 1024)
-
-    print("\nVIDEO CHECK")
-    print(f"Duration: {duration:.2f}s")
-    print(f"Size: {size_mb:.2f} MB")
-
-    if duration < 1:
-        raise RuntimeError("Video is too short.")
-
-    return duration
-
-
-# =========================================================
-# MAIN PIPELINE
-# =========================================================
-
-def main():
-    print("\n========================================")
-    print("YOUTUBE SHORTS AUTOMATION - PROFESSIONAL MODE")
-    print("========================================\n")
-
-    check_environment()
-    validate_topic_pool()
-
-    used_content = load_used_content()
-    used_clips = load_used_clips()
-
-    topic = select_new_topic(used_content)
-
-    clean_previous_files()
-
-    selected_videos = select_unique_videos(
-        topic,
-        used_clips,
-    )
-
-    downloaded = []
-
-    print("\nDownloading clips...")
-
-    for index, item in enumerate(selected_videos, start=1):
-        raw_file = WORK_DIR / f"raw_{index:02d}.mp4"
-        prepared_file = WORK_DIR / f"clip_{index:02d}.mp4"
-
-        download_video(
-            item["link"],
-            raw_file,
-        )
-
-        prepare_clip(
-            raw_file,
-            prepared_file,
-            CLIP_DURATION,
-        )
-
-        downloaded.append(prepared_file)
-
-    if len(downloaded) != NUMBER_OF_CLIPS:
-        raise RuntimeError("Clip preparation count is incorrect.")
-
-    print("\nCreating silent video...")
-    silent_video = create_silent_video(downloaded)
-
-    # Keep the stored topic unchanged for duplicate detection and YouTube metadata,
-    # but use a lighter Saudi conversational version for narration and captions.
-    voice_topic = prepare_topic_for_voice(topic)
-
-    print("\nCreating Arabic voice...")
-    create_voice(voice_topic["text"])
-
-    print("\nCreating final Short...")
-    create_final_video(
-        silent_video,
-        voice_topic["text"],
-    )
-
-    validate_final_video()
-
-    print("\nUploading...")
-    video_id = upload_to_youtube(topic)
-
-    # Only remember the content and Pexels clips AFTER a successful upload.
-    for item in selected_videos:
-        used_clips.add(str(item["id"]))
-
-    save_used_clips(used_clips)
-    remember_content(
-        topic,
-        video_id,
-        used_content,
-    )
-
-    print("\n========================================")
-    print("DONE")
-    print(f"Video ID: {video_id}")
-    print(f"Used Pexels clips remembered: {len(used_clips)}")
-    print(f"Used content items remembered: {len(used_content)}")
-    print("========================================")
-
-
-if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        print("\nStopped by user.")
-        raise
-    except Exception as error:
-        print("\n========================================")
-        print("AUTOMATION FAILED")
-        print("========================================")
-        print(type(error).__name__ + ":", error)
-        raise
+    # Small spoken-language cleanup; do not rewrite fa
+تم اقتطاع المعاينة لأن الملف كبير
