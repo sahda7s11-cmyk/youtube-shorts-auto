@@ -2339,4 +2339,3 @@ def make_natural_arabic_script(text):
         text = text.replace(old, new)
 
     # Small spoken-language cleanup; do not rewrite fa
-تم اقتطاع المعاينة لأن الملف كبير
