@@ -1215,6 +1215,12 @@ def validate_final_video():
 # MAIN PIPELINE
 # =========================================================
 
+def validate_topic_pool():
+    """Compatibility check: static topic pool is disabled."""
+    print("Static topic pool disabled: fresh topics come from Arabic Wikipedia.")
+    print("Conservative safety blacklist enabled.")
+
+
 def main():
     print("\n========================================")
     print("YOUTUBE SHORTS AUTOMATION - PROFESSIONAL MODE")
