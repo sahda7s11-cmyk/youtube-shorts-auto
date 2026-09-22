@@ -1313,7 +1313,7 @@ def main():
     voice_topic = prepare_topic_for_voice(topic)
     voice_topic["text"] = limit_voice_script(voice_topic["text"])
 
-    print(f"Narration length limited to {len(voice_topic["text"].split())} words.")
+    print(f"Narration length limited to {len(voice_topic['text'].split())} words.")
     print("\nCreating Arabic voice...")
     create_voice(voice_topic["text"])
 
