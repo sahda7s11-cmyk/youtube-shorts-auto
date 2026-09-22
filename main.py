@@ -40,16 +40,19 @@ VIDEO_WIDTH = 1080
 VIDEO_HEIGHT = 1920
 
 NUMBER_OF_CLIPS = 9
-CLIP_DURATION = 3.8
-MAX_VOICE_WORDS = 40
-WORD_TIMINGS_FILE = Path("word_timings.json")
+CLIP_DURATION = 2.8
 FPS = 30
 
 VOICE_NAME = "ar-SA-HamedNeural"
-VOICE_RATE = "+20%"
+VOICE_RATE = "+5%"
 VOICE_VOLUME = "+0%"
 VOICE_PITCH = "+0Hz"
 
+# Optional professional voice. If these two secrets exist, Azure Neural Speech
+# is used directly; otherwise the existing Edge-TTS voice remains the fallback.
+AZURE_SPEECH_KEY = os.getenv("AZURE_SPEECH_KEY")
+AZURE_SPEECH_REGION = os.getenv("AZURE_SPEECH_REGION")
+AZURE_VOICE_NAME = os.getenv("AZURE_VOICE_NAME", "ar-SA-HamedNeural")
 
 YOUTUBE_PRIVACY = "public"
 YOUTUBE_CATEGORY_ID = "17"
@@ -59,104 +62,97 @@ YOUTUBE_MADE_FOR_KIDS = False
 # CONTENT
 # =========================================================
 
-TOPICS = []
+TOPICS = [
+    # =========================
+    # كرة القدم والرياضة
+    # =========================
+    {"search":"football match player action","fallback_searches":["soccer match action","football player running"],"title":"اللاعب يقطع عدة كيلومترات أثناء المباراة","text":"يقطع لاعب كرة القدم المحترف عدة كيلومترات خلال المباراة، لكن المسافة ليست العامل الوحيد. اللاعب ينتقل باستمرار بين المشي والركض والجري السريع، ويغيّر سرعته بحسب مكان الكرة وحركة زملائه والمنافسين.","hashtags":["#Shorts","#كرة_القدم","#رياضة","#معلومات"]},
+    {"search":"football goalkeeper save","fallback_searches":["soccer goalkeeper","goalkeeper training"],"title":"حارس المرمى يبدأ الحركة قبل وصول الكرة","text":"يستطيع حارس المرمى أحيانًا توقع اتجاه التسديدة قبل أن تصل الكرة إليه. فهو يراقب وضعية جسم المهاجم واتجاه قدمه ومكان الكرة، ثم يبدأ الاستجابة خلال جزء قصير جدًا من الثانية.","hashtags":["#Shorts","#كرة_القدم","#حراس_المرمى"]},
+    {"search":"football penalty kick goalkeeper","fallback_searches":["soccer penalty","football goalkeeper penalty"],"title":"ركلة الجزاء أسرع من قدرة العين على التتبع","text":"تتحرك الكرة في ركلة الجزاء بسرعة كبيرة، لذلك لا يعتمد الحارس على رؤية الكرة وحدها. قراءة حركة اللاعب واتجاه جسده قبل التسديد تساعده على اختيار اتجاه القفز خلال وقت قصير جدًا.","hashtags":["#Shorts","#كرة_القدم","#رياضة"]},
+    {"search":"football passing training","fallback_searches":["soccer passing","football training"],"title":"التمرير الدقيق يحتاج إلى أكثر من قوة القدم","text":"يعتمد التمرير الدقيق في كرة القدم على زاوية القدم وسرعة الكرة وتوقيت التمريرة. ولهذا يتدرب اللاعب على التمرير في ظروف مختلفة حتى يستطيع تنفيذ الحركة بسرعة أثناء المباراة.","hashtags":["#Shorts","#كرة_القدم","#تدريب"]},
+    {"search":"football stadium modern","fallback_searches":["soccer stadium","modern football stadium"],"title":"تصميم الملعب يؤثر في تجربة المشجع","text":"تصميم ملعب كرة القدم لا يتعلق بشكل المدرجات فقط. توزيع المقاعد ومواقع الشاشات وممرات الحركة وأنظمة الإضاءة والصوت كلها تُخطط لتجعل متابعة المباراة أكثر وضوحًا وتنظيمًا.","hashtags":["#Shorts","#كرة_القدم","#ملاعب"]},
+    {"search":"football VAR referee technology","fallback_searches":["soccer referee technology","football video review"],"title":"الكاميرات تساعد الحكم في مراجعة اللقطات","text":"تستخدم أنظمة التحكيم الحديثة عدة كاميرات لمراجعة بعض الحالات المهمة في المباراة. تُجمع الصور من زوايا مختلفة، ثم تُعرض اللقطة للحكم لمساعدته على اتخاذ القرار وفق قوانين اللعبة.","hashtags":["#Shorts","#كرة_القدم","#تقنية"]},
+    {"search":"football ball spin close up","fallback_searches":["soccer ball spinning","football free kick"],"title":"دوران الكرة يغيّر مسارها في الهواء","text":"عندما تدور كرة القدم أثناء تحركها في الهواء، تتغير طريقة تفاعل الهواء معها. هذا التأثير يمكن أن يجعل الكرة تنحرف عن مسارها المتوقع، ولذلك يستطيع اللاعبون استغلال دوران الكرة في الركلات والتمريرات.","hashtags":["#Shorts","#كرة_القدم","#علوم"]},
+    {"search":"football sprint player","fallback_searches":["soccer sprint","football speed"],"title":"الانطلاق السريع في كرة القدم يحتاج إلى طاقة كبيرة","text":"الجري السريع يستهلك طاقة أكبر من الركض الهادئ، ولذلك لا يستطيع اللاعب الحفاظ على أقصى سرعة طوال المباراة. يعتمد الأداء على تكرار انطلاقات قصيرة مع فترات من الحركة الأقل سرعة.","hashtags":["#Shorts","#كرة_القدم","#رياضة"]},
+    {"search":"football tactics team training","fallback_searches":["soccer tactics","football team training"],"title":"تحرك لاعب واحد قد يفتح مساحة لزميله","text":"في كرة القدم، لا يتحرك اللاعب دائمًا للحصول على الكرة. أحيانًا يجذب تحركه أحد المدافعين إلى منطقة معينة، فينشأ فراغ يستطيع زميل آخر استغلاله. هذه الفكرة جزء أساسي من العمل الجماعي في الهجوم.","hashtags":["#Shorts","#كرة_القدم","#تكتيك"]},
+    {"search":"football boot close up","fallback_searches":["soccer boots","football player feet"],"title":"شكل حذاء كرة القدم يؤثر في طريقة الحركة","text":"يؤثر تصميم حذاء كرة القدم في الاحتكاك بين القدم والأرض. المسامير الموجودة أسفل الحذاء تساعد اللاعب على الثبات أثناء التسارع وتغيير الاتجاه، ويختلف تصميمها بحسب نوع الملعب.","hashtags":["#Shorts","#كرة_القدم","#رياضة"]},
 
-WIKIPEDIA_API = "https://ar.wikipedia.org/w/api.php"
-WIKIPEDIA_RANDOM_BATCH = 20
-WIKIPEDIA_MAX_ATTEMPTS = 12
-WIKIPEDIA_MIN_EXTRACT_CHARS = 180
-WIKIPEDIA_MAX_EXTRACT_CHARS = 650
+    # =========================
+    # العلوم
+    # =========================
+    {"search":"lightning storm","fallback_searches":["lightning science","thunderstorm"],"title":"البرق يسخن الهواء المحيط به بسرعة هائلة","text":"ترتفع درجة حرارة قناة البرق إلى مستويات شديدة الارتفاع خلال زمن قصير جدًا. يؤدي التسخين السريع إلى تمدد الهواء المحيط فجأة، وينتج عن ذلك موجة ضغط نسمعها على شكل صوت الرعد.","hashtags":["#Shorts","#علوم","#برق"]},
+    {"search":"volcano eruption close up","fallback_searches":["volcano science","volcano crater"],"title":"الضغط داخل البركان يمكن أن يدفع الصهارة إلى الأعلى","text":"توجد الصهارة تحت سطح الأرض في درجات حرارة مرتفعة، وقد تحتوي على غازات مذابة. عندما يتغير الضغط وتتحرك الصهارة نحو الأعلى، تتمدد الغازات، ويمكن أن تساهم في دفع المواد البركانية إلى السطح.","hashtags":["#Shorts","#علوم","#براكين"]},
+    {"search":"human eye close up","fallback_searches":["eye science","human vision"],"title":"العين تحول الضوء إلى إشارات يفسرها الدماغ","text":"تدخل أشعة الضوء إلى العين وتصل إلى الشبكية، حيث توجد خلايا حساسة للضوء. هذه الخلايا تحول المعلومات الضوئية إلى إشارات عصبية تنتقل عبر العصب البصري إلى الدماغ لتكوين الصورة التي نراها.","hashtags":["#Shorts","#علوم","#جسم_الإنسان"]},
+    {"search":"human brain neurons","fallback_searches":["brain science","neurons"],"title":"الدماغ يعالج معلومات كثيرة في الوقت نفسه","text":"يستقبل الدماغ إشارات من الحواس المختلفة ويعالجها باستمرار. فهو ينسق الحركة والانتباه والذاكرة واتخاذ القرار من خلال شبكة ضخمة من الخلايا العصبية التي تتواصل فيما بينها.","hashtags":["#Shorts","#علوم","#دماغ"]},
+    {"search":"plant photosynthesis leaves","fallback_searches":["photosynthesis","green leaves science"],"title":"النبات يصنع غذاءه باستخدام الضوء","text":"تستخدم النباتات ضوء الشمس وثاني أكسيد الكربون والماء لإنتاج الطاقة الكيميائية التي تحتاج إليها. تحدث هذه العملية في خلايا تحتوي على الكلوروفيل، وتُعرف باسم البناء الضوئي.","hashtags":["#Shorts","#علوم","#نباتات"]},
+    {"search":"water droplet surface tension","fallback_searches":["water science","surface tension"],"title":"قطرة الماء تميل إلى اتخاذ شكل قريب من الكرة","text":"تؤثر قوى التماسك بين جزيئات الماء في شكل القطرة. عند سقوط قطرة صغيرة بعيدًا عن الأسطح، تميل هذه القوى إلى تقليل مساحة سطحها، ولذلك يصبح شكلها قريبًا من الكرة.","hashtags":["#Shorts","#علوم","#فيزياء"]},
+    {"search":"ice melting close up","fallback_searches":["ice science","water freezing"],"title":"الجليد يطفو لأن كثافته أقل من الماء","text":"عندما يتجمد الماء، تنتظم جزيئاته في بنية تحتوي على فراغات أكثر من الماء السائل. لذلك تصبح كثافة الجليد أقل، فيطفو على سطح الماء بدلًا من الغوص إلى القاع.","hashtags":["#Shorts","#علوم","#ماء"]},
+    {"search":"magnet iron filings","fallback_searches":["magnet science","magnetic field"],"title":"المغناطيس يستطيع التأثير في بعض المعادن من دون لمسها","text":"ينتج المغناطيس مجالًا مغناطيسيًا يمكنه التأثير في مواد معينة مثل الحديد. لهذا يمكن للمغناطيس جذب جسم معدني من مسافة قصيرة حتى من دون تلامس مباشر.","hashtags":["#Shorts","#علوم","#مغناطيس"]},
+    {"search":"sound wave speaker","fallback_searches":["sound science","speaker vibration"],"title":"الصوت يحتاج إلى وسط لينتقل عبره","text":"ينتقل الصوت على شكل اهتزازات خلال مادة مثل الهواء أو الماء أو الأجسام الصلبة. في الفراغ لا توجد جزيئات كافية لنقل هذه الاهتزازات، ولذلك لا ينتقل الصوت بالطريقة المعتادة.","hashtags":["#Shorts","#علوم","#فيزياء"]},
+    {"search":"rain water droplets cloud","fallback_searches":["cloud science","rain formation"],"title":"قطرات المطر تبدأ من قطرات ماء صغيرة داخل السحب","text":"تحتوي السحب على قطرات ماء دقيقة وبلورات جليد. عندما تتجمع هذه الجسيمات وتنمو وتصبح أثقل من قدرة الهواء على إبقائها معلقة، تبدأ بالسقوط نحو الأرض على شكل هطول.","hashtags":["#Shorts","#علوم","#طقس"]},
+    {"search":"shark underwater","fallback_searches":["shark swimming","marine science"],"title":"أسماك القرش تعتمد على حواس متعددة للعثور على فرائسها","text":"تمتلك أسماك القرش حواسًا تساعدها على اكتشاف الحركة والروائح والتغيرات في البيئة المحيطة. وبعض أنواعها تستطيع أيضًا استشعار إشارات كهربائية ضعيفة تنتجها الكائنات الحية.","hashtags":["#Shorts","#علوم","#حيوانات"]},
+    {"search":"cheetah running","fallback_searches":["cheetah speed","wildlife running"],"title":"الفهد يعتمد على تسارع قصير للوصول إلى سرعة عالية","text":"يمتلك الفهد جسمًا مهيأ للجري السريع، مع أطراف طويلة وعمود فقري مرن وذيل يساعده على التوازن. لكنه يعتمد على انطلاقات قصيرة لأن الجري بأقصى سرعة يستهلك طاقة كبيرة.","hashtags":["#Shorts","#علوم","#حيوانات"]},
+    {"search":"octopus underwater","fallback_searches":["octopus science","marine animal"],"title":"الأخطبوط يستطيع تغيير لون جلده بسرعة","text":"يحتوي جلد الأخطبوط على خلايا متخصصة تحتوي على أصباغ، ويمكنه تغيير مظهره بسرعة للمساعدة في التمويه والتواصل. وتعمل هذه الخلايا مع أنظمة عصبية وعضلية دقيقة.","hashtags":["#Shorts","#علوم","#بحار"]},
+    {"search":"butterfly wings close up","fallback_searches":["butterfly science","insect wings"],"title":"ألوان أجنحة بعض الفراشات لا تأتي من الصبغة فقط","text":"تحتوي أجنحة بعض الفراشات على تراكيب مجهرية تغير طريقة انعكاس الضوء. لذلك قد تظهر ألوان لامعة أو متغيرة بحسب زاوية النظر، حتى عندما تكون كمية الصبغة قليلة.","hashtags":["#Shorts","#علوم","#حشرات"]},
+    {"search":"space stars night sky","fallback_searches":["astronomy stars","space science"],"title":"ضوء النجوم يصل إلينا بعد رحلة طويلة عبر الفضاء","text":"الضوء ينتقل بسرعة كبيرة، لكنه يحتاج إلى وقت حتى يصل من النجوم البعيدة إلى الأرض. لذلك عندما ننظر إلى بعض النجوم، فنحن نرى ضوءًا غادر تلك النجوم قبل سنوات أو أكثر بحسب المسافة.","hashtags":["#Shorts","#علوم","#فضاء"]},
 
-# Conservative blacklist. Ambiguous candidates are rejected rather than published.
-FORBIDDEN_TOPIC_TERMS = [
-    "جنس", "جنسية", "جنسي", "إباحية", "اباحية", "إباحي", "عري", "عاري",
-    "بورن", "دعارة", "بغاء", "اتجار جنسي", "اغتصاب", "تحرش جنسي",
-    "استغلال جنسي", "مثلية", "مثلي", "مثليون", "شذوذ", "شاذ",
-    "متحول جنسيا", "متحول جنسيًا", "تغيير الجنس", "هوية جنسية", "توجه جنسي",
-    "ميول جنسية", "امرأة", "امرأه", "نساء", "النساء", "مرأة", "أنثى", "انثى",
-    "أنثوية", "نسائي", "نسائية", "فتاة", "بنات", "زوجة", "زوجات", "حمل",
-    "ولادة", "رضاعة", "حيض", "دورة شهرية",
-    "سياسة", "سياسي", "سياسية", "حكومة", "برلمان", "انتخابات", "انتخاب",
-    "رئيس الجمهورية", "رئيس الوزراء", "وزير", "حزب سياسي", "أحزاب", "حزب",
-    "ديمقراطية", "ديموقراطية", "جمهورية", "مرشح", "مرشحة", "مجلس الشورى",
-    "الكونغرس", "البيت الأبيض", "السلطة", "انقلاب", "ثورة سياسية", "أيديولوجيا",
-    "سياسة خارجية", "علاقات دولية", "تصويت",
-    "انتحار", "انتحاري", "إيذاء النفس", "ايذاء النفس", "إيذاء ذاتي", "جرح النفس",
-    "محاولة انتحار", "تفكير انتحاري",
-    "مخدر", "مخدرات", "هيروين", "كوكايين", "فنتانيل", "ميثامفيتامين", "ماريجوانا",
-    "قنب هندي", "حشيش", "أفيون", "ترامادول", "إكستاسي", "كراك",
-    "قمار", "مراهنات", "رهان", "كازينو", "يانصيب", "مقامرة",
-    "سلاح ناري", "أسلحة نارية", "مسدس", "بندقية", "رشاش", "مدفع", "صاروخ",
-    "قنبلة", "متفجرات", "تفجير", "عبوة ناسفة", "ذخيرة", "لغم", "سلاح كيميائي",
-    "سلاح بيولوجي", "سلاح نووي", "أسلحة دمار شامل",
-    "مجزرة", "مذبحة", "تعذيب", "قتل متسلسل", "قاتل متسلسل", "جريمة قتل",
-    "تشويه جثث", "جثة", "جثث", "دماء", "بتر", "إعدام", "إعدامات",
-    "سرقة", "سطو", "اختطاف", "خطف", "تهريب", "غسيل أموال", "تزوير", "قرصنة",
-    "اختراق", "برمجيات خبيثة", "فيروس حاسوبي", "فدية إلكترونية", "ابتزاز",
-    "تلوث إشعاعي", "مادة سامة", "سم قاتل", "سموم", "مواد سامة", "تحدي خطير",
-]
-FORBIDDEN_TOPIC_STEMS = [
-    "إباح", "اباح", "جنس", "شذوذ", "مثلي", "متحول", "سياس", "انتخاب", "حكوم",
-    "برلمان", "حزب", "مخدر", "قمار", "مراهن", "انتحار", "إيذاء", "ايذاء",
-    "سلاح", "قنبلة", "متفجر", "تعذيب", "مجزرة", "مذبحة", "اختطاف", "خطف",
-    "تهريب", "ابتزاز", "قرصنة", "سموم", "إعدام",
-]
+    # =========================
+    # الهندسة والتقنية
+    # =========================
+    {"search":"bridge engineering structure","fallback_searches":["bridge construction","engineering bridge"],"title":"شكل الجسر يوزع الأحمال بطريقة محسوبة","text":"يصمم المهندسون الجسور بحيث تنتقل الأحمال من سطح الجسر إلى العناصر الحاملة ثم إلى الدعامات والأساسات. اختيار الشكل والمواد يحدد مقدار القوى التي يستطيع الجسر تحملها بأمان.","hashtags":["#Shorts","#هندسة","#جسور"]},
+    {"search":"construction crane building","fallback_searches":["engineering construction","tower crane"],"title":"الرافعة البرجية تستطيع رفع أوزان ضخمة إلى ارتفاعات كبيرة","text":"تستخدم الرافعات البرجية ذراعًا طويلًا ونظامًا من الموازنة والكوابل لتوزيع الأحمال. ويحدد المهندسون وزن الحمولة وموقعها بدقة حتى لا تتجاوز الرافعة حدود التشغيل الآمنة.","hashtags":["#Shorts","#هندسة","#بناء"]},
+    {"search":"train high speed engineering","fallback_searches":["high speed train","railway engineering"],"title":"القطارات السريعة تحتاج إلى مسار مصمم بدقة","text":"كلما زادت سرعة القطار أصبحت جودة المسار والهندسة المحيطة به أكثر أهمية. تُستخدم منحنيات محسوبة وأنظمة تحكم وإشارات دقيقة للمساعدة في الحفاظ على حركة مستقرة وآمنة.","hashtags":["#Shorts","#هندسة","#قطارات"]},
+    {"search":"airplane cockpit flight instruments","fallback_searches":["aircraft navigation","pilot cockpit"],"title":"أنظمة الطائرة تجمع بيانات كثيرة أثناء الرحلة","text":"تعتمد الطائرة على أجهزة وأنظمة تقيس الارتفاع والسرعة والاتجاه ومعلومات أخرى. تُجمع هذه البيانات وتُعرض للطيار وأنظمة التحكم لمساعدتهم على متابعة حالة الرحلة.","hashtags":["#Shorts","#هندسة","#طيران"]},
+    {"search":"rocket launch engineering","fallback_searches":["rocket engine","spacecraft launch"],"title":"الصاروخ يحتاج إلى دفع يتغلب على الجاذبية أثناء الإطلاق","text":"ينتج محرك الصاروخ قوة دفع من خلال دفع الغازات بسرعة كبيرة في الاتجاه المعاكس. عند الإطلاق يجب أن تكون قوة الدفع كافية لتسريع الصاروخ ورفع كتلته بعيدًا عن سطح الأرض.","hashtags":["#Shorts","#هندسة","#فضاء"]},
+    {"search":"solar panels electricity","fallback_searches":["solar energy panels","photovoltaic cells"],"title":"الألواح الشمسية تحول الضوء إلى طاقة كهربائية","text":"تحتوي الألواح الشمسية على خلايا كهروضوئية تمتص الفوتونات القادمة من ضوء الشمس. تؤدي هذه العملية إلى توليد تيار كهربائي يمكن استخدامه مباشرة أو تخزينه في البطاريات.","hashtags":["#Shorts","#هندسة","#طاقة_شمسية"]},
+    {"search":"3d printer engineering","fallback_searches":["three dimensional printer","3d printing"],"title":"الطابعة ثلاثية الأبعاد تبني الجسم طبقة فوق طبقة","text":"تعمل الطابعة ثلاثية الأبعاد بإضافة المادة تدريجيًا وفق نموذج رقمي. تُنشئ طبقة رقيقة ثم تضيف طبقات أخرى فوقها حتى يتكون الجسم بالشكل المطلوب.","hashtags":["#Shorts","#هندسة","#تقنية"]},
+    {"search":"robot arm factory","fallback_searches":["robotics engineering","industrial robot"],"title":"الروبوت الصناعي يستطيع تكرار حركة دقيقة آلاف المرات","text":"تستخدم الروبوتات الصناعية محركات وحساسات وأنظمة تحكم لتنفيذ حركات محددة بدقة. ويمكن برمجتها لتكرار المهمة نفسها مرات كثيرة مع الحفاظ على المسار والسرعة المطلوبين.","hashtags":["#Shorts","#هندسة","#روبوتات"]},
+    {"search":"computer processor close up","fallback_searches":["computer chip","processor technology"],"title":"المعالج ينفذ التعليمات بسرعة كبيرة داخل الحاسوب","text":"يستقبل المعالج تعليمات من البرامج ثم ينفذ عمليات حسابية ومنطقية وينقل البيانات بين أجزاء النظام. وتعمل داخله أعداد هائلة من الترانزستورات لتنفيذ هذه العمليات خلال أزمنة قصيرة جدًا.","hashtags":["#Shorts","#تقنية","#حاسوب"]},
+    {"search":"smartphone sensors close up","fallback_searches":["phone sensors","smartphone technology"],"title":"الهاتف يعرف اتجاهه باستخدام حساسات صغيرة","text":"يحتوي الهاتف على حساسات تقيس الحركة والدوران وأحيانًا المجال المغناطيسي. تجمع البرامج هذه القراءات لتحديد اتجاه الجهاز وحركته، ولذلك تتغير الشاشة تلقائيًا عند تدوير الهاتف.","hashtags":["#Shorts","#تقنية","#هواتف"]},
+    {"search":"electric car motor engineering","fallback_searches":["electric vehicle motor","electric car technology"],"title":"المحرك الكهربائي يحول الطاقة الكهربائية إلى حركة","text":"يستخدم المحرك الكهربائي تفاعل المجالات المغناطيسية لإنتاج دوران. تنتقل الطاقة من البطارية إلى النظام الكهربائي ثم إلى المحرك، الذي يحولها إلى حركة تدير عجلات المركبة.","hashtags":["#Shorts","#هندسة","#سيارات"]},
+    {"search":"wind turbine engineering","fallback_searches":["wind turbine","renewable energy engineering"],"title":"توربينات الرياح تحول حركة الهواء إلى كهرباء","text":"عندما يدفع الهواء شفرات التوربين تبدأ بالدوران. ينقل العمود هذه الحركة إلى مولد كهربائي، فيحوّل الطاقة الحركية الناتجة عن الرياح إلى طاقة كهربائية.","hashtags":["#Shorts","#هندسة","#طاقة"]},
+    {"search":"dam engineering water","fallback_searches":["hydroelectric dam","dam construction"],"title":"السدود تستخدم فرق الارتفاع لتوليد الطاقة","text":"عندما تتحرك المياه من مستوى مرتفع إلى مستوى منخفض يمكن استغلال طاقتها الحركية. في محطات الطاقة الكهرومائية تمر المياه عبر توربينات تدور بدورها مولدات كهربائية.","hashtags":["#Shorts","#هندسة","#طاقة"]},
+    {"search":"fiber optic cable close up","fallback_searches":["fiber optics","internet cable"],"title":"الألياف الضوئية تنقل البيانات باستخدام الضوء","text":"تنتقل البيانات داخل الألياف الضوئية على هيئة نبضات ضوئية عبر ألياف دقيقة جدًا. وتساعد خصائص المادة وتصميم الليف على إبقاء الضوء داخل مساره لمسافات طويلة.","hashtags":["#Shorts","#تقنية","#إنترنت"]},
+    {"search":"satellite orbit earth","fallback_searches":["satellite engineering","space satellite"],"title":"القمر الصناعي يبقى في المدار بسبب توازن السرعة والجاذبية","text":"يدور القمر الصناعي بسرعة أفقية كبيرة بينما تجذبه جاذبية الأرض نحوها. يؤدي الجمع بين الحركة الأمامية والجاذبية إلى مسار مداري بدلًا من سقوطه مباشرة نحو سطح الأرض.","hashtags":["#Shorts","#هندسة","#فضاء"]},
 
-# The channel's preferred editorial direction.
-# Candidates must fit at least one of these factual families.
-PREFERRED_TOPIC_TERMS = [
-    "تاريخ", "حضارة", "حضارات", "مملكة", "إمبراطورية", "آثار", "أثري",
-    "جغرافيا", "جغرافي", "قارة", "جزيرة", "جزر", "جبل", "جبال", "نهر",
-    "أنهار", "بحيرة", "بحيرات", "صحراء", "وادي", "خليج", "مضيق", "شلال",
-    "مدينة", "مدن", "معلم", "معالم", "موقع", "مواقع", "طبيعة", "مناخ",
-    "رياضة", "رياضي", "بطولة", "بطولات", "دوري", "منتخب", "كرة", "سباق",
-    "ألعاب", "أولمبياد", "علم", "علوم", "فيزياء", "كيمياء", "فلك", "فضاء",
-    "هندسة", "اختراع", "اختراعات", "تقنية", "تكنولوجيا", "حيوان", "حيوانات",
-    "نبات", "نباتات", "ظاهرة", "معلومة", "معلومات", "كيف", "سبب", "اكتشاف",
-]
+    # =========================
+    # الألعاب الإلكترونية
+    # =========================
+    {"search":"esports gaming competition","fallback_searches":["competitive gaming","esports players"],"title":"الألعاب التنافسية تعتمد على سرعة القرار وليس سرعة اليد فقط","text":"في الألعاب التنافسية يحتاج اللاعب إلى قراءة الموقف بسرعة ثم اختيار القرار المناسب. التوقيت ومعرفة الخريطة وتوقع حركة الخصم قد تكون عوامل مهمة إلى جانب سرعة الاستجابة.","hashtags":["#Shorts","#ألعاب","#رياضات_إلكترونية"]},
+    {"search":"video game controller close up","fallback_searches":["gaming controller","gamepad"],"title":"يد التحكم ترسل أوامر اللاعب إلى اللعبة خلال أجزاء من الثانية","text":"عند الضغط على زر في يد التحكم تتحول الحركة إلى إشارة يقرأها الجهاز. ثم يعالج النظام الأمر ويرسل النتيجة إلى اللعبة، وتظهر الاستجابة على الشاشة خلال زمن قصير جدًا.","hashtags":["#Shorts","#ألعاب","#تقنية"]},
+    {"search":"gaming computer graphics card","fallback_searches":["gaming pc","graphics card"],"title":"بطاقة الرسومات تعالج جزءًا كبيرًا من الصورة التي تراها في اللعبة","text":"تعالج بطاقة الرسومات العمليات المتعلقة بالرسم وإظهار المشاهد ثلاثية الأبعاد. كلما زادت تفاصيل المشهد احتاجت عملية الرسم إلى قدرة حسابية أكبر للحفاظ على سلاسة العرض.","hashtags":["#Shorts","#ألعاب","#حاسوب"]},
+    {"search":"video game loading screen","fallback_searches":["game loading","gaming technology"],"title":"تظهر شاشة التحميل عندما يحتاج الجهاز إلى تجهيز بيانات جديدة","text":"أثناء تحميل مرحلة جديدة تنقل اللعبة بيانات من وحدة التخزين إلى الذاكرة وتجهز النماذج والأصوات والخرائط المطلوبة. تعتمد مدة التحميل على حجم البيانات وسرعة مكونات الجهاز.","hashtags":["#Shorts","#ألعاب","#تقنية"]},
+    {"search":"video game physics simulation","fallback_searches":["game physics","gaming simulation"],"title":"محركات الألعاب تحاكي الحركة والاصطدامات باستخدام الرياضيات","text":"تعتمد الألعاب الحديثة على محركات فيزيائية لحساب الحركة والجاذبية والاصطدامات. تُجرى هذه الحسابات باستمرار حتى تبدو الأجسام داخل اللعبة وكأنها تتفاعل مع البيئة بطريقة واقعية.","hashtags":["#Shorts","#ألعاب","#علوم"]},
+    {"search":"game development coding","fallback_searches":["video game programming","game developer"],"title":"كل حركة داخل اللعبة تبدأ بتعليمات برمجية","text":"تحدد البرمجيات ما يحدث عندما يتحرك اللاعب أو يضغط زرًا أو يصطدم جسمان داخل اللعبة. يترجم محرك اللعبة هذه التعليمات إلى أحداث وصور وأصوات تظهر للمستخدم.","hashtags":["#Shorts","#ألعاب","#برمجة"]},
+    {"search":"gaming network multiplayer","fallback_searches":["online multiplayer gaming","game server"],"title":"اللعب الجماعي عبر الإنترنت يحتاج إلى تبادل البيانات بسرعة","text":"عندما تلعب عبر الإنترنت تُرسل معلومات عن حركتك وأوامرك إلى الخادم، ثم تعود إليك بيانات اللاعبين الآخرين. كلما زاد زمن انتقال البيانات أصبحت الاستجابة بين حركة اللاعب وما يظهر على الشاشة أبطأ.","hashtags":["#Shorts","#ألعاب","#إنترنت"]},
+    {"search":"gaming monitor high refresh rate","fallback_searches":["gaming display","high refresh monitor"],"title":"معدل التحديث يحدد عدد مرات تحديث الصورة في الثانية","text":"يعبر معدل تحديث الشاشة عن عدد المرات التي يمكن فيها تحديث الصورة خلال ثانية واحدة. المعدل الأعلى يمكن أن يجعل الحركة تبدو أكثر سلاسة عندما يستطيع الجهاز إنتاج عدد مناسب من الإطارات.","hashtags":["#Shorts","#ألعاب","#شاشات"]},
+    {"search":"game console hardware","fallback_searches":["gaming console","console technology"],"title":"أجهزة الألعاب تجمع المعالج والرسومات والذاكرة في نظام واحد","text":"يحتوي جهاز الألعاب على معالج وذاكرة ووحدة لمعالجة الرسومات ووحدات أخرى تعمل معًا. صممت هذه المكونات لتشغيل الألعاب ومعالجة الرسومات والصوت وإدارة البيانات في الوقت نفسه.","hashtags":["#Shorts","#ألعاب","#تقنية"]},
+    {"search":"video game artificial intelligence enemies","fallback_searches":["game enemy ai","game artificial intelligence"],"title":"الشخصيات غير القابلة للتحكم تعتمد على خوارزميات لاتخاذ قراراتها","text":"تستخدم الألعاب خوارزميات مختلفة لتحديد كيفية تحرك الشخصيات التي لا يتحكم بها اللاعب. يمكن للنظام اختيار مسار أو البحث عن اللاعب أو تغيير السلوك وفق الأحداث التي تحدث داخل اللعبة.","hashtags":["#Shorts","#ألعاب","#ذكاء_اصطناعي"]},
+    {"search":"racing video game steering","fallback_searches":["racing game","driving simulator"],"title":"ألعاب السباق تحاكي تأثير السرعة والاحتكاك على السيارة","text":"تحسب ألعاب السباق عوامل مثل السرعة والتسارع والاحتكاك وتغير الاتجاه. هذه الحسابات تجعل استجابة السيارة مختلفة عند الكبح أو التسارع أو دخول المنعطفات.","hashtags":["#Shorts","#ألعاب","#سيارات"]},
+    {"search":"virtual reality gaming headset","fallback_searches":["vr gaming","virtual reality headset"],"title":"نظارة الواقع الافتراضي تتتبع حركة الرأس لتغيير المشهد","text":"تحتوي نظارات الواقع الافتراضي على حساسات تتابع دوران الرأس وحركته. يستخدم النظام هذه البيانات لتحديث زاوية المشهد بسرعة، فيبدو للمستخدم أن البيئة الافتراضية تتحرك مع اتجاه نظره.","hashtags":["#Shorts","#ألعاب","#واقع_افتراضي"]},
+    {"search":"gaming mouse close up","fallback_searches":["computer gaming mouse","gaming peripherals"],"title":"حساس الفأرة يحول حركة اليد إلى بيانات رقمية","text":"يستخدم فأرة الحاسوب حساسًا بصريًا لالتقاط التغير في موضعها على السطح. يحول الجهاز هذه الحركة إلى بيانات يفسرها الحاسوب لتحريك المؤشر أو تنفيذ الأوامر داخل اللعبة.","hashtags":["#Shorts","#ألعاب","#تقنية"]},
+    {"search":"video game sound design headphones","fallback_searches":["game audio design","gaming headphones"],"title":"الصوت في الألعاب يساعد اللاعب على فهم ما يحدث حوله","text":"تستخدم الألعاب المؤثرات الصوتية لتحديد اتجاه الأحداث والتنبيه إلى أشياء قد لا تظهر مباشرة أمام اللاعب. لذلك يمكن للصوت أن يضيف معلومات مهمة إلى المشهد البصري.","hashtags":["#Shorts","#ألعاب","#صوت"]},
+    {"search":"game animation character","fallback_searches":["video game animation","game character animation"],"title":"الحركة داخل اللعبة تتكون من سلسلة من الإطارات","text":"تظهر حركة الشخصية داخل اللعبة نتيجة عرض سلسلة من الصور أو الحالات المتغيرة بسرعة. كلما كانت الانتقالات بين الإطارات أكثر سلاسة بدت الحركة طبيعية للمشاهد.","hashtags":["#Shorts","#ألعاب","#رسوم"]},
+    {"search":"gaming cooling pc fans","fallback_searches":["gaming pc cooling","computer cooling fans"],"title":"تبريد الحاسوب مهم أثناء تشغيل الألعاب الثقيلة","text":"تنتج المعالجات وبطاقات الرسومات حرارة أثناء العمل، وتزداد الحرارة عند ارتفاع الحمل. تستخدم أجهزة الحاسوب المراوح والمشتتات الحرارية وأنظمة أخرى لنقل الحرارة بعيدًا عن المكونات.","hashtags":["#Shorts","#ألعاب","#حاسوب"]},
+    {"search":"game map level design","fallback_searches":["video game level design","game environment design"],"title":"تصميم مراحل الألعاب يوجه اللاعب من دون إعطائه التعليمات دائمًا","text":"يمكن للمصمم استخدام الإضاءة والألوان وشكل البيئة ومواقع العناصر لتوجيه انتباه اللاعب. بهذه الطريقة يفهم اللاعب المسار أو الهدف من خلال تصميم المرحلة نفسه.","hashtags":["#Shorts","#ألعاب","#تصميم"]},
+    {"search":"esports reaction gaming","fallback_searches":["esports reaction time","competitive gaming"],"title":"زمن الاستجابة جزء مهم من الأداء في الألعاب السريعة","text":"زمن الاستجابة هو الوقت بين ظهور المعلومة واتخاذ الإجراء المناسب. في الألعاب السريعة قد تحدث عدة أحداث خلال فترة قصيرة، لذلك يحتاج اللاعب إلى الانتباه ومعالجة المعلومات بسرعة.","hashtags":["#Shorts","#ألعاب","#رياضات_إلكترونية"]},
+    {"search":"game save data storage","fallback_searches":["game save system","gaming storage"],"title":"ملف الحفظ يخزن معلومات تقدم اللاعب","text":"تخزن الألعاب في ملف الحفظ بيانات مثل المرحلة التي وصل إليها اللاعب والعناصر التي حصل عليها وبعض إعدادات اللعبة. عند العودة إلى اللعبة تُقرأ هذه البيانات لاستعادة حالة التقدم.","hashtags":["#Shorts","#ألعاب","#تقنية"]},
 
-# Keep the feed away from celebrity/artist/person pages and Western-centric topics.
-PERSON_AND_ENTERTAINMENT_TERMS = [
-    "ممثل", "ممثلة", "ممثلون", "ممثلات", "فنان", "فنانة", "فنانون", "فنانين",
-    "مغني", "مغنية", "مغنون", "مغنيات", "مطرب", "مطربة", "مخرج", "مخرجة",
-    "سينما", "فيلم", "أفلام", "مسلسل", "مسلسلات", "هوليوود", "موسيقى",
-    "موسيقار", "موسيقية", "مشاهير", "مشهور", "مشاهير", "عارض أزياء",
-    "كاتب", "كاتبة", "شاعر", "شاعرة", "روائي", "روائية", "رسام", "رسامة",
-    "لوحة فنية", "أغنية", "ألبوم", "مؤلف موسيقي",
-]
-
-WESTERN_TOPIC_TERMS = [
-    "الولايات المتحدة", "أمريكا", "الأمريكي", "الأمريكية", "واشنطن",
-    "بريطانيا", "المملكة المتحدة", "إنجلترا", "اسكتلندا", "ويلز", "لندن",
-    "فرنسا", "باريس", "ألمانيا", "برلين", "إيطاليا", "روما", "إسبانيا",
-    "مدريد", "البرتغال", "هولندا", "بلجيكا", "سويسرا", "النمسا",
-    "السويد", "النرويج", "الدنمارك", "فنلندا", "آيسلندا", "أيرلندا",
-    "كندا", "أستراليا", "نيوزيلندا", "أوروبا", "الاتحاد الأوروبي",
-    "هوليوود", "برودواي", "الغرب", "غربي", "غربية",
-]
-
-WIKIPEDIA_PREFERRED_SEARCHES = [
-    "تاريخ الحضارات",
-    "الحضارات القديمة",
-    "التاريخ الإسلامي",
-    "تاريخ شبه الجزيرة العربية",
-    "جغرافيا العالم",
-    "جغرافيا الوطن العربي",
-    "المعالم الجغرافية",
-    "الجبال والأنهار",
-    "البحار والمحيطات",
-    "الصحارى",
-    "المدن التاريخية",
-    "الآثار القديمة",
-    "الرياضات والبطولات",
-    "الألعاب الأولمبية",
-    "كرة القدم والبطولات",
-    "العلوم والفضاء",
-    "الاختراعات والتقنية",
-    "الحيوانات والطبيعة",
-    "الظواهر الطبيعية",
+    # =========================
+    # علوم وتقنية إضافية
+    # =========================
+    {"search":"battery charging lithium ion","fallback_searches":["battery technology","lithium ion battery"],"title":"البطارية تخزن الطاقة في صورة طاقة كيميائية","text":"تخزن البطاريات الطاقة من خلال تفاعلات كيميائية قابلة للعكس في كثير من الأنواع الحديثة. عند توصيل الجهاز تتحول هذه الطاقة إلى تيار كهربائي يغذي الدائرة الإلكترونية.","hashtags":["#Shorts","#علوم","#تقنية"]},
+    {"search":"microscope cells science","fallback_searches":["microscope biology","cells under microscope"],"title":"الخلايا هي وحدات البناء الأساسية في الكائنات الحية","text":"تتكون الكائنات الحية من خلايا تؤدي وظائف مختلفة. بعض الخلايا تنقل الإشارات، وبعضها ينتج الطاقة أو يبني الأنسجة، وتعمل هذه الخلايا معًا للحفاظ على وظائف الجسم.","hashtags":["#Shorts","#علوم","#أحياء"]},
+    {"search":"DNA molecular model","fallback_searches":["DNA science","genetics molecule"],"title":"الحمض النووي يحمل تعليمات وراثية داخل الخلايا","text":"يحتوي الحمض النووي على معلومات وراثية تستخدمها الخلايا لإنتاج بروتينات وتنظيم وظائفها. وتُخزن هذه المعلومات في ترتيب وحدات كيميائية متتابعة داخل الجزيء.","hashtags":["#Shorts","#علوم","#أحياء"]},
+    {"search":"telescope astronomy night","fallback_searches":["astronomy telescope","space telescope"],"title":"التلسكوب يجمع ضوءًا أكثر من العين المجردة","text":"يستخدم التلسكوب عدسات أو مرايا لجمع الضوء وتركيزه، ولذلك يستطيع إظهار أجسام فلكية خافتة لا يمكن رؤيتها بسهولة بالعين المجردة. بعض التلسكوبات تعمل خارج الغلاف الجوي للحصول على صور أوضح.","hashtags":["#Shorts","#فضاء","#علوم"]},
+    {"search":"laser light beam","fallback_searches":["laser technology","laser physics"],"title":"ضوء الليزر يختلف عن الضوء العادي في خصائصه","text":"ينتج الليزر ضوءًا منظمًا يمكن أن يكون شديد التركيز وله خصائص تختلف عن مصادر الضوء المعتادة. لذلك يستخدم في الاتصالات والطب والصناعة والقياس العلمي.","hashtags":["#Shorts","#علوم","#تقنية"]},
+    {"search":"computer cooling fan","fallback_searches":["cpu cooling","computer heat"],"title":"المشتت الحراري يساعد المعالج على التخلص من الحرارة","text":"عند تنفيذ العمليات تنتج الدوائر الإلكترونية حرارة. ينقل المشتت الحراري هذه الحرارة من المعالج إلى مساحة أكبر، ثم تساعد المروحة أو نظام التبريد على إخراجها إلى الهواء.","hashtags":["#Shorts","#تقنية","#حاسوب"]},
+    {"search":"drone flying engineering","fallback_searches":["drone technology","quadcopter"],"title":"الطائرة المسيرة تغير اتجاهها بتعديل سرعة المراوح","text":"تستخدم الطائرات المسيرة عدة مراوح لإنتاج قوة رفع والتحكم في الحركة. عند تغيير سرعة بعض المراوح مقارنة بغيرها يتغير اتجاه القوة، فتستطيع الطائرة الصعود أو الدوران أو التحرك.","hashtags":["#Shorts","#هندسة","#تقنية"]},
+    {"search":"3d animation rendering computer","fallback_searches":["computer rendering","3d graphics"],"title":"الرسم ثلاثي الأبعاد يحتاج إلى حساب شكل الضوء والسطوح","text":"عند إنشاء مشهد ثلاثي الأبعاد يحسب الحاسوب شكل الأجسام ومواقعها واتجاه الضوء والمواد المستخدمة على الأسطح. ثم يحول هذه المعلومات إلى صورة ثنائية الأبعاد تظهر على الشاشة.","hashtags":["#Shorts","#تقنية","#رسوم"]},
 ]
 
+
+# =========================================================
 # GENERAL HELPERS
 # =========================================================
 
@@ -296,218 +292,50 @@ def content_already_used(topic, used_content):
     return False
 
 
-def _topic_text_blob(topic):
-    return normalize_content(" ".join([
-        str(topic.get("title", "")), str(topic.get("text", "")),
-        str(topic.get("search", "")),
-        " ".join(str(x) for x in topic.get("fallback_searches", [])),
-    ]))
+def validate_topic_pool():
+    """Validate the active pool before generation.
 
+    The pool intentionally contains only football, science, engineering/technology,
+    and electronic-gaming topics. Historical and geographic topics are excluded.
+    """
+    if not TOPICS:
+        raise RuntimeError("TOPICS is empty.")
 
-def is_forbidden_topic(topic):
-    """Conservative safety gate for every generated topic."""
-    blob = _topic_text_blob(topic)
-    if not blob:
-        return True
-    for term in FORBIDDEN_TOPIC_TERMS:
-        if normalize_content(term) in blob:
-            return True
-    for stem in FORBIDDEN_TOPIC_STEMS:
-        if normalize_content(stem) in blob:
-            return True
-    return False
+    seen = set()
+    for index, topic in enumerate(TOPICS, start=1):
+        title = sanitize_script(topic.get("title", "")) if "sanitize_script" in globals() else str(topic.get("title", ""))
+        text = sanitize_script(topic.get("text", "")) if "sanitize_script" in globals() else str(topic.get("text", ""))
+        if not title or not text:
+            raise RuntimeError(f"Topic {index} has an empty title or script.")
+        key = normalize_content(title + " " + text)
+        if key in seen:
+            raise RuntimeError(f"Duplicate topic detected at index {index}.")
+        seen.add(key)
 
-
-def _topic_tokens(text):
-    return {x for x in normalize_content(text).split() if len(x) >= 3}
-
-
-def _topic_similarity(a, b):
-    aa = _topic_tokens(_topic_text_blob(a))
-    bb = _topic_tokens(_topic_text_blob(b))
-    if not aa or not bb:
-        return 0.0
-    return len(aa & bb) / len(aa | bb)
-
-
-def topic_is_new(topic, used_content):
-    if is_forbidden_topic(topic) or content_already_used(topic, used_content):
-        return False
-    for old in used_content:
-        old_topic = {
-            "title": old.get("title", ""), "text": old.get("text", ""),
-            "search": old.get("search", ""),
-            "fallback_searches": old.get("fallback_searches", []),
-        }
-        if _topic_similarity(topic, old_topic) >= 0.78:
-            return False
-    return True
-
-
-def _clean_wikipedia_extract(text):
-    text = re.sub(r"\[[^\]]*\]", "", str(text))
-    return re.sub(r"\s+", " ", text).strip()
-
-
-def _wikipedia_random_articles():
-    # Use targeted factual searches instead of unrestricted random pages.
-    # This keeps the feed focused on history, geography, sports and general
-    # knowledge while allowing the existing safety/duplicate audits to decide
-    # the final candidate.
-    search_term = random.choice(WIKIPEDIA_PREFERRED_SEARCHES)
-    params = {
-        "action": "query",
-        "format": "json",
-        "generator": "search",
-        "gsrsearch": search_term,
-        "gsrnamespace": 0,
-        "gsrlimit": WIKIPEDIA_RANDOM_BATCH,
-        "prop": "extracts|info|categories",
-        "exintro": 1,
-        "explaintext": 1,
-        "exchars": WIKIPEDIA_MAX_EXTRACT_CHARS,
-        "inprop": "url",
-        "cllimit": 30,
-        "formatversion": 2,
-    }
-    response = requests.get(
-        WIKIPEDIA_API,
-        params=params,
-        headers={"User-Agent": "YouTubeShortsAutomation/1.0"},
-        timeout=30,
-    )
-    response.raise_for_status()
-    return response.json().get("query", {}).get("pages", [])
-
-
-def _make_topic_from_wikipedia(page):
-    title = _clean_wikipedia_extract(page.get("title", ""))
-    extract = _clean_wikipedia_extract(page.get("extract", ""))
-    if not title or len(extract) < WIKIPEDIA_MIN_EXTRACT_CHARS:
-        return None
-    sentences = [x.strip() for x in re.split(r"(?<=[.!؟])\s+", extract) if x.strip()]
-    text = " ".join(sentences[:3]).strip()
-    if len(text) > WIKIPEDIA_MAX_EXTRACT_CHARS:
-        text = text[:WIKIPEDIA_MAX_EXTRACT_CHARS].rsplit(" ", 1)[0] + "."
-    return {
-        "search": title,
-        "fallback_searches": [title, f"{title} documentary", f"{title} science"],
-        "title": f"هل تعلم ما قصة {title}؟",
-        "text": f"هل تعلم؟ {text}",
-        "hashtags": ["#Shorts", "#هل_تعلم", "#معلومات", "#ويكيبيديا"],
-        "wikipedia_title": title,
-        "wikipedia_url": page.get("fullurl", ""),
-        "wikipedia_categories": [
-            str(item.get("title", ""))
-            for item in page.get("categories", [])
-            if isinstance(item, dict)
-        ],
-    }
-
-
-def get_fresh_wikipedia_topic(used_content):
-    for attempt in range(1, WIKIPEDIA_MAX_ATTEMPTS + 1):
-        print(f"Wikipedia search {attempt}/{WIKIPEDIA_MAX_ATTEMPTS}")
-        try:
-            pages = _wikipedia_random_articles()
-        except Exception as error:
-            print("Wikipedia request error:", error)
-            continue
-        random.shuffle(pages)
-        for page in pages:
-            topic = _make_topic_from_wikipedia(page)
-            if topic is None:
-                continue
-            if not wikipedia_source_is_acceptable(topic):
-                print("Rejected unsuitable Wikipedia page:", topic.get("title", ""))
-                continue
-            if not audit_and_accept_topic(topic, used_content):
-                print("Rejected unsafe/duplicate Wikipedia topic:", topic.get("title", ""))
-                continue
-            return topic
-    raise RuntimeError("NO SAFE NEW WIKIPEDIA TOPIC FOUND. No video will be published.")
-
-
-def final_topic_safety_audit(topic):
-    """Run every safety rule again immediately before the topic enters the pipeline."""
-    required = ["title", "text", "search"]
-    if any(not str(topic.get(key, "")).strip() for key in required):
-        return False, "missing required topic field"
-    if is_forbidden_topic(topic):
-        return False, "forbidden subject detected"
-    if len(normalize_content(topic.get("text", ""))) < 120:
-        return False, "topic text too short"
-    if len(normalize_content(topic.get("title", ""))) > 140:
-        return False, "topic title too long"
-    return True, "ok"
-
-
-def wikipedia_source_is_acceptable(topic):
-    """Reject unsuitable pages and keep the channel's preferred subject direction."""
-    title = normalize_content(topic.get("wikipedia_title", ""))
-    blob = _topic_text_blob(topic)
-    url = str(topic.get("wikipedia_url", "")).lower()
-    if not title:
-        return False
-    if url and "ar.wikipedia.org" not in url:
-        return False
-
-    blocked_namespace_terms = [
-        "قائمة", "تصنيف", "بوابة", "مقالة توضيح", "صفحة توضيح",
-        "سنوات", "أحداث جارية", "وفيات",
-    ]
-    if any(normalize_content(term) in title for term in blocked_namespace_terms):
-        return False
-
-    # Explicitly keep celebrities, artists and entertainment out.
-    if any(normalize_content(term) in blob for term in PERSON_AND_ENTERTAINMENT_TERMS):
-        return False
-
-    # Avoid Western-centric subjects as requested.
-    if any(normalize_content(term) in blob for term in WESTERN_TOPIC_TERMS):
-        return False
-
-    # Require a factual family that matches the channel direction.
-    if not any(normalize_content(term) in blob for term in PREFERRED_TOPIC_TERMS):
-        return False
-
-    # Category metadata is available from Wikipedia search results. Reject
-    # biography/person categories, while still allowing sports/team pages.
-    categories = topic.get("wikipedia_categories", [])
-    category_blob = normalize_content(" ".join(str(x) for x in categories))
-    person_category_terms = [
-        "مواليد", "وفيات", "أشخاص", "شخصيات", "مغنون", "مغنيات",
-        "ممثلون", "ممثلات", "فنانون", "فنانات", "كتاب", "شعراء",
-        "روائيون", "موسيقيون", "مخرجون",
-    ]
-    if any(term in category_blob for term in person_category_terms):
-        return False
-
-    return True
-
-
-def audit_and_accept_topic(topic, used_content):
-    if not wikipedia_source_is_acceptable(topic):
-        return False
-    ok, reason = final_topic_safety_audit(topic)
-    if not ok:
-        print("Topic safety audit rejected candidate:", reason)
-        return False
-    if not topic_is_new(topic, used_content):
-        print("Topic duplicate audit rejected candidate")
-        return False
-    return True
+    print(f"Unique content pool verified: {len(TOPICS)} topics")
 
 
 def select_new_topic(used_content):
-    topic = get_fresh_wikipedia_topic(used_content)
-    if not audit_and_accept_topic(topic, used_content):
-        raise RuntimeError("FINAL SAFETY AUDIT FAILED. No video will be published.")
+    # Never reuse a published topic. The comparison checks the title, full
+    # script, and Pexels search phrase, including legacy memory records.
+    available = [
+        topic for topic in TOPICS
+        if not content_already_used(topic, used_content)
+    ]
+
+    if not available:
+        raise RuntimeError(
+            "ALL UNIQUE CONTENT TOPICS HAVE BEEN USED. Add new genuinely different topics to TOPICS."
+        )
+
+    topic = random.choice(available)
+
     print("\n================================")
-    print("NEW SAFE WIKIPEDIA CONTENT SELECTED")
+    print("NEW CONTENT SELECTED")
     print(topic["title"])
-    print("Source: Arabic Wikipedia")
+    print(f"Remaining unused topics: {len(available) - 1}")
     print("================================\n")
+
     return topic
 
 
@@ -710,149 +538,117 @@ def download_video(url, destination):
                 file.write(chunk)
 
 
+
 # =========================================================
-# NATURAL ARABIC SCRIPT STYLE
+# SCRIPT SANITIZATION
 # =========================================================
-# The project does not currently use an external generative-AI API for text.
-# These rules make the existing verified scripts sound lighter and more
-# conversational before they are sent to the voice engine, without changing
-# the factual idea or the topic title.
-NATURAL_ARABIC_STYLE = """
-استخدم العربية السعودية الخفيفة والطبيعية، كأن شخصًا سعوديًا يتكلم مع المشاهد مباشرة.
-خلك عفوي وواضح، واستخدم تعبيرات خفيفة مثل: تدري، تخيل، الغريب إن، والأغرب إن، بدون مبالغة.
-تجنب الفصحى الرسمية والكلمات المعقدة قدر الإمكان.
-خلي الكلام مفهومًا لجميع العرب، وليس بلهجة محلية صعبة.
-الجمل قصيرة وسهلة النطق.
-لا تستخدم إيموجي أو رموز داخل النص.
-حافظ على المعلومة العلمية أو الواقعية كما هي، ولا تضف معلومة جديدة.
-"""
+def sanitize_script(text):
+    """Prepare one Arabic script for BOTH TTS and subtitles."""
+    text = str(text or "")
 
+    # Remove common introductory filler so the fact starts immediately.
+    text = re.sub(
+        r"^\s*(?:هل\s+تعلم(?:\s+أن)?|تدري(?:\s+أن)?|هل\s+كنت\s+تعلم(?:\s+أن)?|هل\s+فكرت\s+يومًا\s+أن?|هل\s+تساءلت\s+كيف)\s*[:،؟?!.\-—]*\s*",
+        "",
+        text,
+        flags=re.IGNORECASE,
+    )
 
-def make_natural_arabic_script(text):
-    """Lightly convert the existing Arabic script to a natural Saudi-style delivery."""
-    text = clean_text(text)
+    # Remove URLs, email-like strings, hashtags, mentions and code-like fragments.
+    text = re.sub(r"https?://\S+|www\.\S+|\S+@\S+", " ", text)
+    text = re.sub(r"(?<!\w)[#@][\w\u0600-\u06FF_-]+", " ", text)
 
-    replacements = [
-        ("هل تعلم أن", "تدري إن"),
-        ("هل تعلم أن", "تدري إن"),
-        ("هل تعلم", "تدري"),
-        ("هل فكرت يومًا", "قد سألت نفسك"),
-        ("هل تساءلت", "قد سألت نفسك"),
-        ("هل لاحظت أن", "لاحظت إن"),
-        ("هل لاحظت", "لاحظت"),
-        ("يمكن أن", "ممكن"),
-        ("لا يمكن", "ما يقدر"),
-        ("يستطيع", "يقدر"),
-        ("تستطيع", "تقدر"),
-        ("يستطيعون", "يقدرون"),
-        ("تستطيعون", "يقدرون"),
-        ("يحتاج إلى", "يحتاج"),
-        ("تحتاج إلى", "تحتاج"),
-        ("ولهذا", "وعشان كذا"),
-        ("لذلك", "وعشان كذا"),
-        ("بسبب ذلك", "وعشان كذا"),
-        ("بالنسبة إلى", "بالنسبة لـ"),
-        ("داخل الجسم", "داخل الجسم"),
-        ("في الوقت نفسه", "بنفس الوقت"),
-        ("بشكل مستمر", "باستمرار"),
-        ("بشكل كبير", "بشكل كبير"),
-        ("بشكل مختلف", "بطريقة مختلفة"),
-        ("بشكل أفضل", "بطريقة أفضل"),
-        ("تدري أن", "تدري إن"),
-    ]
+    # Remove Latin-script words/abbreviations from the spoken/caption script.
+    # Arabic letters/numbers and normal Arabic punctuation remain.
+    text = re.sub(r"[A-Za-z]+(?:[-_][A-Za-z0-9]+)*", " ", text)
 
-    for old, new in replacements:
-        text = text.replace(old, new)
-
-    # Small spoken-language cleanup; do not rewrite facts or numbers.
+    # Remove technical/special symbols; keep Arabic punctuation.
+    text = re.sub(r"[`~!$%^&*_=+<>|{}\[\]\\/:;\"'“”‘’…•·]", " ", text)
     text = re.sub(r"\s+", " ", text).strip()
-    text = text.replace("، و", "، و")
 
-    return text
+    # Remove leading/trailing punctuation left by the cleanup.
+    text = re.sub(r"^[،؛:؟?.،\-—\s]+|[،؛:؟?.،\-—\s]+$", "", text)
+
+    return text.strip()
 
 
-def prepare_topic_for_voice(topic):
-    """Return a copy with natural delivery text while preserving the original topic."""
-    prepared = dict(topic)
-    prepared["text"] = make_natural_arabic_script(topic.get("text", ""))
-    return prepared
+def prepare_topic_script(topic):
+    """Return a copy whose title/script are cleaned consistently."""
+    cleaned = dict(topic)
+    cleaned["text"] = sanitize_script(topic.get("text", ""))
+    cleaned["title"] = sanitize_script(topic.get("title", ""))
+    return cleaned
 
+# =========================================================
+# VOICE
+# =========================================================
 
 def create_voice(text):
-    """Create Edge Neural TTS and capture exact word-boundary timings."""
-    print(f"Creating Edge Neural TTS voice: {VOICE_NAME}")
+    """
+    Use Azure Neural Speech when configured; otherwise preserve the existing
+    Edge-TTS fallback so the workflow does not become dependent on a paid API.
+    """
+    if AZURE_SPEECH_KEY and AZURE_SPEECH_REGION:
+        print("Creating voice with Azure Neural Speech...")
 
-    async def generate():
-        # IMPORTANT: current edge-tts defaults to SentenceBoundary.
-        # We explicitly request WordBoundary because the subtitle highlighter
-        # needs one timing event for each spoken word.
-        try:
+        url = (
+            f"https://{AZURE_SPEECH_REGION}.tts.speech.microsoft.com/"
+            "cognitiveservices/v1"
+        )
+
+        headers = {
+            "Ocp-Apim-Subscription-Key": AZURE_SPEECH_KEY,
+            "Content-Type": "application/ssml+xml",
+            "X-Microsoft-OutputFormat": "audio-24khz-160kbitrate-mono-mp3",
+            "User-Agent": "youtube-shorts-automation",
+        }
+
+        safe_text = (
+            str(text)
+            .replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace('"', "&quot;")
+            .replace("'", "&apos;")
+        )
+
+        ssml = f"""<speak version="1.0"
+xmlns="http://www.w3.org/2001/10/synthesis"
+xml:lang="ar-SA">
+<voice name="{AZURE_VOICE_NAME}">
+<prosody rate="0%" pitch="0%">
+{safe_text}
+</prosody>
+</voice>
+</speak>"""
+
+        response = requests.post(
+            url,
+            headers=headers,
+            data=ssml.encode("utf-8"),
+            timeout=60,
+        )
+        response.raise_for_status()
+        VOICE_FILE.write_bytes(response.content)
+
+    else:
+        print("Azure Speech secrets not found; using Edge Neural TTS fallback.")
+
+        async def generate():
             communicate = edge_tts.Communicate(
                 text,
                 VOICE_NAME,
                 rate=VOICE_RATE,
                 volume=VOICE_VOLUME,
                 pitch=VOICE_PITCH,
-                boundary="WordBoundary",
             )
-        except TypeError:
-            # Compatibility with older edge-tts versions whose constructor
-            # did not expose the boundary argument.
-            communicate = edge_tts.Communicate(
-                text,
-                VOICE_NAME,
-                rate=VOICE_RATE,
-                volume=VOICE_VOLUME,
-                pitch=VOICE_PITCH,
-            )
+            await communicate.save(str(VOICE_FILE))
 
-        timings = []
-        with open(VOICE_FILE, "wb") as audio_file:
-            async for chunk in communicate.stream():
-                if chunk["type"] == "audio":
-                    audio_file.write(chunk["data"])
-                elif chunk["type"] == "WordBoundary":
-                    data = chunk.get("offset", 0)
-                    duration = chunk.get("duration", 0)
-                    word = str(chunk.get("text", "")).strip()
-                    if word:
-                        timings.append({
-                            "text": word,
-                            "start": float(data) / 10_000_000,
-                            "end": float(data + duration) / 10_000_000,
-                        })
-
-        with open(WORD_TIMINGS_FILE, "w", encoding="utf-8") as file:
-            json.dump(timings, file, ensure_ascii=False, indent=2)
-
-    asyncio.run(generate())
+        asyncio.run(generate())
 
     if not VOICE_FILE.exists() or VOICE_FILE.stat().st_size < 1000:
         raise RuntimeError("Voice file was not created correctly.")
 
-    if not WORD_TIMINGS_FILE.exists():
-        WORD_TIMINGS_FILE.write_text("[]", encoding="utf-8")
-
-    # Some edge-tts/service combinations can return audio without metadata.
-    # Do not abort the whole video here; _map_word_timings() has a proportional
-    # timing fallback. With boundary="WordBoundary" above, normal runs will
-    # contain exact word events.
-
-
-def limit_voice_script(text, max_words=MAX_VOICE_WORDS):
-    """Keep narration in a Shorts-friendly range so the video does not need looping."""
-    text = clean_text(text)
-    words = text.split()
-    if len(words) <= max_words:
-        return text
-
-    shortened = " ".join(words[:max_words]).strip()
-    # End on a complete sentence when possible.
-    for punctuation in (".", "؟", "!", "،"):
-        pos = shortened.rfind(punctuation)
-        if pos >= max(40, len(shortened) - 35):
-            return shortened[:pos + 1].strip()
-    return shortened.rstrip("،") + "."
 
 def get_audio_duration():
     result = command_output([
@@ -879,107 +675,95 @@ def clean_text(text):
     return text.strip()
 
 
-def load_word_timings():
-    if not WORD_TIMINGS_FILE.exists():
-        return []
-    with open(WORD_TIMINGS_FILE, "r", encoding="utf-8") as file:
-        timings = json.load(file)
-    return timings if isinstance(timings, list) else []
-
-
-def _normal_word(value):
-    return re.sub(r"[^\w\u0600-\u06FF]+", "", str(value), flags=re.UNICODE).strip()
-
-
-def _map_word_timings(text):
-    """Map Edge word-boundary events back onto the exact narration words."""
-    target_words = text.split()
-    source = load_word_timings()
-    mapped = []
-    cursor = 0
-
-    for target in target_words:
-        target_key = _normal_word(target)
-        found = None
-        for i in range(cursor, len(source)):
-            source_key = _normal_word(source[i].get("text", ""))
-            if source_key and (source_key == target_key or source_key in target_key or target_key in source_key):
-                found = i
-                break
-        if found is None:
-            continue
-        item = source[found]
-        mapped.append({
-            "text": target,
-            "start": float(item["start"]),
-            "end": max(float(item["end"]), float(item["start"]) + 0.05),
-        })
-        cursor = found + 1
-
-    # If the service emitted fewer boundaries, fall back to proportional timing
-    # rather than allowing subtitles to drift or disappear.
-    if len(mapped) < max(1, int(len(target_words) * 0.75)):
-        duration = get_audio_duration()
-        total = sum(max(1, len(w)) for w in target_words)
-        mapped = []
-        current = 0.0
-        for word in target_words:
-            span = duration * max(1, len(word)) / total
-            mapped.append({"text": word, "start": current, "end": min(duration, current + span)})
-            current += span
-
-    return mapped
-
-
-def _caption_groups(word_timings, max_words=6, max_chars=24):
-    # Keep each caption as ONE visual line. The existing font, size, shadow,
-    # background and timing settings remain unchanged.
-    groups = []
+def split_text_for_subtitles(text):
+    """Split Arabic captions into balanced 1-2 line blocks like modern Shorts captions."""
+    words = clean_text(text).split()
+    parts = []
     current = []
-    chars = 0
-    for item in word_timings:
-        add = len(item["text"]) + (1 if current else 0)
-        if current and (len(current) >= max_words or chars + add > max_chars):
-            groups.append(current)
-            current = []
-            chars = 0
-        current.append(item)
-        chars += len(item["text"]) + (1 if len(current) > 1 else 0)
-    if current:
-        groups.append(current)
-    return groups
 
+    for word in words:
+        candidate = " ".join(current + [word])
 
-def _group_text_with_break(group):
-    # Deliberately no ASS line break: the subtitle stays on one centered line.
-    return " ".join(x["text"] for x in group)
-
-
-def _highlight_word_in_caption(caption, word):
-    plain = caption.replace(r"\N", " ")
-    words = plain.split()
-    target = word.strip()
-    used = False
-    out = []
-    for item in words:
-        if not used and item == target:
-            out.append(r"{\c&H0000FFFF&}" + item + r"{\c&H00FFFFFF&}")
-            used = True
+        if len(candidate) <= 23:
+            current.append(word)
         else:
-            out.append(item)
-    result = " ".join(out)
-    if r"\N" in caption:
-        left, right = caption.split(r"\N", 1)
-        left_words = left.split()
-        right_words = right.split()
-        found = False
-        for words_line in (left_words, right_words):
-            for i, item in enumerate(words_line):
-                if not found and item == target:
-                    words_line[i] = r"{\c&H0000FFFF&}" + item + r"{\c&H00FFFFFF&}"
-                    found = True
-        return " ".join(left_words) + r"\N" + " ".join(right_words)
-    return result
+            if current:
+                parts.append(" ".join(current))
+            current = [word]
+
+    if current:
+        parts.append(" ".join(current))
+
+    # Merge very short neighboring blocks when the result still fits.
+    merged = []
+    for part in parts:
+        if merged and len(merged[-1]) + 1 + len(part) <= 23:
+            merged[-1] = merged[-1] + " " + part
+        else:
+            merged.append(part)
+
+    return merged
+
+
+def make_caption_lines(text):
+    """Create a balanced two-line caption without awkwardly splitting words."""
+    text = clean_text(text)
+    if len(text) <= 23:
+        return text
+
+    words = text.split()
+    best = None
+    best_score = None
+
+    for i in range(1, len(words)):
+        left = " ".join(words[:i])
+        right = " ".join(words[i:])
+
+        if len(left) > 23 or len(right) > 23:
+            continue
+
+        # Prefer two lines with similar visual length.
+        score = abs(len(left) - len(right))
+        if best_score is None or score < best_score:
+            best = left + r"\N" + right
+            best_score = score
+
+    if best:
+        return best
+
+    # Fallback for unusually long text.
+    return text
+
+
+def highlight_caption(text):
+    """Emphasize the final meaningful phrase in yellow, matching the reference style."""
+    plain = text.replace(r"\N", " ")
+    words = plain.split()
+    if len(words) < 3:
+        return text
+
+    # Highlight the final 1-3 words; keep punctuation attached naturally.
+    count = 2 if len(words) >= 4 else 1
+    prefix = " ".join(words[:-count])
+    emphasis = " ".join(words[-count:])
+
+    if r"\N" in text:
+        # Prefer highlighting the final line when it is already split.
+        lines = text.split(r"\N", 1)
+        last_line = lines[1].strip()
+        last_words = last_line.split()
+        if len(last_words) >= 2:
+            count = min(2, len(last_words))
+            normal_last = " ".join(last_words[:-count])
+            yellow_last = " ".join(last_words[-count:])
+            lines[1] = (
+                normal_last + " " if normal_last else ""
+            ) + r"{\c&H0000FFFF&}" + yellow_last + r"{\c&H00FFFFFF&}"
+            return r"\N".join(lines)
+
+    return (
+        prefix + " " if prefix else ""
+    ) + r"{\c&H0000FFFF&}" + emphasis + r"{\c&H00FFFFFF&}"
 
 
 def ass_time(seconds):
@@ -987,6 +771,7 @@ def ass_time(seconds):
     hours, remainder = divmod(total_cs, 360000)
     minutes, remainder = divmod(remainder, 6000)
     seconds_value, centiseconds = divmod(remainder, 100)
+
     return f"{hours}:{minutes:02d}:{seconds_value:02d}.{centiseconds:02d}"
 
 
@@ -1001,11 +786,16 @@ def escape_ass_text(text):
 
 
 def create_subtitle_file(text, duration):
-    word_timings = _map_word_timings(text)
-    groups = _caption_groups(word_timings)
-    if not groups:
-        raise RuntimeError("No subtitle groups could be created.")
+    parts = split_text_for_subtitles(text)
 
+    if not parts:
+        raise RuntimeError("Subtitle text is empty.")
+
+    total_characters = sum(max(1, len(part)) for part in parts)
+
+    # Modern Arabic Shorts caption style:
+    # bold, large white text, thick black outline, subtle shadow,
+    # semi-transparent black caption box, centered in the lower-safe area.
     ass_header = """[Script Info]
 ScriptType: v4.00+
 PlayResX: 1080
@@ -1014,7 +804,7 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Arabic,Noto Sans Arabic,64,&H00FFFFFF,&H00FFFFFF,&H00000000,&H99000000,-1,0,0,0,100,100,0,0,3,2,1,2,70,70,430,1
+Style: Arabic,Noto Sans Arabic,68,&H00FFFFFF,&H00FFFFFF,&H00000000,&H99000000,-1,0,0,0,100,100,0,0,3,2,1,2,90,90,430,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -1023,30 +813,29 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     with open(SUBTITLE_FILE, "w", encoding="utf-8-sig") as file:
         file.write(ass_header)
 
-        for group in groups:
-            group_start = max(0.0, group[0]["start"] - 0.03)
-            group_end = min(duration, group[-1]["end"] + 0.04)
-            caption = _group_text_with_break(group)
+        current_time = 0.0
 
-            # One event per spoken word: the currently spoken word becomes yellow.
-            # This makes the highlight follow the actual Edge TTS boundary instead
-            # of starting at the beginning of the whole caption line.
-            for index, word in enumerate(group):
-                start = max(group_start, word["start"])
-                if index + 1 < len(group):
-                    end = min(group_end, group[index + 1]["start"])
-                else:
-                    end = group_end
-                if end <= start:
-                    continue
-                highlighted = _highlight_word_in_caption(caption, word["text"])
-                file.write(
-                    "Dialogue: 0,"
-                    f"{ass_time(start)},"
-                    f"{ass_time(end)},"
-                    "Arabic,,0,0,0,,"
-                    f"{highlighted}\n"
-                )
+        for index, part in enumerate(parts):
+            part_duration = (max(1, len(part)) / total_characters) * duration
+
+            start = current_time
+            end = duration if index == len(parts) - 1 else min(
+                duration,
+                current_time + part_duration,
+            )
+
+            caption = make_caption_lines(part)
+            caption = highlight_caption(caption)
+
+            file.write(
+                "Dialogue: 0,"
+                f"{ass_time(start)},"
+                f"{ass_time(end)},"
+                "Arabic,,0,0,0,,"
+                f"{caption}\n"
+            )
+
+            current_time = end
 
 
 # =========================================================
@@ -1152,15 +941,31 @@ def create_final_video(silent_video, text):
 
     print(f"Audio duration: {audio_duration:.2f}s")
 
-    # Never loop the finished visual sequence: looping causes the same Pexels clip
-    # to appear again and again when narration is longer than the visuals.
+    # Make sure the visual track is never shorter than the voice.
     silent_duration = probe_video_duration(silent_video)
 
-    if silent_duration + 0.15 < audio_duration:
-        raise RuntimeError(
-            f"Visual track ({silent_duration:.2f}s) is shorter than narration "
-            f"({audio_duration:.2f}s). Increase CLIP_DURATION/clip count instead of looping."
-        )
+    if silent_duration < audio_duration:
+        extra = audio_duration - silent_duration + 0.2
+        print(f"Extending visual track by {extra:.2f}s")
+
+        extended = WORK_DIR / "silent_extended.mp4"
+
+        command = [
+            "ffmpeg",
+            "-y",
+            "-stream_loop", "-1",
+            "-i", str(silent_video),
+            "-t", f"{audio_duration + 0.2:.3f}",
+            "-c:v", "libx264",
+            "-preset", "medium",
+            "-crf", "18",
+            "-pix_fmt", "yuv420p",
+            "-r", str(FPS),
+            str(extended),
+        ]
+
+        run_command(command)
+        silent_video = extended
 
     create_subtitle_file(text, audio_duration)
 
@@ -1368,12 +1173,6 @@ def validate_final_video():
 # MAIN PIPELINE
 # =========================================================
 
-def validate_topic_pool():
-    """Compatibility check: static topic pool is disabled."""
-    print("Static topic pool disabled: fresh topics come from Arabic Wikipedia.")
-    print("Conservative safety blacklist enabled.")
-
-
 def main():
     print("\n========================================")
     print("YOUTUBE SHORTS AUTOMATION - PROFESSIONAL MODE")
@@ -1386,6 +1185,13 @@ def main():
     used_clips = load_used_clips()
 
     topic = select_new_topic(used_content)
+    topic = prepare_topic_script(topic)
+
+    if not topic["text"]:
+        raise RuntimeError("The selected topic became empty after Arabic text cleanup.")
+
+    print("Clean Arabic script:")
+    print(topic["text"])
 
     clean_previous_files()
 
@@ -1421,19 +1227,13 @@ def main():
     print("\nCreating silent video...")
     silent_video = create_silent_video(downloaded)
 
-    # Keep the stored topic unchanged for duplicate detection and YouTube metadata,
-    # but use a lighter Saudi conversational version for narration and captions.
-    voice_topic = prepare_topic_for_voice(topic)
-    voice_topic["text"] = limit_voice_script(voice_topic["text"])
-
-    print(f"Narration length limited to {len(voice_topic['text'].split())} words.")
     print("\nCreating Arabic voice...")
-    create_voice(voice_topic["text"])
+    create_voice(topic["text"])
 
     print("\nCreating final Short...")
     create_final_video(
         silent_video,
-        voice_topic["text"],
+        topic["text"],
     )
 
     validate_final_video()
