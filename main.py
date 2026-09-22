@@ -102,6 +102,60 @@ FORBIDDEN_TOPIC_STEMS = [
     "تهريب", "ابتزاز", "قرصنة", "سموم", "إعدام",
 ]
 
+# The channel's preferred editorial direction.
+# Candidates must fit at least one of these factual families.
+PREFERRED_TOPIC_TERMS = [
+    "تاريخ", "حضارة", "حضارات", "مملكة", "إمبراطورية", "آثار", "أثري",
+    "جغرافيا", "جغرافي", "قارة", "جزيرة", "جزر", "جبل", "جبال", "نهر",
+    "أنهار", "بحيرة", "بحيرات", "صحراء", "وادي", "خليج", "مضيق", "شلال",
+    "مدينة", "مدن", "معلم", "معالم", "موقع", "مواقع", "طبيعة", "مناخ",
+    "رياضة", "رياضي", "بطولة", "بطولات", "دوري", "منتخب", "كرة", "سباق",
+    "ألعاب", "أولمبياد", "علم", "علوم", "فيزياء", "كيمياء", "فلك", "فضاء",
+    "هندسة", "اختراع", "اختراعات", "تقنية", "تكنولوجيا", "حيوان", "حيوانات",
+    "نبات", "نباتات", "ظاهرة", "معلومة", "معلومات", "كيف", "سبب", "اكتشاف",
+]
+
+# Keep the feed away from celebrity/artist/person pages and Western-centric topics.
+PERSON_AND_ENTERTAINMENT_TERMS = [
+    "ممثل", "ممثلة", "ممثلون", "ممثلات", "فنان", "فنانة", "فنانون", "فنانين",
+    "مغني", "مغنية", "مغنون", "مغنيات", "مطرب", "مطربة", "مخرج", "مخرجة",
+    "سينما", "فيلم", "أفلام", "مسلسل", "مسلسلات", "هوليوود", "موسيقى",
+    "موسيقار", "موسيقية", "مشاهير", "مشهور", "مشاهير", "عارض أزياء",
+    "كاتب", "كاتبة", "شاعر", "شاعرة", "روائي", "روائية", "رسام", "رسامة",
+    "لوحة فنية", "أغنية", "ألبوم", "مؤلف موسيقي",
+]
+
+WESTERN_TOPIC_TERMS = [
+    "الولايات المتحدة", "أمريكا", "الأمريكي", "الأمريكية", "واشنطن",
+    "بريطانيا", "المملكة المتحدة", "إنجلترا", "اسكتلندا", "ويلز", "لندن",
+    "فرنسا", "باريس", "ألمانيا", "برلين", "إيطاليا", "روما", "إسبانيا",
+    "مدريد", "البرتغال", "هولندا", "بلجيكا", "سويسرا", "النمسا",
+    "السويد", "النرويج", "الدنمارك", "فنلندا", "آيسلندا", "أيرلندا",
+    "كندا", "أستراليا", "نيوزيلندا", "أوروبا", "الاتحاد الأوروبي",
+    "هوليوود", "برودواي", "الغرب", "غربي", "غربية",
+]
+
+WIKIPEDIA_PREFERRED_SEARCHES = [
+    "تاريخ الحضارات",
+    "الحضارات القديمة",
+    "التاريخ الإسلامي",
+    "تاريخ شبه الجزيرة العربية",
+    "جغرافيا العالم",
+    "جغرافيا الوطن العربي",
+    "المعالم الجغرافية",
+    "الجبال والأنهار",
+    "البحار والمحيطات",
+    "الصحارى",
+    "المدن التاريخية",
+    "الآثار القديمة",
+    "الرياضات والبطولات",
+    "الألعاب الأولمبية",
+    "كرة القدم والبطولات",
+    "العلوم والفضاء",
+    "الاختراعات والتقنية",
+    "الحيوانات والطبيعة",
+    "الظواهر الطبيعية",
+]
 
 # GENERAL HELPERS
 # =========================================================
@@ -296,16 +350,31 @@ def _clean_wikipedia_extract(text):
 
 
 def _wikipedia_random_articles():
+    # Use targeted factual searches instead of unrestricted random pages.
+    # This keeps the feed focused on history, geography, sports and general
+    # knowledge while allowing the existing safety/duplicate audits to decide
+    # the final candidate.
+    search_term = random.choice(WIKIPEDIA_PREFERRED_SEARCHES)
     params = {
-        "action": "query", "format": "json", "generator": "random",
-        "grnnamespace": 0, "grnlimit": WIKIPEDIA_RANDOM_BATCH,
-        "prop": "extracts|info", "exintro": 1, "explaintext": 1,
-        "exchars": WIKIPEDIA_MAX_EXTRACT_CHARS, "inprop": "url",
+        "action": "query",
+        "format": "json",
+        "generator": "search",
+        "gsrsearch": search_term,
+        "gsrnamespace": 0,
+        "gsrlimit": WIKIPEDIA_RANDOM_BATCH,
+        "prop": "extracts|info|categories",
+        "exintro": 1,
+        "explaintext": 1,
+        "exchars": WIKIPEDIA_MAX_EXTRACT_CHARS,
+        "inprop": "url",
+        "cllimit": 30,
         "formatversion": 2,
     }
     response = requests.get(
-        WIKIPEDIA_API, params=params,
-        headers={"User-Agent": "YouTubeShortsAutomation/1.0"}, timeout=30,
+        WIKIPEDIA_API,
+        params=params,
+        headers={"User-Agent": "YouTubeShortsAutomation/1.0"},
+        timeout=30,
     )
     response.raise_for_status()
     return response.json().get("query", {}).get("pages", [])
@@ -328,6 +397,11 @@ def _make_topic_from_wikipedia(page):
         "hashtags": ["#Shorts", "#هل_تعلم", "#معلومات", "#ويكيبيديا"],
         "wikipedia_title": title,
         "wikipedia_url": page.get("fullurl", ""),
+        "wikipedia_categories": [
+            str(item.get("title", ""))
+            for item in page.get("categories", [])
+            if isinstance(item, dict)
+        ],
     }
 
 
@@ -369,18 +443,47 @@ def final_topic_safety_audit(topic):
 
 
 def wikipedia_source_is_acceptable(topic):
-    """Reject pages that are not suitable factual source material."""
+    """Reject unsuitable pages and keep the channel's preferred subject direction."""
     title = normalize_content(topic.get("wikipedia_title", ""))
+    blob = _topic_text_blob(topic)
     url = str(topic.get("wikipedia_url", "")).lower()
     if not title:
         return False
     if url and "ar.wikipedia.org" not in url:
         return False
+
     blocked_namespace_terms = [
         "قائمة", "تصنيف", "بوابة", "مقالة توضيح", "صفحة توضيح",
         "سنوات", "أحداث جارية", "وفيات",
     ]
-    return not any(term in title for term in blocked_namespace_terms)
+    if any(normalize_content(term) in title for term in blocked_namespace_terms):
+        return False
+
+    # Explicitly keep celebrities, artists and entertainment out.
+    if any(normalize_content(term) in blob for term in PERSON_AND_ENTERTAINMENT_TERMS):
+        return False
+
+    # Avoid Western-centric subjects as requested.
+    if any(normalize_content(term) in blob for term in WESTERN_TOPIC_TERMS):
+        return False
+
+    # Require a factual family that matches the channel direction.
+    if not any(normalize_content(term) in blob for term in PREFERRED_TOPIC_TERMS):
+        return False
+
+    # Category metadata is available from Wikipedia search results. Reject
+    # biography/person categories, while still allowing sports/team pages.
+    categories = topic.get("wikipedia_categories", [])
+    category_blob = normalize_content(" ".join(str(x) for x in categories))
+    person_category_terms = [
+        "مواليد", "وفيات", "أشخاص", "شخصيات", "مغنون", "مغنيات",
+        "ممثلون", "ممثلات", "فنانون", "فنانات", "كتاب", "شعراء",
+        "روائيون", "موسيقيون", "مخرجون",
+    ]
+    if any(term in category_blob for term in person_category_terms):
+        return False
+
+    return True
 
 
 def audit_and_accept_topic(topic, used_content):
@@ -828,7 +931,9 @@ def _map_word_timings(text):
     return mapped
 
 
-def _caption_groups(word_timings, max_words=7, max_chars=30):
+def _caption_groups(word_timings, max_words=6, max_chars=24):
+    # Keep each caption as ONE visual line. The existing font, size, shadow,
+    # background and timing settings remain unchanged.
     groups = []
     current = []
     chars = 0
@@ -846,18 +951,8 @@ def _caption_groups(word_timings, max_words=7, max_chars=30):
 
 
 def _group_text_with_break(group):
-    if len(group) <= 3:
-        return " ".join(x["text"] for x in group)
-    best = None
-    best_score = None
-    for i in range(1, len(group)):
-        left = " ".join(x["text"] for x in group[:i])
-        right = " ".join(x["text"] for x in group[i:])
-        score = abs(len(left) - len(right))
-        if len(left) <= 22 and len(right) <= 22 and (best_score is None or score < best_score):
-            best = left + r"\N" + right
-            best_score = score
-    return best or " ".join(x["text"] for x in group)
+    # Deliberately no ASS line break: the subtitle stays on one centered line.
+    return " ".join(x["text"] for x in group)
 
 
 def _highlight_word_in_caption(caption, word):
@@ -919,7 +1014,7 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Arabic,Noto Sans Arabic,64,&H00FFFFFF,&H00FFFFFF,&H00000000,&H99000000,-1,0,0,0,100,100,0,0,3,2,1,3,70,70,430,1
+Style: Arabic,Noto Sans Arabic,64,&H00FFFFFF,&H00FFFFFF,&H00000000,&H99000000,-1,0,0,0,100,100,0,0,3,2,1,2,70,70,430,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
