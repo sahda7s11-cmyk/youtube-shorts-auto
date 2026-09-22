@@ -680,13 +680,28 @@ def create_voice(text):
     print(f"Creating Edge Neural TTS voice: {VOICE_NAME}")
 
     async def generate():
-        communicate = edge_tts.Communicate(
-            text,
-            VOICE_NAME,
-            rate=VOICE_RATE,
-            volume=VOICE_VOLUME,
-            pitch=VOICE_PITCH,
-        )
+        # IMPORTANT: current edge-tts defaults to SentenceBoundary.
+        # We explicitly request WordBoundary because the subtitle highlighter
+        # needs one timing event for each spoken word.
+        try:
+            communicate = edge_tts.Communicate(
+                text,
+                VOICE_NAME,
+                rate=VOICE_RATE,
+                volume=VOICE_VOLUME,
+                pitch=VOICE_PITCH,
+                boundary="WordBoundary",
+            )
+        except TypeError:
+            # Compatibility with older edge-tts versions whose constructor
+            # did not expose the boundary argument.
+            communicate = edge_tts.Communicate(
+                text,
+                VOICE_NAME,
+                rate=VOICE_RATE,
+                volume=VOICE_VOLUME,
+                pitch=VOICE_PITCH,
+            )
 
         timings = []
         with open(VOICE_FILE, "wb") as audio_file:
@@ -713,7 +728,12 @@ def create_voice(text):
         raise RuntimeError("Voice file was not created correctly.")
 
     if not WORD_TIMINGS_FILE.exists():
-        raise RuntimeError("Word timing data was not created.")
+        WORD_TIMINGS_FILE.write_text("[]", encoding="utf-8")
+
+    # Some edge-tts/service combinations can return audio without metadata.
+    # Do not abort the whole video here; _map_word_timings() has a proportional
+    # timing fallback. With boundary="WordBoundary" above, normal runs will
+    # contain exact word events.
 
 
 def limit_voice_script(text, max_words=MAX_VOICE_WORDS):
@@ -758,12 +778,10 @@ def clean_text(text):
 
 def load_word_timings():
     if not WORD_TIMINGS_FILE.exists():
-        raise RuntimeError("Word timing data is missing.")
+        return []
     with open(WORD_TIMINGS_FILE, "r", encoding="utf-8") as file:
         timings = json.load(file)
-    if not timings:
-        raise RuntimeError("Word timing data is empty.")
-    return timings
+    return timings if isinstance(timings, list) else []
 
 
 def _normal_word(value):
