@@ -40,7 +40,9 @@ VIDEO_WIDTH = 1080
 VIDEO_HEIGHT = 1920
 
 NUMBER_OF_CLIPS = 9
-CLIP_DURATION = 2.8
+CLIP_DURATION = 4.0
+MAX_VOICE_WORDS = 78
+WORD_TIMINGS_FILE = Path("word_timings.json")
 FPS = 30
 
 VOICE_NAME = "ar-SA-HamedNeural"
@@ -674,7 +676,7 @@ def prepare_topic_for_voice(topic):
 
 
 def create_voice(text):
-    """Create the narration with free Edge Neural TTS."""
+    """Create Edge Neural TTS and capture exact word-boundary timings."""
     print(f"Creating Edge Neural TTS voice: {VOICE_NAME}")
 
     async def generate():
@@ -685,12 +687,49 @@ def create_voice(text):
             volume=VOICE_VOLUME,
             pitch=VOICE_PITCH,
         )
-        await communicate.save(str(VOICE_FILE))
+
+        timings = []
+        with open(VOICE_FILE, "wb") as audio_file:
+            async for chunk in communicate.stream():
+                if chunk["type"] == "audio":
+                    audio_file.write(chunk["data"])
+                elif chunk["type"] == "WordBoundary":
+                    data = chunk.get("offset", 0)
+                    duration = chunk.get("duration", 0)
+                    word = str(chunk.get("text", "")).strip()
+                    if word:
+                        timings.append({
+                            "text": word,
+                            "start": float(data) / 10_000_000,
+                            "end": float(data + duration) / 10_000_000,
+                        })
+
+        with open(WORD_TIMINGS_FILE, "w", encoding="utf-8") as file:
+            json.dump(timings, file, ensure_ascii=False, indent=2)
 
     asyncio.run(generate())
 
     if not VOICE_FILE.exists() or VOICE_FILE.stat().st_size < 1000:
         raise RuntimeError("Voice file was not created correctly.")
+
+    if not WORD_TIMINGS_FILE.exists():
+        raise RuntimeError("Word timing data was not created.")
+
+
+def limit_voice_script(text, max_words=MAX_VOICE_WORDS):
+    """Keep narration in a Shorts-friendly range so the video does not need looping."""
+    text = clean_text(text)
+    words = text.split()
+    if len(words) <= max_words:
+        return text
+
+    shortened = " ".join(words[:max_words]).strip()
+    # End on a complete sentence when possible.
+    for punctuation in (".", "؟", "!", "،"):
+        pos = shortened.rfind(punctuation)
+        if pos >= max(40, len(shortened) - 35):
+            return shortened[:pos + 1].strip()
+    return shortened.rstrip("،") + "."
 
 def get_audio_duration():
     result = command_output([
@@ -717,95 +756,117 @@ def clean_text(text):
     return text.strip()
 
 
-def split_text_for_subtitles(text):
-    """Split Arabic captions into balanced 1-2 line blocks like modern Shorts captions."""
-    words = clean_text(text).split()
-    parts = []
+def load_word_timings():
+    if not WORD_TIMINGS_FILE.exists():
+        raise RuntimeError("Word timing data is missing.")
+    with open(WORD_TIMINGS_FILE, "r", encoding="utf-8") as file:
+        timings = json.load(file)
+    if not timings:
+        raise RuntimeError("Word timing data is empty.")
+    return timings
+
+
+def _normal_word(value):
+    return re.sub(r"[^\w\u0600-\u06FF]+", "", str(value), flags=re.UNICODE).strip()
+
+
+def _map_word_timings(text):
+    """Map Edge word-boundary events back onto the exact narration words."""
+    target_words = text.split()
+    source = load_word_timings()
+    mapped = []
+    cursor = 0
+
+    for target in target_words:
+        target_key = _normal_word(target)
+        found = None
+        for i in range(cursor, len(source)):
+            source_key = _normal_word(source[i].get("text", ""))
+            if source_key and (source_key == target_key or source_key in target_key or target_key in source_key):
+                found = i
+                break
+        if found is None:
+            continue
+        item = source[found]
+        mapped.append({
+            "text": target,
+            "start": float(item["start"]),
+            "end": max(float(item["end"]), float(item["start"]) + 0.05),
+        })
+        cursor = found + 1
+
+    # If the service emitted fewer boundaries, fall back to proportional timing
+    # rather than allowing subtitles to drift or disappear.
+    if len(mapped) < max(1, int(len(target_words) * 0.75)):
+        duration = get_audio_duration()
+        total = sum(max(1, len(w)) for w in target_words)
+        mapped = []
+        current = 0.0
+        for word in target_words:
+            span = duration * max(1, len(word)) / total
+            mapped.append({"text": word, "start": current, "end": min(duration, current + span)})
+            current += span
+
+    return mapped
+
+
+def _caption_groups(word_timings, max_words=7, max_chars=30):
+    groups = []
     current = []
-
-    for word in words:
-        candidate = " ".join(current + [word])
-
-        if len(candidate) <= 23:
-            current.append(word)
-        else:
-            if current:
-                parts.append(" ".join(current))
-            current = [word]
-
+    chars = 0
+    for item in word_timings:
+        add = len(item["text"]) + (1 if current else 0)
+        if current and (len(current) >= max_words or chars + add > max_chars):
+            groups.append(current)
+            current = []
+            chars = 0
+        current.append(item)
+        chars += len(item["text"]) + (1 if len(current) > 1 else 0)
     if current:
-        parts.append(" ".join(current))
-
-    # Merge very short neighboring blocks when the result still fits.
-    merged = []
-    for part in parts:
-        if merged and len(merged[-1]) + 1 + len(part) <= 23:
-            merged[-1] = merged[-1] + " " + part
-        else:
-            merged.append(part)
-
-    return merged
+        groups.append(current)
+    return groups
 
 
-def make_caption_lines(text):
-    """Create a balanced two-line caption without awkwardly splitting words."""
-    text = clean_text(text)
-    if len(text) <= 23:
-        return text
-
-    words = text.split()
+def _group_text_with_break(group):
+    if len(group) <= 3:
+        return " ".join(x["text"] for x in group)
     best = None
     best_score = None
-
-    for i in range(1, len(words)):
-        left = " ".join(words[:i])
-        right = " ".join(words[i:])
-
-        if len(left) > 23 or len(right) > 23:
-            continue
-
-        # Prefer two lines with similar visual length.
+    for i in range(1, len(group)):
+        left = " ".join(x["text"] for x in group[:i])
+        right = " ".join(x["text"] for x in group[i:])
         score = abs(len(left) - len(right))
-        if best_score is None or score < best_score:
+        if len(left) <= 22 and len(right) <= 22 and (best_score is None or score < best_score):
             best = left + r"\N" + right
             best_score = score
-
-    if best:
-        return best
-
-    # Fallback for unusually long text.
-    return text
+    return best or " ".join(x["text"] for x in group)
 
 
-def highlight_caption(text):
-    """Emphasize the final meaningful phrase in yellow, matching the reference style."""
-    plain = text.replace(r"\N", " ")
+def _highlight_word_in_caption(caption, word):
+    plain = caption.replace(r"\N", " ")
     words = plain.split()
-    if len(words) < 3:
-        return text
-
-    # Highlight the final 1-3 words; keep punctuation attached naturally.
-    count = 2 if len(words) >= 4 else 1
-    prefix = " ".join(words[:-count])
-    emphasis = " ".join(words[-count:])
-
-    if r"\N" in text:
-        # Prefer highlighting the final line when it is already split.
-        lines = text.split(r"\N", 1)
-        last_line = lines[1].strip()
-        last_words = last_line.split()
-        if len(last_words) >= 2:
-            count = min(2, len(last_words))
-            normal_last = " ".join(last_words[:-count])
-            yellow_last = " ".join(last_words[-count:])
-            lines[1] = (
-                normal_last + " " if normal_last else ""
-            ) + r"{\c&H0000FFFF&}" + yellow_last + r"{\c&H00FFFFFF&}"
-            return r"\N".join(lines)
-
-    return (
-        prefix + " " if prefix else ""
-    ) + r"{\c&H0000FFFF&}" + emphasis + r"{\c&H00FFFFFF&}"
+    target = word.strip()
+    used = False
+    out = []
+    for item in words:
+        if not used and item == target:
+            out.append(r"{\c&H0000FFFF&}" + item + r"{\c&H00FFFFFF&}")
+            used = True
+        else:
+            out.append(item)
+    result = " ".join(out)
+    if r"\N" in caption:
+        left, right = caption.split(r"\N", 1)
+        left_words = left.split()
+        right_words = right.split()
+        found = False
+        for words_line in (left_words, right_words):
+            for i, item in enumerate(words_line):
+                if not found and item == target:
+                    words_line[i] = r"{\c&H0000FFFF&}" + item + r"{\c&H00FFFFFF&}"
+                    found = True
+        return " ".join(left_words) + r"\N" + " ".join(right_words)
+    return result
 
 
 def ass_time(seconds):
@@ -813,7 +874,6 @@ def ass_time(seconds):
     hours, remainder = divmod(total_cs, 360000)
     minutes, remainder = divmod(remainder, 6000)
     seconds_value, centiseconds = divmod(remainder, 100)
-
     return f"{hours}:{minutes:02d}:{seconds_value:02d}.{centiseconds:02d}"
 
 
@@ -828,16 +888,11 @@ def escape_ass_text(text):
 
 
 def create_subtitle_file(text, duration):
-    parts = split_text_for_subtitles(text)
+    word_timings = _map_word_timings(text)
+    groups = _caption_groups(word_timings)
+    if not groups:
+        raise RuntimeError("No subtitle groups could be created.")
 
-    if not parts:
-        raise RuntimeError("Subtitle text is empty.")
-
-    total_characters = sum(max(1, len(part)) for part in parts)
-
-    # Modern Arabic Shorts caption style:
-    # bold, large white text, thick black outline, subtle shadow,
-    # semi-transparent black caption box, centered in the lower-safe area.
     ass_header = """[Script Info]
 ScriptType: v4.00+
 PlayResX: 1080
@@ -846,7 +901,7 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Arabic,Noto Sans Arabic,68,&H00FFFFFF,&H00FFFFFF,&H00000000,&H99000000,-1,0,0,0,100,100,0,0,3,2,1,2,90,90,430,1
+Style: Arabic,Noto Sans Arabic,64,&H00FFFFFF,&H00FFFFFF,&H00000000,&H99000000,-1,0,0,0,100,100,0,0,3,2,1,3,70,70,430,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -855,29 +910,30 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     with open(SUBTITLE_FILE, "w", encoding="utf-8-sig") as file:
         file.write(ass_header)
 
-        current_time = 0.0
+        for group in groups:
+            group_start = max(0.0, group[0]["start"] - 0.03)
+            group_end = min(duration, group[-1]["end"] + 0.04)
+            caption = _group_text_with_break(group)
 
-        for index, part in enumerate(parts):
-            part_duration = (max(1, len(part)) / total_characters) * duration
-
-            start = current_time
-            end = duration if index == len(parts) - 1 else min(
-                duration,
-                current_time + part_duration,
-            )
-
-            caption = make_caption_lines(part)
-            caption = highlight_caption(caption)
-
-            file.write(
-                "Dialogue: 0,"
-                f"{ass_time(start)},"
-                f"{ass_time(end)},"
-                "Arabic,,0,0,0,,"
-                f"{caption}\n"
-            )
-
-            current_time = end
+            # One event per spoken word: the currently spoken word becomes yellow.
+            # This makes the highlight follow the actual Edge TTS boundary instead
+            # of starting at the beginning of the whole caption line.
+            for index, word in enumerate(group):
+                start = max(group_start, word["start"])
+                if index + 1 < len(group):
+                    end = min(group_end, group[index + 1]["start"])
+                else:
+                    end = group_end
+                if end <= start:
+                    continue
+                highlighted = _highlight_word_in_caption(caption, word["text"])
+                file.write(
+                    "Dialogue: 0,"
+                    f"{ass_time(start)},"
+                    f"{ass_time(end)},"
+                    "Arabic,,0,0,0,,"
+                    f"{highlighted}\n"
+                )
 
 
 # =========================================================
@@ -983,31 +1039,15 @@ def create_final_video(silent_video, text):
 
     print(f"Audio duration: {audio_duration:.2f}s")
 
-    # Make sure the visual track is never shorter than the voice.
+    # Never loop the finished visual sequence: looping causes the same Pexels clip
+    # to appear again and again when narration is longer than the visuals.
     silent_duration = probe_video_duration(silent_video)
 
-    if silent_duration < audio_duration:
-        extra = audio_duration - silent_duration + 0.2
-        print(f"Extending visual track by {extra:.2f}s")
-
-        extended = WORK_DIR / "silent_extended.mp4"
-
-        command = [
-            "ffmpeg",
-            "-y",
-            "-stream_loop", "-1",
-            "-i", str(silent_video),
-            "-t", f"{audio_duration + 0.2:.3f}",
-            "-c:v", "libx264",
-            "-preset", "medium",
-            "-crf", "18",
-            "-pix_fmt", "yuv420p",
-            "-r", str(FPS),
-            str(extended),
-        ]
-
-        run_command(command)
-        silent_video = extended
+    if silent_duration + 0.15 < audio_duration:
+        raise RuntimeError(
+            f"Visual track ({silent_duration:.2f}s) is shorter than narration "
+            f"({audio_duration:.2f}s). Increase CLIP_DURATION/clip count instead of looping."
+        )
 
     create_subtitle_file(text, audio_duration)
 
@@ -1271,7 +1311,9 @@ def main():
     # Keep the stored topic unchanged for duplicate detection and YouTube metadata,
     # but use a lighter Saudi conversational version for narration and captions.
     voice_topic = prepare_topic_for_voice(topic)
+    voice_topic["text"] = limit_voice_script(voice_topic["text"])
 
+    print(f"Narration length limited to {len(voice_topic["text"].split())} words.")
     print("\nCreating Arabic voice...")
     create_voice(voice_topic["text"])
 
