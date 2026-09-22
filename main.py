@@ -291,6 +291,80 @@ def content_already_used(topic, used_content):
 
     return False
 
+# =========================================================
+# HARD CONTENT BLOCKLIST
+# =========================================================
+# These are hard filters: a topic is rejected before generation if its
+# title/script contains one of these prohibited subjects.
+# The Pexels search phrase is intentionally NOT scanned because it is an
+# internal English search query and must not be confused with spoken text.
+BLOCKED_CONTENT_TERMS = [
+    # Politics / elections / political actors
+    "سياسة", "سياسي", "السياسة", "انتخابات", "انتخاب", "حزب سياسي",
+    "حكومة", "رئيس", "وزير", "برلمان", "مجلس الشورى", "تصويت",
+    "مرشح", "مرشحة", "حملة انتخابية", "انتخابي",
+
+    # Sexual / explicit content
+    "جنس", "جنسي", "إباحية", "اباحي", "إباحي", "محتوى إباحي",
+    "علاقة جنسية", "ممارسة جنسية", "اعتداء جنسي",
+
+    # Sexual-orientation topics
+    "مثلية", "المثلية", "مثلي", "مثلية جنسية", "شذوذ", "شاذ جنسيا",
+
+    # Drugs / intoxication
+    "مخدرات", "مخدر", "هيروين", "كوكايين", "كريستال ميث", "الميثامفيتامين",
+    "حشيش", "ماريجوانا", "قنب", "تعاطي المخدرات",
+
+    # Gambling / betting
+    "قمار", "مقامرة", "مراهنات", "مراهنة", "رهان", "كازينو",
+
+    # Weapons / explosives
+    "أسلحة", "سلاح", "بندقية", "مسدس", "رصاص", "ذخيرة", "متفجرات",
+    "قنبلة", "قنابل", "صاروخ", "تفجير", "متفجر",
+
+    # Crime / violent or graphic subjects
+    "جريمة", "جرائم", "قتل", "قاتل", "اغتيال", "مجرم", "مجرمين",
+    "اختطاف", "خطف", "ابتزاز", "سطو", "سرقة", "عصابة", "إرهاب",
+    "إرهابي", "تعذيب", "دماء", "دموي", "مذبحة", "مجزرة",
+
+    # Actors / actresses / singers / entertainers
+    "ممثل", "ممثلة", "ممثلين", "ممثلات", "فنان", "فنانة", "فنانين",
+    "مغني", "مغنية", "مغنين", "موسيقي", "مشاهير", "مشهور", "مشاهيرة",
+
+    # Women/female-focused subjects, as requested for this channel
+    "نساء", "النساء", "امرأة", "المرأة", "نساءً", "أنثى", "أنثوية",
+
+    # Historical / geographic subjects
+    "تاريخ", "تاريخي", "التاريخ", "جغرافيا", "جغرافي", "الجغرافيا",
+    "عاصمة", "عواصم", "دولة", "دول", "حدود", "خريطة", "خرائط",
+
+    # Western-centric cultural topics to avoid
+    "هوليوود", "أمريكا", "الولايات المتحدة", "بريطانيا", "بريطانيا العظمى",
+    "إنجلترا", "فرنسا", "ألمانيا", "إيطاليا", "إسبانيا", "كندا",
+    "أوروبا", "الغرب", "الغربي", "الغربية",
+]
+
+
+def find_blocked_content_terms(*texts):
+    """Return hard-blocked terms found in the human-facing topic text."""
+    combined = normalize_content(" ".join(str(x or "") for x in texts))
+    found = []
+    for term in BLOCKED_CONTENT_TERMS:
+        normalized_term = normalize_content(term)
+        if normalized_term and normalized_term in combined:
+            found.append(term)
+    return sorted(set(found), key=len, reverse=True)
+
+
+def topic_is_allowed(topic):
+    """Hard content gate used before a topic can be selected or published."""
+    blocked = find_blocked_content_terms(
+        topic.get("title", ""),
+        topic.get("text", ""),
+    )
+    return not blocked, blocked
+
+
 
 def validate_topic_pool():
     """Validate the active pool before generation.
@@ -307,6 +381,14 @@ def validate_topic_pool():
         text = sanitize_script(topic.get("text", "")) if "sanitize_script" in globals() else str(topic.get("text", ""))
         if not title or not text:
             raise RuntimeError(f"Topic {index} has an empty title or script.")
+
+        allowed, blocked = topic_is_allowed({"title": title, "text": text})
+        if not allowed:
+            raise RuntimeError(
+                f"Blocked topic detected at index {index}: {blocked}. "
+                "Remove the prohibited subject from TOPICS."
+            )
+
         key = normalize_content(title + " " + text)
         if key in seen:
             raise RuntimeError(f"Duplicate topic detected at index {index}.")
@@ -318,10 +400,18 @@ def validate_topic_pool():
 def select_new_topic(used_content):
     # Never reuse a published topic. The comparison checks the title, full
     # script, and Pexels search phrase, including legacy memory records.
-    available = [
-        topic for topic in TOPICS
-        if not content_already_used(topic, used_content)
-    ]
+    available = []
+    blocked_count = 0
+
+    for topic in TOPICS:
+        allowed, blocked = topic_is_allowed(topic)
+        if not allowed:
+            blocked_count += 1
+            print(f"BLOCKED TOPIC SKIPPED: {topic.get('title', '')} -> {blocked}")
+            continue
+
+        if not content_already_used(topic, used_content):
+            available.append(topic)
 
     if not available:
         raise RuntimeError(
