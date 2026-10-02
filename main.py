@@ -62,111 +62,7 @@ YOUTUBE_MADE_FOR_KIDS = False
 # CONTENT
 # =========================================================
 
-TOPICS = [
-    # =========================================================
-    # FOOTBALL ONLY — ENGAGING PLAYER-FOCUSED CONTENT
-    # Active categories: 1, 4, 5, 6, 7, 9, 10
-    # =========================================================
-
-    # ---------------------------------------------------------
-    # 1) Unexpected numbers and statistics
-    # ---------------------------------------------------------
-    {"search":"Lionel Messi dribbling goal action","fallback_searches":["Messi close control football","Messi dribble match"],"title":"ميسي لا يحتاج إلى مساحة كبيرة ليصنع الخطورة","text":"من أكثر الأشياء اللافتة في أسلوب ميسي قدرته على تغيير اتجاهه بسرعة داخل مساحات ضيقة. هذا التحكم يجعل المدافع أمامه مضطرًا إلى اتخاذ قرار في لحظة قصيرة جدًا.","hashtags":["#Shorts","#ميسي","#كرة_القدم"]},
-    {"search":"Cristiano Ronaldo powerful shot football","fallback_searches":["Ronaldo shooting football","Cristiano Ronaldo match action"],"title":"رونالدو جمع بين السرعة والقوة في التسديد","text":"من أبرز ما ميّز رونالدو طوال مسيرته قدرته على التسديد بقوة من مسافات مختلفة. ومع تطور أسلوبه أصبح يعتمد أكثر على اختيار المكان والتوقيت بدل القوة وحدها.","hashtags":["#Shorts","#رونالدو","#كرة_القدم"]},
-    {"search":"Kylian Mbappe sprint football","fallback_searches":["Mbappe speed match","Mbappe running football"],"title":"سرعة مبابي تصبح أخطر عندما يبدأ من المساحة","text":"خطورة مبابي لا تأتي من سرعته القصوى فقط، بل من توقيت انطلاقته. عندما يبدأ الركض قبل أن يغلق المدافع المساحة، يتحول الفارق الصغير إلى فرصة خطيرة خلال ثوانٍ.","hashtags":["#Shorts","#مبابي","#كرة_القدم"]},
-    {"search":"Erling Haaland goal celebration football","fallback_searches":["Haaland goal match","Haaland striker football"],"title":"هالاند لا يحتاج إلى لمس الكرة كثيرًا ليؤثر في المباراة","text":"أسلوب هالاند يعتمد كثيرًا على التحرك داخل منطقة الجزاء واختيار المكان المناسب. لذلك قد تكون لمساته قليلة مقارنة بغيره، لكنه يبقى حاضرًا عندما تصل الكرة إلى المنطقة الخطرة.","hashtags":["#Shorts","#هالاند","#كرة_القدم"]},
-    {"search":"Mohamed Salah Liverpool goal action","fallback_searches":["Salah dribbling football","Mohamed Salah sprint"],"title":"صلاح يجعل أول خطوة بعد استلام الكرة مهمة جدًا","text":"من نقاط قوة صلاح قدرته على تحويل الاستلام إلى انطلاقة مباشرة نحو المرمى. تغيير السرعة بعد اللمسة الأولى يمنحه مساحة إضافية قبل أن يلحق به المدافع.","hashtags":["#Shorts","#صلاح","#كرة_القدم"]},
-    {"search":"Neymar dribbling football match","fallback_searches":["Neymar skills football","Neymar close control"],"title":"نيمار يعتمد على الخداع قبل المهارة نفسها","text":"عند مشاهدة نيمار، قد تبدو المهارة هي العنصر الأبرز، لكن الخداع يبدأ قبل الحركة. تغيير اتجاه الجسم ونظرة اللاعب يمكن أن يدفع المدافع للتحرك قبل تنفيذ المراوغة.","hashtags":["#Shorts","#نيمار","#كرة_القدم"]},
-    {"search":"Luka Modric passing football match","fallback_searches":["Modric pass football","Luka Modric midfield"],"title":"مودريتش يستطيع تغيير اتجاه الهجمة بلمسة واحدة","text":"يمتلك مودريتش قدرة لافتة على رؤية المساحة قبل وصول الكرة إليه. لذلك يمكنه أحيانًا تنفيذ تمريرة واحدة تنقل اللعب من جهة إلى أخرى قبل أن ينظم المنافس دفاعه.","hashtags":["#Shorts","#مودريتش","#كرة_القدم"]},
-    {"search":"Kevin De Bruyne assist football","fallback_searches":["De Bruyne passing","Kevin De Bruyne cross"],"title":"دي بروين لا يمرر دائمًا إلى مكان اللاعب","text":"في بعض تمريراته، يرسل دي بروين الكرة إلى المساحة التي يتوقع أن يصل إليها زميله. هذه الفكرة تجعل التمريرة أسرع من انتظار وصول اللاعب إلى موقعه ثم تمرير الكرة إليه.","hashtags":["#Shorts","#دي_بروين","#كرة_القدم"]},
-    {"search":"Karim Benzema football goal action","fallback_searches":["Benzema striker movement","Benzema football match"],"title":"بنزيما كان يخلق المساحة لغيره قبل أن يبحث عن الهدف","text":"لم يعتمد بنزيما على إنهاء الهجمات فقط، بل كان يتراجع أحيانًا لسحب المدافع وفتح مساحة لزميله. هذا النوع من التحرك قد لا يظهر في الإحصائيات البسيطة لكنه يؤثر في الهجمة.","hashtags":["#Shorts","#بنزيما","#كرة_القدم"]},
-    {"search":"Robert Lewandowski striker goal football","fallback_searches":["Lewandowski finishing","Lewandowski movement"],"title":"ليفاندوفسكي يجعل اللمسة الأولى جزءًا من عملية التسجيل","text":"من نقاط قوة ليفاندوفسكي التحكم في الكرة داخل المنطقة ثم تجهيزها بسرعة للتسديد. تقليل عدد اللمسات يمنح المهاجم وقتًا أقل للمدافع كي يتدخل.","hashtags":["#Shorts","#ليفاندوفسكي","#كرة_القدم"]},
-
-    # ---------------------------------------------------------
-    # 4) Rare moments and unusual details
-    # ---------------------------------------------------------
-    {"search":"Messi free kick football close up","fallback_searches":["Messi free kick match","Messi set piece"],"title":"ميسي غيّر طريقة تنفيذ الركلات الحرة مع مرور السنوات","text":"في بداياته كان ميسي يعتمد على القوة والاتجاه في الركلات الحرة، ثم أصبح يركز أكثر على الدقة وتغيير ارتفاع الكرة ومسارها. تطور هذه التفاصيل جعل الركلة أكثر تنوعًا.","hashtags":["#Shorts","#ميسي","#كرة_القدم"]},
-    {"search":"Ronaldo free kick football slow motion","fallback_searches":["Ronaldo free kick","Cristiano Ronaldo set piece"],"title":"طريقة رونالدو في الركلات الحرة أصبحت علامة مميزة","text":"كان رونالدو يضع تركيزًا كبيرًا على وقفته قبل الركلة وعلى طريقة ضرب الكرة. اختلاف نقطة الضرب والدوران يمكن أن يغير مسار الكرة بصورة واضحة.","hashtags":["#Shorts","#رونالدو","#كرة_القدم"]},
-    {"search":"Mbappe celebration football match","fallback_searches":["Mbappe goal celebration","Mbappe match action"],"title":"احتفال مبابي الشهير بدأ كإشارة بسيطة ثم أصبح معروفًا للجميع","text":"احتفال مبابي بعد التسجيل أصبح من أكثر اللقطات التي يتعرف عليها الجمهور بسرعة. المميز أن الحركة نفسها بسيطة جدًا، لكنها ارتبطت به حتى أصبحت جزءًا من صورته داخل الملعب.","hashtags":["#Shorts","#مبابي","#كرة_القدم"]},
-    {"search":"Haaland meditation celebration football","fallback_searches":["Haaland celebration","Haaland goal celebration"],"title":"احتفال هالاند الهادئ له قصة مختلفة عن شكل الاحتفال","text":"اختار هالاند في بعض أهدافه احتفالًا هادئًا يشبه وضعية التأمل. لذلك أصبحت اللقطة لافتة لأنها تختلف تمامًا عن الاحتفالات الصاخبة المعتادة بعد التسجيل.","hashtags":["#Shorts","#هالاند","#كرة_القدم"]},
-    {"search":"Neymar football skills close up","fallback_searches":["Neymar skill move","Neymar trick football"],"title":"لماذا تبدو مراوغات نيمار وكأنها تحدث فجأة؟","text":"نيمار يستخدم تغيير السرعة وتوجيه القدم والجسم معًا لخداع المدافع. عندما يتوقف للحظة ثم ينطلق، يصبح المدافع مضطرًا إلى توقع اتجاه الحركة قبل أن تتضح بالكامل.","hashtags":["#Shorts","#نيمار","#كرة_القدم"]},
-    {"search":"Vinicius Junior dribble football","fallback_searches":["Vinicius Jr speed","Vinicius football match"],"title":"فينيسيوس يجعل المدافع في مشكلة بمجرد أن يواجهه واحدًا لواحد","text":"أحد أخطر أساليب فينيسيوس هو الجمع بين المراوغة والانطلاق. المدافع لا يعرف هل سيغير اللاعب اتجاهه أم يمر بالسرعة، وهذا التردد قد يصنع المساحة المطلوبة.","hashtags":["#Shorts","#فينيسيوس","#كرة_القدم"]},
-    {"search":"Jude Bellingham football celebration","fallback_searches":["Bellingham match action","Jude Bellingham goal"],"title":"بيلينغهام لا ينتظر دائمًا داخل منطقة الجزاء ليظهر في الهجمة","text":"يميل بيلينغهام إلى التحرك من الخلف نحو مناطق التسجيل بدل البقاء ثابتًا. هذا التوقيت يجعل وصوله أصعب على المدافعين الذين يركزون أولًا على المهاجمين أمامهم.","hashtags":["#Shorts","#بيلينغهام","#كرة_القدم"]},
-    {"search":"Luka Modric outside foot pass","fallback_searches":["Modric outside foot pass","Modric football technique"],"title":"لمسة مودريتش بالقدم الخارجية ليست مجرد استعراض","text":"استخدام القدم الخارجية يسمح للاعب بتغيير اتجاه الكرة من دون تدوير جسمه بالكامل. هذه اللمسة تمنح مودريتش زاوية تمرير مختلفة في مواقف ضيقة.","hashtags":["#Shorts","#مودريتش","#كرة_القدم"]},
-    {"search":"Salah left foot football goal","fallback_searches":["Salah cutting inside","Mohamed Salah goal"],"title":"الحركة التي يكررها صلاح ويعرفها المدافعون مسبقًا","text":"يميل صلاح إلى استلام الكرة على الجهة ثم التحرك إلى الداخل قبل البحث عن التسديد أو التمرير. ورغم أن الفكرة معروفة، فإن سرعة التنفيذ تجعل إيقافها صعبًا.","hashtags":["#Shorts","#صلاح","#كرة_القدم"]},
-    {"search":"Ronaldo header football goal","fallback_searches":["Cristiano Ronaldo header","Ronaldo aerial goal"],"title":"قفزات رونالدو لم تكن مجرد قوة بدنية","text":"في الكرات الهوائية، لا تكفي القدرة على القفز وحدها. التوقيت ومكان الانطلاق ووضعية الجسم لحظة الارتقاء كلها تحدد مدى نجاح اللاعب في الوصول إلى الكرة وتوجيهها.","hashtags":["#Shorts","#رونالدو","#كرة_القدم"]},
-
-    # ---------------------------------------------------------
-    # 5) Career details and behind-the-scenes football stories
-    # ---------------------------------------------------------
-    {"search":"Messi Barcelona youth football","fallback_searches":["Messi early football","Messi young player"],"title":"ميسي لم يبدأ مسيرته بالطريقة التي يتخيلها كثيرون","text":"بدأ ميسي طريقه في كرة القدم منذ سن صغيرة، وكان تطوره مرتبطًا بالتدريب المستمر واللعب في بيئات تنافسية. قصته توضح أن المهارة وحدها ليست الجزء الوحيد من بناء لاعب استثنائي.","hashtags":["#Shorts","#ميسي","#كرة_القدم"]},
-    {"search":"Ronaldo Manchester United young football","fallback_searches":["Ronaldo young player","Cristiano Ronaldo early career"],"title":"رونالدو تغيّر كثيرًا بين بدايته ومرحلة النضج","text":"في بداياته كان رونالدو يعتمد كثيرًا على المراوغة والسرعة، ثم تطور تدريجيًا ليصبح أكثر تركيزًا على التحرك والتسجيل وإنهاء الهجمات. هذا التغير كان واضحًا في أسلوب لعبه.","hashtags":["#Shorts","#رونالدو","#كرة_القدم"]},
-    {"search":"Mbappe Monaco young football","fallback_searches":["Mbappe early career","Mbappe young player"],"title":"مبابي ظهر مبكرًا بأسلوب يعتمد على الانطلاق خلف الدفاع","text":"منذ بداياته الاحترافية كان مبابي يعتمد على السرعة والتحرك في المساحة خلف المدافعين. ومع تطوره أضاف إلى ذلك القدرة على التسجيل وصناعة الفرص من أكثر من منطقة.","hashtags":["#Shorts","#مبابي","#كرة_القدم"]},
-    {"search":"Haaland Salzburg young football","fallback_searches":["Haaland early career","Haaland young striker"],"title":"هالاند لفت الأنظار قبل وصوله إلى أكبر الملاعب","text":"ظهر هالاند كمهاجم شاب يمتلك مزيجًا من القوة والسرعة والحس التهديفي. انتقاله بين مراحل مختلفة من مسيرته كشف أن تطوره لم يعتمد على عامل واحد فقط.","hashtags":["#Shorts","#هالاند","#كرة_القدم"]},
-    {"search":"Salah early career football","fallback_searches":["Mohamed Salah early career","Salah young football"],"title":"صلاح احتاج إلى أكثر من محطة حتى يصل إلى مستواه المعروف","text":"مر صلاح بعدة مراحل في مسيرته قبل أن يثبت نفسه كأحد أبرز المهاجمين. في كل مرحلة تطورت جوانب مختلفة من سرعته وتحركاته وإنهائه للهجمات.","hashtags":["#Shorts","#صلاح","#كرة_القدم"]},
-    {"search":"Benzema Lyon young football","fallback_searches":["Benzema early career","Karim Benzema young"],"title":"بنزيما بدأ كمهاجم ثم أصبح دوره أكثر شمولًا","text":"مع تطور مسيرته لم يعد بنزيما يعتمد فقط على الوقوف أمام المرمى. أصبح يشارك في بناء الهجمة والربط بين الخطوط وفتح المساحات، ثم يعود لإنهاء الهجمة.","hashtags":["#Shorts","#بنزيما","#كرة_القدم"]},
-    {"search":"Lewandowski young football striker","fallback_searches":["Lewandowski early career","Lewandowski training"],"title":"ليفاندوفسكي بنى قوته التهديفية من تفاصيل صغيرة","text":"تطور ليفاندوفسكي كمهاجم من خلال تحسين الحركة داخل المنطقة والتمركز واللمسة الأخيرة. هذه التفاصيل جعلته قادرًا على التسجيل بطرق متعددة بدل الاعتماد على نوع واحد من الفرص.","hashtags":["#Shorts","#ليفاندوفسكي","#كرة_القدم"]},
-    {"search":"Modric early career football","fallback_searches":["Luka Modric young","Modric early football"],"title":"مودريتش لم يكن مجرد لاعب تمرير منذ بدايته","text":"تطور مودريتش تدريجيًا ليجمع بين التحكم بالكرة والرؤية والقدرة على تغيير اتجاه اللعب. ومع الخبرة أصبح تأثيره في إيقاع المباراة أكبر من مجرد صناعة تمريرة.","hashtags":["#Shorts","#مودريتش","#كرة_القدم"]},
-    {"search":"Neymar Santos young football","fallback_searches":["Neymar young player","Neymar early career"],"title":"نيمار لفت الأنظار منذ أن كان لاعبًا شابًا","text":"منذ بداياته ظهر أسلوب نيمار القائم على المراوغة واللمسات السريعة. ومع انتقاله إلى مستويات أعلى أصبح مطالبًا بإضافة صناعة الفرص والتسجيل والعمل ضمن منظومات مختلفة.","hashtags":["#Shorts","#نيمار","#كرة_القدم"]},
-    {"search":"Vinicius Junior young football","fallback_searches":["Vinicius early career","Vinicius young player"],"title":"تطور فينيسيوس لم يكن في السرعة فقط","text":"مع مرور الوقت أصبح فينيسيوس أكثر هدوءًا في القرار الأخير، وأفضل في اختيار توقيت التمرير والتسديد. هذا التطور جعل سرعته أداة داخل منظومة لعب متكاملة.","hashtags":["#Shorts","#فينيسيوس","#كرة_القدم"]},
-
-    # ---------------------------------------------------------
-    # 6) Records and achievements
-    # ---------------------------------------------------------
-    {"search":"Messi Ballon d'Or football","fallback_searches":["Messi awards football","Messi trophy football"],"title":"ميسي صنع رقمًا استثنائيًا في جائزة الكرة الذهبية","text":"يملك ميسي الرقم القياسي في عدد مرات الفوز بالكرة الذهبية، وهو إنجاز يعكس طول فترة بقائه ضمن أعلى مستوى فردي في كرة القدم العالمية.","hashtags":["#Shorts","#ميسي","#الكرة_الذهبية"]},
-    {"search":"Ronaldo Champions League goals football","fallback_searches":["Ronaldo Champions League","Cristiano Ronaldo goals"],"title":"رونالدو يملك رقمًا تاريخيًا في أهداف دوري الأبطال","text":"يُعد رونالدو صاحب الرقم القياسي في عدد أهداف دوري أبطال أوروبا، كما سجل في مراحل مختلفة من البطولة وعلى مدار سنوات عديدة، ما جعل رقمه مرتبطًا بتاريخ المسابقة نفسها.","hashtags":["#Shorts","#رونالدو","#دوري_الأبطال"]},
-    {"search":"Ronaldo international goals football","fallback_searches":["Cristiano Ronaldo national team goals","Ronaldo Portugal goals"],"title":"رونالدو وصل إلى رقم استثنائي مع منتخب بلاده","text":"يملك رونالدو الرقم القياسي العالمي في الأهداف الدولية للرجال، وهو رقم جمعه عبر سنوات طويلة من المشاركة والتسجيل مع المنتخب.","hashtags":["#Shorts","#رونالدو","#كرة_القدم"]},
-    {"search":"Messi World Cup football trophy","fallback_searches":["Messi World Cup final","Messi Argentina football"],"title":"ميسي جمع بين أكبر إنجازات الأندية والمنتخب","text":"حقق ميسي خلال مسيرته إنجازات كبرى مع الأندية والمنتخب، ومن أبرزها الفوز بكأس العالم عام 2022. لذلك أصبحت مسيرته مرتبطة بعدة مراحل مختلفة من النجاح.","hashtags":["#Shorts","#ميسي","#كأس_العالم"]},
-    {"search":"Mbappe World Cup goal final football","fallback_searches":["Mbappe World Cup","Mbappe final goals"],"title":"مبابي دخل سجلًا مميزًا في كأس العالم وهو في عمر صغير","text":"سجل مبابي في كأس العالم وهو في سن صغيرة، ثم واصل التألق في البطولة التالية. وصول لاعب شاب إلى هذه المرحلة التهديفية في أكبر مسابقة للمنتخبات جعله من أبرز الأسماء في جيله.","hashtags":["#Shorts","#مبابي","#كأس_العالم"]},
-    {"search":"Haaland goal record football","fallback_searches":["Haaland scoring record","Haaland Premier League goals"],"title":"هالاند حطم أرقامًا تهديفية بسرعة لافتة","text":"منذ انتقاله إلى مستوى المنافسة الأعلى، سجل هالاند أهدافًا بمعدل مرتفع وحقق أرقامًا قياسية في فترات زمنية قصيرة. قوته في الإنهاء والتحرك جعلته من أكثر المهاجمين إنتاجًا.","hashtags":["#Shorts","#هالاند","#كرة_القدم"]},
-    {"search":"Salah Premier League goals record football","fallback_searches":["Mohamed Salah scoring record","Salah Liverpool records"],"title":"صلاح ترك أرقامًا مهمة في موسم واحد","text":"حقق صلاح أرقامًا تهديفية وصناعية بارزة خلال مواسمه، وكان أحد مواسمه الأولى مع فريقه نقطة تحول كبيرة في أرقامه الفردية وفي نظرة الجمهور إلى مستواه.","hashtags":["#Shorts","#صلاح","#كرة_القدم"]},
-    {"search":"Lewandowski goals record football","fallback_searches":["Lewandowski scoring record","Lewandowski Bundesliga goals"],"title":"ليفاندوفسكي وصل إلى أرقام تهديفية نادرة في موسم واحد","text":"سجل ليفاندوفسكي عددًا ضخمًا من الأهداف في موسم واحد، وحقق رقمًا قياسيًا تهديفيًا في الدوري الألماني عندما سجل أربعين هدفًا في موسم واحد.","hashtags":["#Shorts","#ليفاندوفسكي","#كرة_القدم"]},
-    {"search":"Benzema Ballon d'Or football","fallback_searches":["Karim Benzema Ballon d'Or","Benzema award"],"title":"بنزيما أنهى مرحلة طويلة من الانتظار بجائزة فردية كبرى","text":"فاز بنزيما بالكرة الذهبية بعد موسم قدم فيه مستوى تهديفيًا وصناعة فرص لافتًا، ليحصل على واحدة من أهم الجوائز الفردية في مسيرته.","hashtags":["#Shorts","#بنزيما","#الكرة_الذهبية"]},
-    {"search":"Modric Ballon d'Or football","fallback_searches":["Luka Modric Ballon d'Or","Modric award"],"title":"مودريتش كسر هيمنة المهاجمين على الكرة الذهبية في عام استثنائي","text":"فاز مودريتش بالكرة الذهبية بعد موسم برز فيه كلاعب وسط وقائد وصانع لعب، ليصبح أحد الأسماء القليلة من لاعبي الوسط الذين حصلوا على الجائزة في العصر الحديث.","hashtags":["#Shorts","#مودريتش","#الكرة_الذهبية"]},
-
-    # ---------------------------------------------------------
-    # 7) Smart comparisons between stars
-    # ---------------------------------------------------------
-    {"search":"Messi Ronaldo comparison football","fallback_searches":["Messi Ronaldo skills","Messi Ronaldo goals"],"title":"ميسي ورونالدو: لماذا يصعب اختزال الفرق بينهما في الأهداف؟","text":"ميسي اشتهر أكثر بصناعة اللعب والمراوغة والتمرير إلى جانب التسجيل، بينما اشتهر رونالدو بالتسجيل والتحرك واللعب الهوائي والتسديد. لذلك المقارنة بينهما تتغير بحسب الجانب الذي تنظر إليه.","hashtags":["#Shorts","#ميسي","#رونالدو","#كرة_القدم"]},
-    {"search":"Mbappe Haaland comparison football","fallback_searches":["Mbappe Haaland skills","Haaland Mbappe goals"],"title":"مبابي وهالاند: السرعة ضد القوة التهديفية","text":"يميل مبابي إلى استغلال المساحات والسرعة والانطلاق، بينما يعتمد هالاند أكثر على التمركز والقوة والحسم داخل المنطقة. كلا الأسلوبين يمكن أن يصنع الفارق لكن بطريقة مختلفة.","hashtags":["#Shorts","#مبابي","#هالاند","#كرة_القدم"]},
-    {"search":"Messi Neymar comparison football","fallback_searches":["Messi Neymar dribbling","Messi Neymar skills"],"title":"ميسي ونيمار: مهارتان متشابهتان لكن طريقة الخروج من الضغط مختلفة","text":"كلاهما يمتلك تحكمًا استثنائيًا بالكرة، لكن ميسي يميل إلى تغيير الاتجاه بسرعة مع دفع الكرة للأمام، بينما يعتمد نيمار كثيرًا على الخداع والمهارات وتغيير الإيقاع.","hashtags":["#Shorts","#ميسي","#نيمار","#كرة_القدم"]},
-    {"search":"Salah Mbappe comparison football","fallback_searches":["Salah Mbappe speed","Salah Mbappe goals"],"title":"صلاح ومبابي يشتركان في ميزة خطيرة: الانطلاق بعد استلام الكرة","text":"كلا اللاعبين يستطيع تحويل اللمسة الأولى إلى هجمة سريعة، لكن صلاح يعتمد كثيرًا على التحرك من الجهة إلى الداخل، بينما يستخدم مبابي المساحات الواسعة والانطلاق المباشر خلف الدفاع.","hashtags":["#Shorts","#صلاح","#مبابي","#كرة_القدم"]},
-    {"search":"Ronaldo Haaland comparison football","fallback_searches":["Ronaldo Haaland finishing","Ronaldo Haaland striker"],"title":"رونالدو وهالاند: مهاجمان لكن طريقة الوصول للهدف مختلفة","text":"رونالدو جمع خلال مسيرته بين التسديد والتحرك والكرات الهوائية، بينما يعتمد هالاند بصورة أكبر على التمركز والسرعة في الوصول إلى الكرة داخل المنطقة. النتيجة واحدة: البحث عن أفضل لحظة للتسجيل.","hashtags":["#Shorts","#رونالدو","#هالاند","#كرة_القدم"]},
-    {"search":"De Bruyne Modric comparison football","fallback_searches":["De Bruyne Modric passing","Modric De Bruyne midfield"],"title":"دي بروين ومودريتش: صانع لعب بطريقتين مختلفتين","text":"يميل دي بروين إلى التمريرات المباشرة وصناعة الفرص بسرعة، بينما يبرع مودريتش أكثر في التحكم بإيقاع اللعب وتغيير اتجاه الهجمة. كلاهما يملك رؤية عالية لكن استخدامهما لها مختلف.","hashtags":["#Shorts","#دي_بروين","#مودريتش","#كرة_القدم"]},
-    {"search":"Vinicius Neymar comparison football","fallback_searches":["Vinicius Neymar dribbling","Brazil football skills"],"title":"فينيسيوس ونيمار: لماذا تبدو مراوغاتهما مختلفة؟","text":"يعتمد فينيسيوس كثيرًا على تغيير السرعة والانطلاق بعد المراوغة، بينما يستخدم نيمار الخداع واللمسات القصيرة وتغيير الإيقاع. كلاهما يهدف إلى جعل المدافع يتحرك قبل الوقت المناسب.","hashtags":["#Shorts","#فينيسيوس","#نيمار","#كرة_القدم"]},
-    {"search":"Benzema Lewandowski comparison football","fallback_searches":["Benzema Lewandowski striker","Lewandowski Benzema goals"],"title":"بنزيما وليفاندوفسكي: مهاجمان بأسلوبين مختلفين","text":"ليفاندوفسكي معروف بالتمركز والحسم داخل المنطقة، بينما اشتهر بنزيما أيضًا بالربط وصناعة المساحات والمشاركة في بناء الهجمة. لذلك قد يؤدي المهاجمان الدور نفسه بطرق مختلفة.","hashtags":["#Shorts","#بنزيما","#ليفاندوفسكي","#كرة_القدم"]},
-
-    # ---------------------------------------------------------
-    # 9) Short match stories and turning points
-    # ---------------------------------------------------------
-    {"search":"Messi dramatic goal football match","fallback_searches":["Messi late goal","Messi decisive match"],"title":"هناك مباريات لا تحتاج فيها إلى عشر فرص حتى تصبح البطل","text":"في بعض مباريات ميسي، كانت لحظة واحدة كافية لتغيير النتيجة: تمريرة أو مراوغة أو تسديدة في الوقت المناسب. قيمة اللاعب تظهر أحيانًا في تأثيره عندما تكون الفرصة الوحيدة هي الأهم.","hashtags":["#Shorts","#ميسي","#كرة_القدم"]},
-    {"search":"Ronaldo Champions League comeback goal","fallback_searches":["Ronaldo comeback match","Ronaldo decisive goal"],"title":"رونالدو اشتهر بالظهور عندما تصبح المباراة في لحظتها الأصعب","text":"خلال مسيرته، سجل رونالدو أهدافًا حاسمة في مراحل كبيرة من البطولات. ما يجعل هذه اللقطات مميزة هو توقيتها، لأن الهدف في مباراة متقاربة قد يغير كل شيء.","hashtags":["#Shorts","#رونالدو","#دوري_الأبطال"]},
-    {"search":"Mbappe World Cup final goal action","fallback_searches":["Mbappe final match","Mbappe decisive goal"],"title":"مبابي أثبت أن مباراة واحدة قد تغير كل شيء في دقائق","text":"في المباريات الكبيرة يمكن أن تتغير النتيجة خلال دقائق قليلة، ومبابي قدم أمثلة واضحة على ذلك عندما استغل السرعة والمساحة والحسم في اللحظات الحاسمة.","hashtags":["#Shorts","#مبابي","#كرة_القدم"]},
-    {"search":"Haaland hat trick football match","fallback_searches":["Haaland three goals","Haaland match goals"],"title":"هاتريك هالاند يبدأ غالبًا من قراءة المكان قبل وصول الكرة","text":"عندما يسجل هالاند عدة أهداف في مباراة واحدة، لا تكون كل الأهداف بالطريقة نفسها. جزء كبير من خطورته يأتي من وصوله إلى المكان الصحيح قبل المدافع ثم إنهاء الهجمة بسرعة.","hashtags":["#Shorts","#هالاند","#كرة_القدم"]},
-    {"search":"Salah comeback football goal","fallback_searches":["Salah decisive match","Salah late goal"],"title":"صلاح يستطيع تحويل هجمة واحدة إلى فرصة خلال ثوانٍ","text":"عندما يستلم صلاح الكرة في المساحة المناسبة، يمكن أن ينتقل من الاستلام إلى المراوغة ثم التسديد بسرعة كبيرة. لهذا تكون بعض هجماته قصيرة جدًا لكنها خطيرة.","hashtags":["#Shorts","#صلاح","#كرة_القدم"]},
-    {"search":"Neymar comeback football match","fallback_searches":["Neymar decisive goal","Neymar match moment"],"title":"نيمار كان يستطيع تغيير شكل الهجمة بلمسة واحدة","text":"في بعض المباريات كانت لمسة نيمار الأولى كافية لتغيير اتجاه الهجمة. قدرته على استقبال الكرة تحت الضغط ثم مواجهة المدافع مباشرة جعلت لحظاته الفردية مؤثرة.","hashtags":["#Shorts","#نيمار","#كرة_القدم"]},
-    {"search":"Bellingham late goal football match","fallback_searches":["Jude Bellingham late goal","Bellingham decisive match"],"title":"بيلينغهام جعل الوصول المتأخر إلى منطقة الجزاء سلاحًا","text":"عندما يتقدم بيلينغهام من الخلف في الوقت المناسب، قد يصل إلى منطقة الجزاء دون مراقبة مباشرة. هذه الحركة تمنحه فرصة للتسديد أو استغلال ارتداد الكرة.","hashtags":["#Shorts","#بيلينغهام","#كرة_القدم"]},
-    {"search":"Modric Champions League match pass","fallback_searches":["Modric decisive pass","Modric big match"],"title":"تمريرة واحدة من مودريتش قد تغيّر اتجاه المباراة","text":"في المباريات المتقاربة، تمريرة واحدة تكسر خط الضغط يمكن أن تنقل الفريق من الدفاع إلى الهجوم فورًا. هذا النوع من التمرير من أبرز نقاط قوة مودريتش.","hashtags":["#Shorts","#مودريتش","#كرة_القدم"]},
-    {"search":"Vinicius Champions League goal football","fallback_searches":["Vinicius decisive goal","Vinicius big match"],"title":"فينيسيوس خطير عندما يحصل على متر واحد فقط","text":"لا يحتاج فينيسيوس إلى مساحة كبيرة لبدء الانطلاقة. إذا حصل على متر إضافي أمام المدافع، يستطيع تغيير الاتجاه ثم استخدام سرعته للوصول إلى منطقة خطرة بسرعة.","hashtags":["#Shorts","#فينيسيوس","#كرة_القدم"]},
-    {"search":"De Bruyne assist big match football","fallback_searches":["De Bruyne decisive assist","Kevin De Bruyne big match"],"title":"دي بروين يستطيع صناعة فرصة قبل أن يتوقعها المدافع","text":"ميزة دي بروين في بعض الهجمات أنه يمرر الكرة قبل أن تصبح المساحة واضحة للجميع. سرعة القرار تجعل المدافع يتأخر في قراءة اتجاه الهجمة.","hashtags":["#Shorts","#دي_بروين","#كرة_القدم"]},
-
-    # ---------------------------------------------------------
-    # 10) Skills and playing styles
-    # ---------------------------------------------------------
-    {"search":"Messi close control dribbling football","fallback_searches":["Messi dribbling close up","Messi ball control"],"title":"سر مراوغة ميسي يبدأ من قرب الكرة من قدمه","text":"يحافظ ميسي أثناء المراوغة على الكرة قريبة من قدمه، وهذا يسمح له بتغيير الاتجاه بسرعة عندما يتحرك المدافع. كلما قصرت المسافة بين اللاعب والكرة أصبح التحكم أسرع.","hashtags":["#Shorts","#ميسي","#مهارات_كرة_القدم"]},
-    {"search":"Ronaldo stepovers football skills","fallback_searches":["Ronaldo skills","Cristiano Ronaldo dribbling"],"title":"الخطوات السريعة حول الكرة كانت جزءًا من أسلوب رونالدو","text":"استخدم رونالدو حركات القدم حول الكرة لإجبار المدافع على توقع اتجاهه. الفكرة ليست في الحركة وحدها، بل في اللحظة التي يغير فيها اللاعب سرعته بعدها.","hashtags":["#Shorts","#رونالدو","#مهارات_كرة_القدم"]},
-    {"search":"Mbappe change direction sprint football","fallback_searches":["Mbappe dribbling","Mbappe acceleration"],"title":"مبابي لا يحتاج إلى أقصى سرعة طوال المراوغة","text":"الخطير في أسلوب مبابي هو الانتقال السريع بين السرعات. قد يبدأ بسرعة متوسطة ثم يرفعها فجأة، وهذا التغير أصعب على المدافع من السرعة الثابتة.","hashtags":["#Shorts","#مبابي","#مهارات_كرة_القدم"]},
-    {"search":"Haaland first touch football training","fallback_searches":["Haaland first touch","Haaland finishing technique"],"title":"لمسة هالاند الأولى تساعده على إنهاء الهجمة بسرعة","text":"داخل منطقة الجزاء، يمكن أن تكون اللمسة الأولى هي الفارق بين فرصة وتسديدة. هالاند يحاول توجيه الكرة إلى مكان يسمح له بالتسديد باللمسة التالية مباشرة.","hashtags":["#Shorts","#هالاند","#مهارات_كرة_القدم"]},
-    {"search":"Salah cutting inside football","fallback_searches":["Salah dribbling left foot","Salah shooting technique"],"title":"لماذا يحب صلاح التحرك من الجهة إلى الداخل؟","text":"التحرك من الجهة إلى الداخل يفتح أمام صلاح زاوية أكبر للتمرير أو التسديد. ومع سرعته يصبح المدافع أمام خيار صعب بين إغلاق الطريق أو الاستعداد للانطلاق خلفه.","hashtags":["#Shorts","#صلاح","#مهارات_كرة_القدم"]},
-    {"search":"Neymar elastico football skill","fallback_searches":["Neymar dribbling skill","Neymar football trick"],"title":"حركة نيمار السريعة تجعل المدافع يتفاعل مع اتجاه خاطئ","text":"بعض حركات نيمار تعتمد على دفع الكرة في اتجاه ثم سحبها أو تغييرها بسرعة. الهدف هو جعل المدافع ينقل وزنه إلى الجهة الخطأ قبل الانطلاق.","hashtags":["#Shorts","#نيمار","#مهارات_كرة_القدم"]},
-    {"search":"Vinicius dribbling speed football","fallback_searches":["Vinicius one on one","Vinicius skill football"],"title":"فينيسيوس يحول المواجهة الفردية إلى سباق قصير","text":"عند مواجهة مدافع واحد، يستطيع فينيسيوس استخدام تغيير الاتجاه ثم الانطلاق بدل الاستمرار في المراوغة لوقت طويل. السرعة بعد تجاوز المدافع هي الجزء الأخطر من الحركة.","hashtags":["#Shorts","#فينيسيوس","#مهارات_كرة_القدم"]},
-    {"search":"Bellingham ball control football","fallback_searches":["Bellingham dribbling","Jude Bellingham skills"],"title":"بيلينغهام يستخدم جسمه لحماية الكرة قبل تغيير الاتجاه","text":"عند الضغط عليه، يستطيع بيلينغهام استخدام وضعية الجسم لإبعاد المدافع عن الكرة، ثم تدوير جسمه والانطلاق إلى المساحة. القوة والتوازن هنا جزء من المهارة نفسها.","hashtags":["#Shorts","#بيلينغهام","#مهارات_كرة_القدم"]},
-    {"search":"Modric outside foot football pass","fallback_searches":["Modric technique","Modric passing skill"],"title":"القدم الخارجية تمنح مودريتش زاوية تمرير غير متوقعة","text":"عندما يستخدم اللاعب القدم الخارجية، يستطيع تمرير الكرة بزاوية مختلفة مع إبقاء جسمه في اتجاه آخر. هذه الحركة مفيدة عندما تكون المساحة ضيقة والوقت محدودًا.","hashtags":["#Shorts","#مودريتش","#مهارات_كرة_القدم"]},
-    {"search":"De Bruyne through ball football","fallback_searches":["De Bruyne through pass","Kevin De Bruyne technique"],"title":"التمريرة البينية عند دي بروين تعتمد على التوقيت قبل القوة","text":"التمريرة البينية الناجحة تحتاج إلى إرسال الكرة في اللحظة التي يبدأ فيها المهاجم بالتحرك. إذا سبقت الكرة اللاعب كثيرًا خرجت من الملعب، وإذا تأخرت وصل المدافع إليها.","hashtags":["#Shorts","#دي_بروين","#مهارات_كرة_القدم"]},
-    {"search":"Lewandowski finishing football training","fallback_searches":["Lewandowski finishing skill","Lewandowski striker technique"],"title":"ليفاندوفسكي يختصر الوقت بين استلام الكرة والتسديد","text":"في منطقة الجزاء، يحاول ليفاندوفسكي تجهيز جسمه قبل وصول الكرة حتى لا يحتاج إلى حركة إضافية بعد الاستلام. هذا يقلل الوقت المتاح للمدافع للتدخل.","hashtags":["#Shorts","#ليفاندوفسكي","#مهارات_كرة_القدم"]},
-    {"search":"Benzema first touch football","fallback_searches":["Benzema ball control","Benzema technique"],"title":"لمسة بنزيما الأولى كانت جزءًا من صناعة الفرصة","text":"لم يكن هدف اللمسة الأولى عند بنزيما دائمًا التقدم نحو المرمى. أحيانًا كانت اللمسة موجهة لحماية الكرة أو ربط الهجمة بزميل قادم من الخلف.","hashtags":["#Shorts","#بنزيما","#مهارات_كرة_القدم"]},
-]
-
+TOPICS = [{'search': 'ميسي والأرقام التي لا تظهر بمجرد عد الأهداف', 'fallback_searches': ['ميسي والأرقام football match', 'ميسي والأرقام action'], 'title': 'أرقام ميسي لا تختصر تأثيره في التسجيل فقط؛ فصناعة الفرص والمراوغات والتمريرات الحاسمة تكشف جانبًا آخر من حجم تأثيره في المباراة.', 'text': 'Lionel Messi chance creation dribbling match', 'hashtags': ['#Shorts', '#كرة_القدم', '#ميسي']}, {'search': 'رونالدو وكيف تحولت أرقامه مع تغير مركزه', 'fallback_searches': ['رونالدو وكيف football match', 'رونالدو وكيف action'], 'title': 'أرقام رونالدو التهديفية ارتبطت أيضًا بتطور مركزه داخل الملعب. انتقاله من الجناح إلى أدوار هجومية أكثر قربًا من المرمى غيّر نوع الفرص التي يحصل عليها.', 'text': 'Cristiano Ronaldo position striker match', 'hashtags': ['#Shorts', '#كرة_القدم', '#رونالدو']}, {'search': 'مبابي والسرعة التي تتحول إلى أرقام', 'fallback_searches': ['مبابي والسرعة football match', 'مبابي والسرعة action'], 'title': 'سرعة مبابي لا تصبح مؤثرة لمجرد أنه سريع؛ قيمتها تظهر عندما يستلم الكرة في المساحة ويحوّل الانطلاقة إلى فرصة أو تسديدة خلال وقت قصير.', 'text': 'Kylian Mbappe sprint attacking football', 'hashtags': ['#Shorts', '#كرة_القدم', '#مبابي']}, {'search': 'هالاند ولماذا تكشف لمساته القليلة شيئًا مهمًا', 'fallback_searches': ['هالاند ولماذا football match', 'هالاند ولماذا action'], 'title': 'عدد لمساته لا يشرح وحده أداء هالاند. المهاجم قد يلمس الكرة مرات قليلة لكنه يختار أماكنه داخل المنطقة بحيث تصبح كل لمسة أخطر.', 'text': 'Erling Haaland striker movement match', 'hashtags': ['#Shorts', '#كرة_القدم', '#هالاند']}, {'search': 'صلاح والأرقام خلف تحركاته من الجناح', 'fallback_searches': ['صلاح والأرقام football match', 'صلاح والأرقام action'], 'title': 'تأثير صلاح لا يعتمد على التسديد فقط؛ دخوله من الجهة إلى العمق يجمع بين التسجيل وصناعة الفرص وإجبار الدفاع على تغيير تمركزه.', 'text': 'Mohamed Salah cutting inside match', 'hashtags': ['#Shorts', '#كرة_القدم', '#صلاح']}, {'search': 'نيمار والأرقام التي تكشف قيمة المراوغة', 'fallback_searches': ['نيمار والأرقام football match', 'نيمار والأرقام action'], 'title': 'المراوغة ليست مجرد لقطة جميلة؛ عندما يتجاوز نيمار لاعبًا بالكرة تتغير زوايا التمرير والمساحة المتاحة لبقية الهجمة.', 'text': 'Neymar dribbling chance creation football', 'hashtags': ['#Shorts', '#كرة_القدم', '#نيمار']}, {'search': 'مودريتش وكيف يظهر تأثيره في عدد التمريرات', 'fallback_searches': ['مودريتش وكيف football match', 'مودريتش وكيف action'], 'title': 'كثرة التمريرات ليست المقياس الوحيد لمودريتش؛ الأهم هو أين يستلم الكرة وإلى أي منطقة ينقل اللعب بعد اللمسة.', 'text': 'Luka Modric passing midfield match', 'hashtags': ['#Shorts', '#كرة_القدم', '#مودريتش']}, {'search': 'دي بروين ولماذا تكون التمريرة الواحدة كافية', 'fallback_searches': ['دي بروين football match', 'دي بروين action'], 'title': 'قد تصنع تمريرة واحدة من دي بروين فرصة أخطر من سلسلة تمريرات قصيرة، لأن توقيتها قد يكسر خطًا كاملًا من الدفاع.', 'text': 'Kevin De Bruyne through pass match', 'hashtags': ['#Shorts', '#كرة_القدم', '#دي_بروين']}, {'search': 'بنزيما والأرقام التي تكشف دوره كمهاجم وصانع لعب', 'fallback_searches': ['بنزيما والأرقام football match', 'بنزيما والأرقام action'], 'title': 'بنزيما لم يكن يعتمد على التسجيل فقط؛ مساهمته في الربط وسحب المدافعين وصناعة المساحة كانت جزءًا من قيمته الهجومية.', 'text': 'Karim Benzema link up play match', 'hashtags': ['#Shorts', '#كرة_القدم', '#بنزيما']}, {'search': 'ليفاندوفسكي وكيف يختصر الطريق إلى التسديدة', 'fallback_searches': ['ليفاندوفسكي وكيف football match', 'ليفاندوفسكي وكيف action'], 'title': 'من أهم جوانب ليفاندوفسكي تقليل الوقت بين استلام الكرة والتسديد. هذا يجعل المدافع أمام فرصة قصيرة جدًا للتدخل.', 'text': 'Robert Lewandowski finishing match', 'hashtags': ['#Shorts', '#كرة_القدم', '#ليفاندوفسكي']}, {'search': 'فينيسيوس وتحول الانطلاقة إلى فرصة', 'fallback_searches': ['فينيسيوس وتحول football match', 'فينيسيوس وتحول action'], 'title': 'أرقام فينيسيوس في الهجوم ترتبط كثيرًا بما يحدث بعد أول مراوغة؛ فالمساحة التي يصنعها لنفسه تتحول بسرعة إلى تمريرة أو تسديدة.', 'text': 'Vinicius Junior dribbling attack match', 'hashtags': ['#Shorts', '#كرة_القدم', '#فينيسيوس']}, {'search': 'بيلينغهام والأرقام التي تأتي من الوسط', 'fallback_searches': ['بيلينغهام والأرقام football match', 'بيلينغهام والأرقام action'], 'title': 'وجود بيلينغهام في مناطق مختلفة يجعل تأثيره يتجاوز التسجيل؛ تحركاته من الوسط نحو الثلث الأخير تضيف خيارًا هجوميًا إضافيًا.', 'text': 'Jude Bellingham midfield attack match', 'hashtags': ['#Shorts', '#كرة_القدم', '#بيلينغهام']}, {'search': 'رونالدو والكرات الهوائية كجزء من سجله', 'fallback_searches': ['رونالدو والكرات football match', 'رونالدو والكرات action'], 'title': 'الكرات الهوائية كانت عنصرًا واضحًا في أسلوب رونالدو، خصوصًا عندما يختار توقيت الركض والارتقاء بدل الاعتماد على القوة وحدها.', 'text': 'Cristiano Ronaldo aerial header football', 'hashtags': ['#Shorts', '#كرة_القدم', '#رونالدو']}, {'search': 'ميسي وعدد اللمسات في المساحات الضيقة', 'fallback_searches': ['ميسي وعدد football match', 'ميسي وعدد action'], 'title': 'عندما تكون المساحة ضيقة، تصبح اللمسات القصيرة وتغيير الاتجاه أهم من السرعة القصوى، وهذا يفسر جانبًا من قوة ميسي في المواقف الفردية.', 'text': 'Lionel Messi close control dribbling', 'hashtags': ['#Shorts', '#كرة_القدم', '#ميسي']}, {'search': 'هالاند والتمركز الذي يسبق الإحصائية', 'fallback_searches': ['هالاند والتمركز football match', 'هالاند والتمركز action'], 'title': 'قبل أن يظهر اسم هالاند في جدول الهدافين، هناك حركة بدون كرة تساعده على الوصول إلى المكان المناسب قبل المدافع.', 'text': 'Erling Haaland off ball movement', 'hashtags': ['#Shorts', '#كرة_القدم', '#هالاند']}, {'search': 'صلاح ولماذا تبدأ بعض أهدافه من أول لمسة', 'fallback_searches': ['صلاح ولماذا football match', 'صلاح ولماذا action'], 'title': 'في كثير من هجمات صلاح، اللمسة الأولى تحدد اتجاه الهجمة. إذا جاءت للأمام أو إلى الداخل، يصبح لديه وقت ومساحة أكبر للقرار التالي.', 'text': 'Mohamed Salah first touch attack', 'hashtags': ['#Shorts', '#كرة_القدم', '#صلاح']}, {'search': 'ميسي والركلة الحرة التي تحتاج أكثر من قوة', 'fallback_searches': ['ميسي والركلة football match', 'ميسي والركلة action'], 'title': 'تنفيذ الركلة الحرة يعتمد على زاوية القدم ومسار الكرة وارتفاعها، وميسي طوّر أسلوبًا يعتمد كثيرًا على الدقة أكثر من القوة الخام.', 'text': 'Lionel Messi free kick football', 'hashtags': ['#Shorts', '#كرة_القدم', '#ميسي']}, {'search': 'رونالدو ووقفة الركلة الحرة قبل التسديد', 'fallback_searches': ['رونالدو ووقفة football match', 'رونالدو ووقفة action'], 'title': 'الوقفة الشهيرة قبل الركلات الحرة ليست الجزء المهم وحده؛ الأهم هو طريقة الاقتراب من الكرة ونقطة ضربها والتحكم في المسار.', 'text': 'Cristiano Ronaldo free kick football', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'مبابي واحتفاله الذي أصبح علامة معروفة', 'fallback_searches': ['مبابي واحتفاله football match', 'مبابي واحتفاله action'], 'title': 'حركة احتفال مبابي بسيطة، لكنها ارتبطت به بسرعة وأصبحت من اللقطات التي يتعرف عليها الجمهور مباشرة بعد أهدافه.', 'text': 'Kylian Mbappe celebration football', 'hashtags': ['#Shorts', '#كرة_القدم', '#مبابي']}, {'search': 'هالاند واحتفال التأمل الهادئ', 'fallback_searches': ['هالاند واحتفال football match', 'هالاند واحتفال action'], 'title': 'اختار هالاند في عدة مناسبات وضعية هادئة بعد التسجيل، وهو ما جعل الاحتفال مختلفًا بصريًا عن الاحتفالات المعتادة.', 'text': 'Erling Haaland meditation celebration', 'hashtags': ['#Shorts', '#كرة_القدم', '#هالاند']}, {'search': 'نيمار والحركة التي تجعل المدافع يتحرك قبل المراوغة', 'fallback_searches': ['نيمار والحركة football match', 'نيمار والحركة action'], 'title': 'الخداع عند نيمار يبدأ أحيانًا من حركة الجسم قبل لمس الكرة، فيجعل المدافع يتوقع اتجاهًا ثم يغيره بسرعة.', 'text': 'Neymar body feint dribbling', 'hashtags': ['#Shorts', '#كرة_القدم', '#نيمار']}, {'search': 'صلاح وتغيير السرعة بعد المراوغة', 'fallback_searches': ['صلاح وتغيير football match', 'صلاح وتغيير action'], 'title': 'اللقطة الخطيرة ليست دائمًا في المراوغة نفسها؛ تغيير السرعة مباشرة بعدها هو ما يصنع الفارق في كثير من مواجهات صلاح الفردية.', 'text': 'Mohamed Salah acceleration dribbling', 'hashtags': ['#Shorts', '#كرة_القدم', '#صلاح']}, {'search': 'مودريتش والتمرير بالقدم الخارجية', 'fallback_searches': ['مودريتش والتمرير football match', 'مودريتش والتمرير action'], 'title': 'استخدام القدم الخارجية يسمح بتمرير الكرة من زاوية غير معتادة، وهو أحد التفاصيل الفنية التي تجعل بعض تمريرات مودريتش لافتة.', 'text': 'Luka Modric outside foot pass', 'hashtags': ['#Shorts', '#كرة_القدم', '#مودريتش']}, {'search': 'دي بروين والتمريرة التي تصل قبل المدافع', 'fallback_searches': ['دي بروين football match', 'دي بروين action'], 'title': 'عندما يرسل دي بروين الكرة إلى المساحة قبل وصول المهاجم إليها، يعتمد نجاح الهجمة على قراءة اللحظة لا على قوة التمريرة فقط.', 'text': 'Kevin De Bruyne through ball', 'hashtags': ['#Shorts', '#كرة_القدم', '#دي_بروين']}, {'search': 'بنزيما واللمسة التي تحافظ على استمرار الهجمة', 'fallback_searches': ['بنزيما واللمسة football match', 'بنزيما واللمسة action'], 'title': 'اللمسة الأولى قد تكون للربط مع زميل بدل التوجه للمرمى، وهذه من التفاصيل التي ظهرت كثيرًا في طريقة لعب بنزيما.', 'text': 'Karim Benzema first touch football', 'hashtags': ['#Shorts', '#كرة_القدم', '#بنزيما']}, {'search': 'ليفاندوفسكي وكيف يجهز جسمه قبل وصول الكرة', 'fallback_searches': ['ليفاندوفسكي وكيف football match', 'ليفاندوفسكي وكيف action'], 'title': 'التمركز الجيد يجعل المهاجم مستعدًا للتسديد قبل وصول الكرة، وهذا يقلل عدد الحركات التي يحتاجها بعد الاستلام.', 'text': 'Robert Lewandowski positioning finishing', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'فينيسيوس والوقوف أمام المدافع قبل الانطلاق', 'fallback_searches': ['فينيسيوس والوقوف football match', 'فينيسيوس والوقوف action'], 'title': 'في المواجهة الفردية، يمكن لتوقف قصير أن يجبر المدافع على تثبيت قدمه، ثم تأتي الانطلاقة لتستغل لحظة التردد.', 'text': 'Vinicius Junior one on one dribbling', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'بيلينغهام واستخدام الجسم تحت الضغط', 'fallback_searches': ['بيلينغهام واستخدام football match', 'بيلينغهام واستخدام action'], 'title': 'التحكم بالجسم يساعد بيلينغهام على حماية الكرة ثم الدوران نحو المساحة بدل فقدانها عند أول ضغط.', 'text': 'Jude Bellingham ball control match', 'hashtags': ['#Shorts', '#كرة_القدم', '#بيلينغهام']}, {'search': 'رونالدو والقفز في اللحظة المناسبة', 'fallback_searches': ['رونالدو والقفز football match', 'رونالدو والقفز action'], 'title': 'الكرات العالية تحتاج توقيتًا دقيقًا؛ الارتقاء المبكر أو المتأخر قد يلغي أفضلية اللاعب مهما كانت قدرته البدنية.', 'text': 'Cristiano Ronaldo header timing', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'ميسي واللمسة التي تسبق تغيير الاتجاه', 'fallback_searches': ['ميسي واللمسة football match', 'ميسي واللمسة action'], 'title': 'في المساحات الضيقة، دفع الكرة مسافة صغيرة يسمح لميسي بتغيير اتجاهه دون فقدان السيطرة.', 'text': 'Lionel Messi close control football', 'hashtags': ['#Shorts', '#كرة_القدم', '#ميسي']}, {'search': 'نيمار والخداع قبل لمس الكرة', 'fallback_searches': ['نيمار والخداع football match', 'نيمار والخداع action'], 'title': 'نظرة اللاعب واتجاه جسمه قد يوحيان بقرار مختلف عن القرار الحقيقي، وهذه التفاصيل تساعد نيمار على خلق المساحة للمراوغة.', 'text': 'Neymar feint football skill', 'hashtags': ['#Shorts', '#كرة_القدم', '#نيمار']}, {'search': 'هالاند والحركة خلف المدافع قبل العرضية', 'fallback_searches': ['هالاند والحركة football match', 'هالاند والحركة action'], 'title': 'المهاجم الذي يتحرك قبل وصول العرضية يملك أفضلية زمنية، وهالاند يعتمد كثيرًا على اختيار المسار داخل المنطقة.', 'text': 'Erling Haaland movement cross', 'hashtags': ['#Shorts', '#كرة_القدم', '#هالاند']}, {'search': 'كيف تحول رونالدو من جناح مهاري إلى هداف متكامل', 'fallback_searches': ['كيف تحول football match', 'كيف تحول action'], 'title': 'بدايات رونالدو اعتمدت كثيرًا على المراوغة والسرعة، ثم أصبح أكثر تركيزًا على التحرك والتسجيل وإنهاء الهجمات.', 'text': 'Cristiano Ronaldo early career Manchester United', 'hashtags': ['#Shorts', '#كرة_القدم', '#رونالدو']}, {'search': 'المرحلة التي غيرت طريقة لعب ميسي', 'fallback_searches': ['المرحلة التي football match', 'المرحلة التي action'], 'title': 'مع تطور مسيرته تغيّر دور ميسي من لاعب يعتمد على التحرك والمراوغة إلى لاعب يشارك في صناعة اللعب والتسجيل معًا.', 'text': 'Lionel Messi career playing style', 'hashtags': ['#Shorts', '#كرة_القدم', '#ميسي']}, {'search': 'كيف تطور مبابي من موهبة شابة إلى مهاجم متعدد الأدوار', 'fallback_searches': ['كيف تطور football match', 'كيف تطور action'], 'title': 'مع مرور الوقت أضاف مبابي إلى سرعته مهارات في صناعة الفرص وإنهاء الهجمات والتحرك في أكثر من مركز هجومي.', 'text': 'Kylian Mbappe career development', 'hashtags': ['#Shorts', '#كرة_القدم', '#مبابي']}, {'search': 'لماذا كان انتقال هالاند بين الأندية مهمًا لأسلوبه', 'fallback_searches': ['لماذا كان football match', 'لماذا كان action'], 'title': 'تدرج هالاند بين مستويات مختلفة من المنافسة منحه خبرة في أنظمة هجومية متنوعة، مع بقاء قوته الأساسية في التحرك والحسم.', 'text': 'Erling Haaland career development', 'hashtags': ['#Shorts', '#كرة_القدم', '#هالاند']}, {'search': 'رحلة صلاح قبل الوصول إلى قمة مستواه', 'fallback_searches': ['رحلة صلاح football match', 'رحلة صلاح action'], 'title': 'مر صلاح بعدة مراحل احترافية ساعدته على تطوير السرعة والقرار الأخير والقدرة على التسجيل من الجهة.', 'text': 'Mohamed Salah career early football', 'hashtags': ['#Shorts', '#كرة_القدم', '#صلاح']}, {'search': 'كيف تغير دور بنزيما مع الخبرة', 'fallback_searches': ['كيف تغير football match', 'كيف تغير action'], 'title': 'مع تقدم مسيرته أصبح بنزيما يشارك أكثر في بناء الهجمة والربط وفتح المساحات إلى جانب إنهاء الفرص.', 'text': 'Karim Benzema career playing style', 'hashtags': ['#Shorts', '#كرة_القدم', '#بنزيما']}, {'search': 'لماذا أصبح ليفاندوفسكي أكثر تنوعًا كمهاجم', 'fallback_searches': ['لماذا أصبح football match', 'لماذا أصبح action'], 'title': 'تطور ليفاندوفسكي في التمركز والإنهاء واللعب بظهره للمرمى، ما جعله قادرًا على التعامل مع أنواع مختلفة من الفرص.', 'text': 'Robert Lewandowski career development', 'hashtags': ['#Shorts', '#كرة_القدم', '#ليفاندوفسكي']}, {'search': 'كيف حافظ مودريتش على أسلوبه رغم تغير أدواره', 'fallback_searches': ['كيف حافظ football match', 'كيف حافظ action'], 'title': 'خبرة مودريتش سمحت له بتعديل موقعه وطريقة تحركه مع الحفاظ على أهم عناصر لعبه: الرؤية والتحكم بإيقاع الهجمة.', 'text': 'Luka Modric career playing style', 'hashtags': ['#Shorts', '#كرة_القدم', '#مودريتش']}, {'search': 'نيمار بين المراوغة وصناعة اللعب', 'fallback_searches': ['نيمار بين football match', 'نيمار بين action'], 'title': 'مع ارتفاع مستوى المنافسة، لم يعد دور نيمار قائمًا على المراوغة فقط؛ أصبح مطالبًا بصناعة الفرص والتسجيل والربط بين الخطوط.', 'text': 'Neymar career playing style', 'hashtags': ['#Shorts', '#كرة_القدم', '#نيمار']}, {'search': 'تطور فينيسيوس من السرعة إلى القرار', 'fallback_searches': ['تطور فينيسيوس football match', 'تطور فينيسيوس action'], 'title': 'من أبرز جوانب تطور فينيسيوس تحسين قراره في اللحظة الأخيرة، سواء بالتمرير أو التسديد بدل الاعتماد على الانطلاقة وحدها.', 'text': 'Vinicius Junior career development', 'hashtags': ['#Shorts', '#كرة_القدم', '#فينيسيوس']}, {'search': 'كيف أصبح بيلينغهام أخطر من منطقة الوسط', 'fallback_searches': ['كيف أصبح football match', 'كيف أصبح action'], 'title': 'قدرة بيلينغهام على التحرك من الخلف أضافت بعدًا هجوميًا إلى دوره كلاعب وسط، خصوصًا عندما يصل إلى الثلث الأخير.', 'text': 'Jude Bellingham career playing style', 'hashtags': ['#Shorts', '#كرة_القدم', '#بيلينغهام']}, {'search': 'دي بروين وبناء أسلوبه حول صناعة الفرص', 'fallback_searches': ['دي بروين football match', 'دي بروين action'], 'title': 'أسلوب دي بروين يعتمد على الرؤية والتمرير المباشر واستغلال المساحات، وهي عناصر ظهرت بوضوح مع تطور مسيرته.', 'text': 'Kevin De Bruyne career playing style', 'hashtags': ['#Shorts', '#كرة_القدم', '#دي_بروين']}, {'search': 'لماذا تغيرت طريقة لعب رونالدو داخل منطقة الجزاء', 'fallback_searches': ['لماذا تغيرت football match', 'لماذا تغيرت action'], 'title': 'مع مرور السنوات أصبح التحرك داخل المنطقة والتمركز لإنهاء الهجمة أهم من الاعتماد على المراوغة لمسافات طويلة.', 'text': 'Cristiano Ronaldo striker evolution', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'ميسي وكيف جمع بين صانع اللعب والهداف', 'fallback_searches': ['ميسي وكيف football match', 'ميسي وكيف action'], 'title': 'أحد أكثر جوانب مسيرة ميسي تميزًا هو قدرته على الانتقال بين صناعة الهجمة وإنهائها بنفسه.', 'text': 'Lionel Messi playmaker goals', 'hashtags': ['#Shorts', '#كرة_القدم', '#ميسي']}, {'search': 'هالاند وكيف صقل أسلوبه بدون كرة', 'fallback_searches': ['هالاند وكيف football match', 'هالاند وكيف action'], 'title': 'جزء مهم من تطور هالاند هو الحركة قبل استلام الكرة، لأنها تساعده على الوصول إلى مناطق التسجيل بأفضلية زمنية.', 'text': 'Erling Haaland off ball development', 'hashtags': ['#Shorts', '#كرة_القدم', '#هالاند']}, {'search': 'صلاح وكيف أصبح أكثر هدوءًا في القرار الأخير', 'fallback_searches': ['صلاح وكيف football match', 'صلاح وكيف action'], 'title': 'مع الخبرة أصبح صلاح أكثر قدرة على اختيار اللحظة المناسبة بين التسديد والتمرير والانطلاق.', 'text': 'Mohamed Salah decision making career', 'hashtags': ['#Shorts', '#كرة_القدم', '#صلاح']}, {'search': 'رقم رونالدو التاريخي في دوري أبطال أوروبا', 'fallback_searches': ['رقم رونالدو football match', 'رقم رونالدو action'], 'title': 'رونالدو يملك الرقم القياسي في عدد أهداف دوري أبطال أوروبا، وهو رقم جمعه عبر سنوات طويلة من المشاركة في البطولة.', 'text': 'Cristiano Ronaldo Champions League goals record', 'hashtags': ['#Shorts', '#كرة_القدم', '#رونالدو']}, {'search': 'رقم ميسي في الكرة الذهبية', 'fallback_searches': ['رقم ميسي football match', 'رقم ميسي action'], 'title': 'ميسي يملك الرقم القياسي في عدد مرات الفوز بالكرة الذهبية، وهو إنجاز امتد عبر مراحل مختلفة من مسيرته.', 'text': "Lionel Messi Ballon d'Or record", 'hashtags': ['#Shorts', '#كرة_القدم', '#ميسي']}, {'search': 'رقم رونالدو مع منتخب البرتغال', 'fallback_searches': ['رقم رونالدو football match', 'رقم رونالدو action'], 'title': 'رونالدو يملك الرقم القياسي العالمي في الأهداف الدولية للرجال، وهو من أبرز أرقامه مع المنتخب.', 'text': 'Cristiano Ronaldo international goals record', 'hashtags': ['#Shorts', '#كرة_القدم', '#رونالدو']}, {'search': 'ميسي وكأس العالم الذي أكمل مسيرته الدولية', 'fallback_searches': ['ميسي وكأس football match', 'ميسي وكأس action'], 'title': 'فوز ميسي بكأس العالم مع الأرجنتين عام 2022 أضاف أهم لقب دولي إلى سجل مسيرته.', 'text': 'Lionel Messi World Cup trophy 2022', 'hashtags': ['#Shorts', '#كرة_القدم', '#ميسي']}, {'search': 'مبابي والإنجاز المبكر في كأس العالم', 'fallback_searches': ['مبابي والإنجاز football match', 'مبابي والإنجاز action'], 'title': 'فوز مبابي بكأس العالم مع فرنسا وهو في سن صغيرة جعله يدخل مبكرًا في قائمة اللاعبين الذين حققوا أكبر ألقاب المنتخبات.', 'text': 'Kylian Mbappe World Cup 2018', 'hashtags': ['#Shorts', '#كرة_القدم', '#مبابي']}, {'search': 'هالاند والأرقام التهديفية السريعة', 'fallback_searches': ['هالاند والأرقام football match', 'هالاند والأرقام action'], 'title': 'من أبرز ما يميز هالاند قدرته على الوصول إلى أرقام تهديفية كبيرة خلال عدد قليل نسبيًا من المباريات.', 'text': 'Erling Haaland scoring records', 'hashtags': ['#Shorts', '#كرة_القدم', '#هالاند']}, {'search': 'صلاح وموسم غيّر أرقامه في الدوري الإنجليزي', 'fallback_searches': ['صلاح وموسم football match', 'صلاح وموسم action'], 'title': 'موسم صلاح الأول مع ليفربول كان نقطة تحول تهديفية كبيرة، وسجل خلاله رقمًا بارزًا في الدوري الإنجليزي بنظام 38 مباراة.', 'text': 'Mohamed Salah 2017 2018 Premier League record', 'hashtags': ['#Shorts', '#كرة_القدم', '#صلاح']}, {'search': 'ليفاندوفسكي والرقم القياسي في موسم واحد بالدوري الألماني', 'fallback_searches': ['ليفاندوفسكي والرقم football match', 'ليفاندوفسكي والرقم action'], 'title': 'سجل ليفاندوفسكي 41 هدفًا في موسم واحد من الدوري الألماني، محققًا رقمًا قياسيًا في المسابقة.', 'text': 'Robert Lewandowski 41 goals Bundesliga record', 'hashtags': ['#Shorts', '#كرة_القدم', '#ليفاندوفسكي']}, {'search': 'بنزيما والكرة الذهبية بعد موسم استثنائي', 'fallback_searches': ['بنزيما والكرة football match', 'بنزيما والكرة action'], 'title': 'حصل بنزيما على الكرة الذهبية بعد موسم بارز مع ريال مدريد، ليضيف الجائزة الفردية الكبرى إلى مسيرته.', 'text': "Karim Benzema Ballon d'Or 2022", 'hashtags': ['#Shorts', '#كرة_القدم', '#بنزيما']}, {'search': 'مودريتش والكرة الذهبية كلاعب وسط', 'fallback_searches': ['مودريتش والكرة football match', 'مودريتش والكرة action'], 'title': 'فوز مودريتش بالكرة الذهبية عام 2018 كان إنجازًا لافتًا للاعب وسط في عصر هيمن فيه المهاجمون على الجائزة.', 'text': "Luka Modric Ballon d'Or 2018", 'hashtags': ['#Shorts', '#كرة_القدم', '#مودريتش']}, {'search': 'رونالدو وعدد ألقاب دوري الأبطال', 'fallback_searches': ['رونالدو وعدد football match', 'رونالدو وعدد action'], 'title': 'حقق رونالدو دوري أبطال أوروبا عدة مرات، وارتبط اسمه بالبطولة أكثر من أي لاعب آخر من حيث الأهداف والمشاركة في مراحلها الحاسمة.', 'text': 'Cristiano Ronaldo Champions League trophies', 'hashtags': ['#Shorts', '#كرة_القدم', '#رونالدو']}, {'search': 'ميسي وأرقام التسجيل مع برشلونة', 'fallback_searches': ['ميسي وأرقام football match', 'ميسي وأرقام action'], 'title': 'حقق ميسي أرقامًا تهديفية استثنائية مع برشلونة خلال سنواته الطويلة مع النادي، وأصبح الهداف التاريخي للنادي.', 'text': 'Lionel Messi Barcelona scoring record', 'hashtags': ['#Shorts', '#كرة_القدم', '#ميسي']}, {'search': 'هالاند وأسرع الوصول إلى أرقام كبيرة في إنجلترا', 'fallback_searches': ['هالاند وأسرع football match', 'هالاند وأسرع action'], 'title': 'قدرة هالاند على التسجيل بمعدل مرتفع جعلته يصل إلى أرقام تهديفية في الدوري الإنجليزي بسرعة لافتة.', 'text': 'Erling Haaland Premier League scoring record', 'hashtags': ['#Shorts', '#كرة_القدم', '#هالاند']}, {'search': 'مبابي وأرقامه التهديفية في كأس العالم', 'fallback_searches': ['مبابي وأرقامه football match', 'مبابي وأرقامه action'], 'title': 'سجل مبابي عددًا كبيرًا من الأهداف في كأس العالم رغم صغر سنه، وأصبح من أبرز الهدافين الشباب في تاريخ البطولة.', 'text': 'Kylian Mbappe World Cup goals', 'hashtags': ['#Shorts', '#كرة_القدم', '#مبابي']}, {'search': 'ميسي وعدد الأهداف الدولية', 'fallback_searches': ['ميسي وعدد football match', 'ميسي وعدد action'], 'title': 'واصل ميسي تسجيل الأهداف مع الأرجنتين عبر سنوات طويلة، وأصبح من أبرز الهدافين الدوليين في تاريخ كرة القدم للرجال.', 'text': 'Lionel Messi Argentina international goals', 'hashtags': ['#Shorts', '#كرة_القدم', '#ميسي']}, {'search': 'رونالدو والهداف التاريخي للمنتخبات', 'fallback_searches': ['رونالدو والهداف football match', 'رونالدو والهداف action'], 'title': 'استمر رونالدو في تسجيل الأهداف الدولية عبر عدة أجيال من لاعبي المنتخب البرتغالي، حتى وصل إلى الرقم القياسي العالمي.', 'text': 'Cristiano Ronaldo Portugal international record', 'hashtags': ['#Shorts', '#كرة_القدم', '#رونالدو']}, {'search': 'ميسي ورونالدو: اختلاف الطريقة قبل اختلاف الأرقام', 'fallback_searches': ['ميسي ورونالدو: football match', 'ميسي ورونالدو: action'], 'title': 'ميسي يعتمد كثيرًا على المراوغة وصناعة اللعب والتمرير، بينما برز رونالدو في التسجيل والتحرك والكرات الهوائية.', 'text': 'Messi Ronaldo comparison football', 'hashtags': ['#Shorts', '#كرة_القدم', '#ميسي', '#رونالدو']}, {'search': 'مبابي وهالاند: كيف يصل كل منهما إلى المرمى', 'fallback_searches': ['مبابي وهالاند: football match', 'مبابي وهالاند: action'], 'title': 'مبابي يستفيد من السرعة والمساحات، بينما يعتمد هالاند أكثر على التمركز والقوة والحسم داخل المنطقة.', 'text': 'Mbappe Haaland comparison football', 'hashtags': ['#Shorts', '#كرة_القدم', '#مبابي', '#هالاند']}, {'search': 'صلاح ومبابي: من الأخطر في المساحة؟', 'fallback_searches': ['صلاح ومبابي: football match', 'صلاح ومبابي: action'], 'title': 'كلاهما يستطيع استغلال المساحة خلف الدفاع، لكن طريقة الوصول إليها تختلف بين تحرك صلاح من الجهة وانطلاق مبابي المباشر.', 'text': 'Salah Mbappe comparison football', 'hashtags': ['#Shorts', '#كرة_القدم', '#مبابي', '#صلاح']}, {'search': 'نيمار وميسي: المراوغة بطريقتين مختلفتين', 'fallback_searches': ['نيمار وميسي: football match', 'نيمار وميسي: action'], 'title': 'كلاهما يمتلك تحكمًا عاليًا بالكرة، لكن ميسي يميل إلى تغيير الاتجاه بسرعة بينما يعتمد نيمار أكثر على الخداع وتغيير الإيقاع.', 'text': 'Neymar Messi dribbling comparison', 'hashtags': ['#Shorts', '#كرة_القدم', '#ميسي', '#نيمار']}, {'search': 'رونالدو وهالاند: مهاجمان بخصائص مختلفة', 'fallback_searches': ['رونالدو وهالاند: football match', 'رونالدو وهالاند: action'], 'title': 'رونالدو جمع بين التسديد واللعب الهوائي والتحرك، بينما يعتمد هالاند بصورة كبيرة على التمركز والإنهاء داخل المنطقة.', 'text': 'Ronaldo Haaland striker comparison', 'hashtags': ['#Shorts', '#كرة_القدم', '#رونالدو', '#هالاند']}, {'search': 'دي بروين ومودريتش: صناعة اللعب من زاويتين', 'fallback_searches': ['دي بروين football match', 'دي بروين action'], 'title': 'دي بروين يميل إلى التمريرات المباشرة وصناعة الفرص، بينما يركز مودريتش أكثر على التحكم بالإيقاع وتغيير اتجاه اللعب.', 'text': 'De Bruyne Modric comparison', 'hashtags': ['#Shorts', '#كرة_القدم', '#مودريتش', '#دي_بروين']}, {'search': 'بنزيما وليفاندوفسكي: كيف يخدم المهاجم فريقه؟', 'fallback_searches': ['بنزيما وليفاندوفسكي: football match', 'بنزيما وليفاندوفسكي: action'], 'title': 'ليفاندوفسكي يبرز في التمركز والإنهاء، بينما يجمع بنزيما بين التسجيل والربط وصناعة المساحات.', 'text': 'Benzema Lewandowski comparison', 'hashtags': ['#Shorts', '#كرة_القدم', '#بنزيما', '#ليفاندوفسكي']}, {'search': 'فينيسيوس ونيمار: ماذا يحدث بعد المراوغة؟', 'fallback_searches': ['فينيسيوس ونيمار: football match', 'فينيسيوس ونيمار: action'], 'title': 'فينيسيوس يعتمد كثيرًا على التسارع بعد تجاوز المدافع، بينما يستخدم نيمار الخداع وتغيير الإيقاع للحفاظ على السيطرة.', 'text': 'Vinicius Neymar comparison', 'hashtags': ['#Shorts', '#كرة_القدم', '#نيمار', '#فينيسيوس']}, {'search': 'ميسي ومبابي: التحكم مقابل الانفجار', 'fallback_searches': ['ميسي ومبابي: football match', 'ميسي ومبابي: action'], 'title': 'ميسي يعتمد على التحكم الدقيق وتغيير الاتجاه، بينما يمتلك مبابي ميزة واضحة في التسارع واستغلال المساحة.', 'text': 'Messi Mbappe comparison', 'hashtags': ['#Shorts', '#كرة_القدم', '#ميسي', '#مبابي']}, {'search': 'صلاح ورونالدو: الجناح الذي يتحول إلى هداف', 'fallback_searches': ['صلاح ورونالدو: football match', 'صلاح ورونالدو: action'], 'title': 'كلاهما استطاع تطوير دوره الهجومي، لكن طريقة الوصول إلى المرمى مختلفة بحسب الحركة والتسديد والتمركز.', 'text': 'Salah Ronaldo comparison', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'هالاند وليفاندوفسكي: قراءة منطقة الجزاء', 'fallback_searches': ['هالاند وليفاندوفسكي: football match', 'هالاند وليفاندوفسكي: action'], 'title': 'كلاهما من أبرز المهاجمين في التمركز، لكن طريقة تحرك كل لاعب قبل التسديد تختلف حسب المساحة والمدافع.', 'text': 'Haaland Lewandowski comparison', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'مودريتش ودي بروين: التمريرة الحاسمة ليست شكلًا واحدًا', 'fallback_searches': ['مودريتش ودي football match', 'مودريتش ودي action'], 'title': 'دي بروين يبرع في تمريرات المساحة المباشرة، بينما يتميز مودريتش بقدرته على تغيير اتجاه اللعب وصناعة زوايا جديدة.', 'text': 'Modric De Bruyne passing comparison', 'hashtags': ['#Shorts', '#كرة_القدم', '#مودريتش', '#دي_بروين']}, {'search': 'بيلينغهام ومودريتش: لاعب وسط من جيلين', 'fallback_searches': ['بيلينغهام ومودريتش: football match', 'بيلينغهام ومودريتش: action'], 'title': 'مودريتش يعتمد على التحكم والإيقاع والخبرة، بينما يضيف بيلينغهام الحركة والقوة والوصول المتأخر إلى منطقة الجزاء.', 'text': 'Bellingham Modric midfield comparison', 'hashtags': ['#Shorts', '#كرة_القدم', '#مودريتش', '#بيلينغهام']}, {'search': 'مبابي وفينيسيوس: السرعة مع الكرة', 'fallback_searches': ['مبابي وفينيسيوس: football match', 'مبابي وفينيسيوس: action'], 'title': 'كلاهما خطير في المواجهات الفردية، لكن توقيت تغيير الاتجاه وطريقة استغلال المساحة تختلف بينهما.', 'text': 'Mbappe Vinicius comparison', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'نيمار وصلاح: صناعة الخطورة من الجناح', 'fallback_searches': ['نيمار وصلاح: football match', 'نيمار وصلاح: action'], 'title': 'نيمار يعتمد أكثر على الخداع والمهارة، بينما يميل صلاح إلى السرعة والتحرك إلى الداخل والبحث عن التسديد.', 'text': 'Neymar Salah comparison', 'hashtags': ['#Shorts', '#كرة_القدم', '#صلاح', '#نيمار']}, {'search': 'رونالدو وبنزيما: مهاجمان في منظومة واحدة بطريقتين', 'fallback_searches': ['رونالدو وبنزيما: football match', 'رونالدو وبنزيما: action'], 'title': 'رونالدو ركز كثيرًا على إنهاء الهجمات، بينما كان بنزيما يجمع بين الربط وصناعة المساحة والتسجيل.', 'text': 'Ronaldo Benzema comparison', 'hashtags': ['#Shorts', '#كرة_القدم', '#رونالدو', '#بنزيما']}, {'search': 'هدف واحد غيّر ليلة ميسي في مباراة كبيرة', 'fallback_searches': ['هدف واحد football match', 'هدف واحد action'], 'title': 'في المباريات المتقاربة، لحظة واحدة قد تكون أهم من عدد الفرص، وميسي اشتهر بصناعة هذه اللحظات بالتمريرة أو المراوغة أو التسديد.', 'text': 'Lionel Messi decisive goal match', 'hashtags': ['#Shorts', '#كرة_القدم', '#ميسي']}, {'search': 'رونالدو واللحظة التي ينتظرها في المباريات الكبيرة', 'fallback_searches': ['رونالدو واللحظة football match', 'رونالدو واللحظة action'], 'title': 'عندما تضيق المساحات، يصبح التحرك دون كرة مهمًا، ورونالدو كثيرًا ما بحث عن اللحظة التي يستطيع فيها الانفصال عن المدافع.', 'text': 'Cristiano Ronaldo big match movement', 'hashtags': ['#Shorts', '#كرة_القدم', '#رونالدو']}, {'search': 'مبابي وكيف يمكن لهجمة واحدة أن تقلب المباراة', 'fallback_searches': ['مبابي وكيف football match', 'مبابي وكيف action'], 'title': 'السرعة تجعل الهجمة تتحول بسرعة من استلام الكرة إلى مواجهة مباشرة مع الدفاع، وهذا ما يجعل بعض لحظات مبابي قصيرة وحاسمة.', 'text': 'Kylian Mbappe decisive attack match', 'hashtags': ['#Shorts', '#كرة_القدم', '#مبابي']}, {'search': 'هالاند والهدف الذي يبدأ قبل وصول الكرة', 'fallback_searches': ['هالاند والهدف football match', 'هالاند والهدف action'], 'title': 'التحرك إلى المكان المناسب قبل وصول التمريرة قد يحسم الهجمة قبل أن تبدأ التسديدة أصلًا.', 'text': 'Erling Haaland goal movement match', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'صلاح والهجمة التي تبدأ من الجهة', 'fallback_searches': ['صلاح والهجمة football match', 'صلاح والهجمة action'], 'title': 'عندما يستلم صلاح في الجهة ثم يدخل إلى العمق بسرعة، قد تتحول الهجمة إلى فرصة قبل أن يتمكن الدفاع من إعادة تمركزه.', 'text': 'Mohamed Salah decisive attack match', 'hashtags': ['#Shorts', '#كرة_القدم', '#صلاح']}, {'search': 'نيمار واللمسة التي كسرت ضغط الدفاع', 'fallback_searches': ['نيمار واللمسة football match', 'نيمار واللمسة action'], 'title': 'استلام الكرة تحت الضغط ثم الخروج منها بالمراوغة قد يحول وضعية دفاعية إلى هجمة في ثوانٍ.', 'text': 'Neymar pressure dribble match', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'مودريتش والتمريرة التي قلبت اتجاه اللعب', 'fallback_searches': ['مودريتش والتمريرة football match', 'مودريتش والتمريرة action'], 'title': 'تغيير جهة اللعب بسرعة يمكن أن يفتح مساحة كبيرة في الطرف المقابل قبل أن يتحرك الدفاع إليها.', 'text': 'Luka Modric switch pass match', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'دي بروين والتمريرة قبل ظهور المساحة', 'fallback_searches': ['دي بروين football match', 'دي بروين action'], 'title': 'أحيانًا تكون أفضل تمريرة هي التي تأتي قبل أن يلاحظ الجميع الفراغ، وهذا جزء من سرعة قراءة دي بروين للهجمة.', 'text': 'Kevin De Bruyne decisive pass match', 'hashtags': ['#Shorts', '#كرة_القدم', '#دي_بروين']}, {'search': 'بنزيما والعودة التي تبدأ من مهاجم', 'fallback_searches': ['بنزيما والعودة football match', 'بنزيما والعودة action'], 'title': 'تراجع المهاجم لاستلام الكرة قد يسحب المدافع ويخلق طريقًا لزميل قادم من الخلف، وهي إحدى أفكار بنزيما الهجومية.', 'text': 'Karim Benzema link up match', 'hashtags': ['#Shorts', '#كرة_القدم', '#بنزيما']}, {'search': 'ليفاندوفسكي واللمسة التي تحسم داخل المنطقة', 'fallback_searches': ['ليفاندوفسكي واللمسة football match', 'ليفاندوفسكي واللمسة action'], 'title': 'في منطقة الجزاء لا يوجد وقت طويل للتفكير، لذلك تصبح زاوية اللمسة الأولى والتسديد السريع حاسمة.', 'text': 'Robert Lewandowski decisive finish', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'فينيسيوس والمرتدة التي تتحول إلى سباق', 'fallback_searches': ['فينيسيوس والمرتدة football match', 'فينيسيوس والمرتدة action'], 'title': 'عندما يحصل فينيسيوس على المساحة، يمكن أن تصبح المرتدة مواجهة سرعة مباشرة بينه وبين خط الدفاع.', 'text': 'Vinicius Junior counter attack match', 'hashtags': ['#Shorts', '#كرة_القدم', '#فينيسيوس']}, {'search': 'بيلينغهام والوصول المتأخر الذي يفاجئ الدفاع', 'fallback_searches': ['بيلينغهام والوصول football match', 'بيلينغهام والوصول action'], 'title': 'التحرك من الخلف يجعل مراقبة اللاعب أصعب، خصوصًا عندما ينشغل المدافع بالمهاجم الموجود أمامه.', 'text': 'Jude Bellingham late run match', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'رونالدو والعودة في مباراة دوري الأبطال', 'fallback_searches': ['رونالدو والعودة football match', 'رونالدو والعودة action'], 'title': 'بعض مباريات دوري الأبطال ارتبطت بأهداف رونالدو الحاسمة في لحظات ضغط عالية، وهو ما جعل حضوره في الأدوار الإقصائية لافتًا.', 'text': 'Cristiano Ronaldo Champions League comeback match', 'hashtags': ['#Shorts', '#كرة_القدم', '#رونالدو']}, {'search': 'ميسي والتمريرة التي سبقت الهدف', 'fallback_searches': ['ميسي والتمريرة football match', 'ميسي والتمريرة action'], 'title': 'في بعض الهجمات تكون التمريرة قبل الأخيرة هي التي تفتح كل شيء، وليس اللمسة الأخيرة فقط.', 'text': 'Lionel Messi key pass match', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'هالاند والهجمة التي تحتاج ثانيتين فقط', 'fallback_searches': ['هالاند والهجمة football match', 'هالاند والهجمة action'], 'title': 'عندما يتحرك هالاند خلف المدافع في اللحظة المناسبة، قد تختصر الهجمة إلى تمريرة واحدة وتسديدة مباشرة.', 'text': 'Erling Haaland quick attack match', 'hashtags': ['#Shorts', '#كرة_القدم', '#هالاند']}, {'search': 'صلاح وكيف تتحول أول لمسة إلى فرصة', 'fallback_searches': ['صلاح وكيف football match', 'صلاح وكيف action'], 'title': 'استلام صلاح باتجاه المرمى بدل الوقوف على الكرة يسمح له بتحويل المساحة الصغيرة إلى هجمة سريعة.', 'text': 'Mohamed Salah first touch attack match', 'hashtags': ['#Shorts', '#كرة_القدم', '#صلاح']}, {'search': 'ميسي وكيف يحافظ على الكرة قريبة من قدمه', 'fallback_searches': ['ميسي وكيف football match', 'ميسي وكيف action'], 'title': 'المسافة القصيرة بين الكرة والقدم تمنح ميسي فرصة لتغيير الاتجاه بسرعة عندما يقترب المدافع.', 'text': 'Lionel Messi close control dribbling', 'hashtags': ['#Shorts', '#كرة_القدم', '#ميسي']}, {'search': 'رونالدو وحركة القدم حول الكرة', 'fallback_searches': ['رونالدو وحركة football match', 'رونالدو وحركة action'], 'title': 'حركات القدم السريعة تجبر المدافع على قراءة اتجاه محتمل قبل أن يقرر رونالدو الانطلاق.', 'text': 'Cristiano Ronaldo stepovers football', 'hashtags': ['#Shorts', '#كرة_القدم', '#رونالدو']}, {'search': 'مبابي وتغيير السرعة أثناء المراوغة', 'fallback_searches': ['مبابي وتغيير football match', 'مبابي وتغيير action'], 'title': 'الانتقال من سرعة متوسطة إلى انطلاقة مفاجئة قد يكون أصعب على المدافع من الجري بأقصى سرعة طوال الوقت.', 'text': 'Kylian Mbappe acceleration dribbling', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'هالاند واللمسة الأولى داخل المنطقة', 'fallback_searches': ['هالاند واللمسة football match', 'هالاند واللمسة action'], 'title': 'اللمسة الأولى الجيدة تجعل الجسم في وضعية مناسبة للتسديد قبل أن يصل المدافع إلى اللاعب.', 'text': 'Erling Haaland first touch finishing', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'صلاح والدخول إلى الداخل بعد استلام الكرة', 'fallback_searches': ['صلاح والدخول football match', 'صلاح والدخول action'], 'title': 'التحرك من الجهة إلى العمق يفتح زاوية للتسديد ويجبر المدافع على تغيير اتجاهه.', 'text': 'Mohamed Salah cutting inside', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'نيمار والخداع قبل تغيير الاتجاه', 'fallback_searches': ['نيمار والخداع football match', 'نيمار والخداع action'], 'title': 'إشارة الجسم إلى اتجاه ثم تغيير القرار في اللحظة الأخيرة يمكن أن تفقد المدافع توازنه.', 'text': 'Neymar feint dribbling skill', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'فينيسيوس والسرعة بعد تجاوز المدافع', 'fallback_searches': ['فينيسيوس والسرعة football match', 'فينيسيوس والسرعة action'], 'title': 'بعد نجاح المراوغة، يصبح التسارع هو الجزء الذي يمنع المدافع من العودة إلى المواجهة.', 'text': 'Vinicius Junior acceleration dribbling', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'بيلينغهام وحماية الكرة بالجسم', 'fallback_searches': ['بيلينغهام وحماية football match', 'بيلينغهام وحماية action'], 'title': 'استخدام الجسم في المساحات الضيقة يسمح له بالحفاظ على الكرة ثم الدوران نحو المساحة المتاحة.', 'text': 'Jude Bellingham shielding ball', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'مودريتش والقدم الخارجية في التمرير', 'fallback_searches': ['مودريتش والقدم football match', 'مودريتش والقدم action'], 'title': 'القدم الخارجية تتيح تمرير الكرة من زاوية مختلفة مع إبقاء اتجاه الجسم أقل وضوحًا للمدافع.', 'text': 'Luka Modric outside foot pass', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'دي بروين والتمريرة البينية في توقيتها الصحيح', 'fallback_searches': ['دي بروين football match', 'دي بروين action'], 'title': 'التمريرة البينية الناجحة تحتاج أن تغادر القدم في اللحظة التي يبدأ فيها المهاجم بالتحرك.', 'text': 'Kevin De Bruyne through ball technique', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'ليفاندوفسكي وكيف يسبق المدافع بخطوة', 'fallback_searches': ['ليفاندوفسكي وكيف football match', 'ليفاندوفسكي وكيف action'], 'title': 'اختيار نقطة التحرك داخل المنطقة قبل وصول الكرة يعطي المهاجم أفضلية زمنية.', 'text': 'Robert Lewandowski positioning', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'بنزيما واللمسة التي تربط الخطوط', 'fallback_searches': ['بنزيما واللمسة football match', 'بنزيما واللمسة action'], 'title': 'التحكم بالكرة واللعب بلمسة أو لمستين يساعد المهاجم على ربط الوسط بالثلث الهجومي.', 'text': 'Karim Benzema link up play', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'ميسي وتغيير الاتجاه من دون إيقاف الكرة', 'fallback_searches': ['ميسي وتغيير football match', 'ميسي وتغيير action'], 'title': 'دفع الكرة أمام القدم أثناء الجري يسمح بتغيير المسار من دون فقدان السرعة بالكامل.', 'text': 'Lionel Messi change direction dribbling', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'رونالدو والتحرك قبل العرضية', 'fallback_searches': ['رونالدو والتحرك football match', 'رونالدو والتحرك action'], 'title': 'الركض نحو نقطة مختلفة قبل وصول العرضية يجعل المدافع مضطرًا إلى تغيير اتجاهه في وقت قصير.', 'text': 'Cristiano Ronaldo movement cross', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'مبابي وكيف يستخدم المساحة خلف الظهير', 'fallback_searches': ['مبابي وكيف football match', 'مبابي وكيف action'], 'title': 'الانطلاق خلف الظهير تحتاج توقيتًا دقيقًا حتى لا يبدأ اللاعب من وضعية تسلل أو يغلق المدافع المسار.', 'text': 'Kylian Mbappe movement behind defense', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'هالاند واختيار نقطة التسديد', 'fallback_searches': ['هالاند واختيار football match', 'هالاند واختيار action'], 'title': 'داخل المنطقة، اختيار مكان استقبال الكرة قبل التسديد قد يكون أهم من قوة التسديدة نفسها.', 'text': 'Erling Haaland finishing technique', 'hashtags': ['#Shorts', '#كرة_القدم']}]
 
 # =========================================================
 # GENERAL HELPERS
@@ -533,108 +429,351 @@ def choose_video_file(video):
     return None
 
 
-def build_visual_queries(topic):
-    """Build concept-focused Pexels queries instead of generic repeated searches."""
-    primary = clean_text(topic.get("search", ""))
-    fallbacks = [
-        clean_text(x)
-        for x in topic.get("fallback_searches", [])
-        if clean_text(x)
-    ]
 
-    queries = []
-    for query in [primary] + fallbacks:
-        if query and query.lower() not in {q.lower() for q in queries}:
-            queries.append(query)
+# ---------------------------------------------------------
+# SMART VISUAL RELEVANCE
+# ---------------------------------------------------------
+# Pexels search can return generic football footage even when the query
+# contains a famous player's name. These profiles let the pipeline build
+# several precise searches around the actual player(s) and the visual
+# context of the topic, then select clips from those relevant groups.
+VISUAL_PLAYER_PROFILES = {
+    "messi": {
+        "names": ["lionel messi", "messi"],
+        "arabic": ["ميسي", "ليونيل ميسي"],
+    },
+    "ronaldo": {
+        "names": ["cristiano ronaldo", "ronaldo"],
+        "arabic": ["رونالدو", "كريستيانو رونالدو"],
+    },
+    "mbappe": {
+        "names": ["kylian mbappe", "mbappe"],
+        "arabic": ["مبابي", "كيليان مبابي"],
+    },
+    "haaland": {
+        "names": ["erling haaland", "haaland"],
+        "arabic": ["هالاند", "إيرلينغ هالاند"],
+    },
+    "salah": {
+        "names": ["mohamed salah", "salah"],
+        "arabic": ["صلاح", "محمد صلاح"],
+    },
+    "neymar": {
+        "names": ["neymar", "neymar jr"],
+        "arabic": ["نيمار"],
+    },
+    "modric": {
+        "names": ["luka modric", "modric"],
+        "arabic": ["مودريتش", "لوكا مودريتش"],
+    },
+    "de_bruyne": {
+        "names": ["kevin de bruyne", "de bruyne"],
+        "arabic": ["دي بروين", "كيفين دي بروين"],
+    },
+    "benzema": {
+        "names": ["karim benzema", "benzema"],
+        "arabic": ["بنزيما", "كريم بنزيما"],
+    },
+    "lewandowski": {
+        "names": ["robert lewandowski", "lewandowski"],
+        "arabic": ["ليفاندوفسكي", "روبرت ليفاندوفسكي"],
+    },
+    "vinicius": {
+        "names": ["vinicius junior", "vinicius jr", "vinicius"],
+        "arabic": ["فينيسيوس", "فينيسيوس جونيور"],
+    },
+    "bellingham": {
+        "names": ["jude bellingham", "bellingham"],
+        "arabic": ["بيلينغهام", "جود بيلينغهام"],
+    },
+}
 
-    # Ask for a few additional visual variants using the same subject.
-    words = primary.split()
-    if words:
-        queries.extend([
-            " ".join(words) + " close up",
-            " ".join(words) + " slow motion",
-            " ".join(words) + " cinematic",
-        ])
+VISUAL_CONTEXT_TERMS = [
+    ("dribble", ["dribbling", "football match action"]),
+    ("dribbling", ["dribbling", "football match action"]),
+    ("goal", ["goal celebration", "football match action"]),
+    ("celebration", ["goal celebration", "football match"]),
+    ("shoot", ["shooting", "football match action"]),
+    ("shot", ["shooting", "football match action"]),
+    ("free kick", ["free kick", "football match"]),
+    ("header", ["header", "football match"]),
+    ("pass", ["passing", "football match action"]),
+    ("assist", ["assist", "football match action"]),
+    ("cross", ["crossing", "football match"]),
+    ("sprint", ["sprinting", "football match action"]),
+    ("speed", ["sprinting", "football match action"]),
+    ("skills", ["football skills", "dribbling"]),
+    ("skill", ["football skill", "dribbling"]),
+    ("ball control", ["ball control", "football match"]),
+    ("first touch", ["first touch", "football match"]),
+    ("finishing", ["finishing", "football match action"]),
+    ("striker", ["striker", "football match action"]),
+    ("midfield", ["midfielder", "football match action"]),
+    ("passing", ["passing", "football match action"]),
+    ("through ball", ["through ball", "football match"]),
+    ("trophy", ["football trophy", "player celebration"]),
+    ("ballon d'or", ["football awards", "football player ceremony"]),
+    ("world cup", ["world cup football", "football match"]),
+    ("champions league", ["champions league football", "football match"]),
+    ("premier league", ["premier league football", "football match"]),
+]
+
+def _topic_search_text(topic):
+    return " ".join(
+        clean_text(str(topic.get(key, "")))
+        for key in ("search", "title", "text")
+    ).lower()
+
+
+def detect_visual_players(topic):
+    """Return the famous-player profiles explicitly present in this topic."""
+    combined = _topic_search_text(topic)
+    found = []
+
+    for key, profile in VISUAL_PLAYER_PROFILES.items():
+        if any(name.lower() in combined for name in profile["names"]):
+            found.append(key)
+            continue
+
+        if any(name in combined for name in profile["arabic"]):
+            found.append(key)
+
+    return found
+
+
+def detect_visual_context(topic):
+    """Extract the concrete football action/event from the topic."""
+    combined = _topic_search_text(topic)
+    found = []
+
+    for trigger, variants in VISUAL_CONTEXT_TERMS:
+        if trigger in combined:
+            found.extend(variants)
 
     unique = []
     seen = set()
-    for query in queries:
-        key = query.lower().strip()
-        if key and key not in seen:
+    for item in found:
+        key = item.lower()
+        if key not in seen:
             seen.add(key)
-            unique.append(query)
+            unique.append(item)
 
-    return unique[:7]
+    return unique[:4]
+
+
+def build_visual_query_groups(topic):
+    """
+    Build relevance-first query groups.
+
+    A group belongs to one explicit player. Comparison topics therefore
+    produce separate player groups instead of one vague comparison query.
+    """
+    players = detect_visual_players(topic)
+    context = detect_visual_context(topic)
+
+    primary = clean_text(topic.get("search", ""))
+    groups = []
+
+    if not players:
+        fallback = [primary] if primary else []
+        for query in topic.get("fallback_searches", []):
+            query = clean_text(query)
+            if query and query not in fallback:
+                fallback.append(query)
+        return [fallback[:5]] if fallback else []
+
+    for player_key in players:
+        profile = VISUAL_PLAYER_PROFILES[player_key]
+        full_name = profile["names"][0]
+
+        queries = [
+            f"{full_name} football match action",
+            f"{full_name} professional football match",
+        ]
+
+        for action in context:
+            queries.append(f"{full_name} {action}")
+
+        if primary and any(
+            name.lower() in primary.lower() for name in profile["names"]
+        ):
+            queries.insert(0, primary)
+
+        unique = []
+        seen = set()
+        for query in queries:
+            query = clean_text(query)
+            key = query.lower()
+            if query and key not in seen:
+                seen.add(key)
+                unique.append(query)
+
+        groups.append(unique[:6])
+
+    return groups
+
+
+def build_visual_queries(topic):
+    """Compatibility wrapper: return all relevance-first searches."""
+    groups = build_visual_query_groups(topic)
+    queries = []
+
+    for group in groups:
+        for query in group:
+            if query.lower() not in {q.lower() for q in queries}:
+                queries.append(query)
+
+    return queries[:18]
+
+
+def _candidate_score(video, query_rank, group_rank, portrait, resolution_score):
+    """Score relevance before resolution."""
+    relevance = max(0, 1000 - (query_rank * 90) - (group_rank * 25))
+    format_bonus = 180 if portrait else 0
+    quality = min(160, resolution_score / 25000)
+    return relevance + format_bonus + quality
 
 
 def select_unique_videos(topic, used_clips):
-    search_queries = build_visual_queries(topic)
-    candidates = {}
+    groups = build_visual_query_groups(topic)
 
-    for query in search_queries:
-        print(f"Searching Pexels: {query}")
+    if not groups:
+        raise RuntimeError("Could not build relevant visual searches for the topic.")
 
-        for page in range(1, 4):
-            try:
-                videos = search_pexels(query, page)
-            except Exception as error:
-                print("Pexels search error:", error)
-                continue
+    players = detect_visual_players(topic)
+    print("Visual subjects:", ", ".join(players) if players else "fallback")
 
-            for video in videos:
-                video_id = str(video.get("id", ""))
-                if not video_id or video_id in used_clips:
+    candidates_by_group = []
+    global_candidates = {}
+
+    for group_index, queries in enumerate(groups):
+        group_candidates = {}
+
+        for query_rank, query in enumerate(queries):
+            print(
+                f"Searching Pexels [subject {group_index + 1}, "
+                f"query {query_rank + 1}]: {query}"
+            )
+
+            for page in range(1, 4):
+                try:
+                    videos = search_pexels(query, page)
+                except Exception as error:
+                    print("Pexels search error:", error)
                     continue
 
-                video_file = choose_video_file(video)
-                if not video_file:
-                    continue
+                for video in videos:
+                    video_id = str(video.get("id", ""))
+                    if not video_id or video_id in used_clips:
+                        continue
 
-                width = int(video_file.get("width") or video.get("width") or 0)
-                height = int(video_file.get("height") or video.get("height") or 0)
+                    video_file = choose_video_file(video)
+                    if not video_file:
+                        continue
 
-                # Prefer large portrait sources. Keep a landscape fallback,
-                # because forcing only portrait results can fail for niche topics.
-                portrait = height > width
-                resolution_score = min(width, 1080) * min(height, 1920)
+                    width = int(video_file.get("width") or video.get("width") or 0)
+                    height = int(video_file.get("height") or video.get("height") or 0)
+                    portrait = height > width
+                    resolution_score = min(width, 1080) * min(height, 1920)
 
-                candidates[video_id] = {
-                    "id": video_id,
-                    "link": video_file["link"],
-                    "width": width,
-                    "height": height,
-                    "portrait": portrait,
-                    "score": (1000000000 if portrait else 0) + resolution_score,
-                }
+                    score = _candidate_score(
+                        video,
+                        query_rank,
+                        group_index,
+                        portrait,
+                        resolution_score,
+                    )
 
-            if len(candidates) >= 60:
+                    item = {
+                        "id": video_id,
+                        "link": video_file["link"],
+                        "width": width,
+                        "height": height,
+                        "portrait": portrait,
+                        "score": score,
+                        "subject_group": group_index,
+                        "query_rank": query_rank,
+                        "query": query,
+                    }
+
+                    old = group_candidates.get(video_id)
+                    if old is None or item["score"] > old["score"]:
+                        group_candidates[video_id] = item
+
+                    old_global = global_candidates.get(video_id)
+                    if old_global is None or item["score"] > old_global["score"]:
+                        global_candidates[video_id] = item
+
+                if len(group_candidates) >= 30:
+                    break
+
+            if len(group_candidates) >= 30:
                 break
 
-        if len(candidates) >= max(NUMBER_OF_CLIPS * 4, 36):
+        candidates_by_group.append(
+            sorted(
+                group_candidates.values(),
+                key=lambda item: item["score"],
+                reverse=True,
+            )
+        )
+
+    # Guarantee subject coverage first. For comparison topics this prevents
+    # nine clips of one player when the topic explicitly names two players.
+    selected = []
+    selected_ids = set()
+
+    while len(selected) < NUMBER_OF_CLIPS:
+        added_this_round = False
+
+        for group in candidates_by_group:
+            if len(selected) >= NUMBER_OF_CLIPS:
+                break
+
+            while group and group[0]["id"] in selected_ids:
+                group.pop(0)
+
+            if not group:
+                continue
+
+            item = group.pop(0)
+            selected.append(item)
+            selected_ids.add(item["id"])
+            added_this_round = True
+
+        if not added_this_round:
             break
 
-    candidates_list = list(candidates.values())
+    # Fill remaining slots only from other high-relevance candidates for
+    # this exact topic, never from an unrelated generic pool.
+    if len(selected) < NUMBER_OF_CLIPS:
+        remaining = [
+            item for item in global_candidates.values()
+            if item["id"] not in selected_ids
+        ]
+        remaining.sort(key=lambda item: item["score"], reverse=True)
 
-    # Keep variety: first rank by quality, then sample from the strongest pool
-    # rather than blindly shuffling all results.
-    candidates_list.sort(key=lambda item: item["score"], reverse=True)
-    quality_pool = candidates_list[:max(NUMBER_OF_CLIPS * 4, 36)]
-    random.shuffle(quality_pool)
+        for item in remaining:
+            if len(selected) >= NUMBER_OF_CLIPS:
+                break
+            selected.append(item)
+            selected_ids.add(item["id"])
 
-    if len(quality_pool) < NUMBER_OF_CLIPS:
+    if len(selected) < NUMBER_OF_CLIPS:
         raise RuntimeError(
-            f"Not enough NEW Pexels clips. Found {len(quality_pool)}, "
+            f"Not enough NEW relevant Pexels clips. Found {len(selected)}, "
             f"need {NUMBER_OF_CLIPS}."
         )
 
-    selected = quality_pool[:NUMBER_OF_CLIPS]
+    print("\nSELECTED RELEVANT PEXELS CLIPS:")
+    for index, item in enumerate(selected, start=1):
+        print(
+            f"  {index:02d}. ID={item['id']} | "
+            f"subject_group={item['subject_group'] + 1} | "
+            f"score={item['score']:.1f} | query={item['query']}"
+        )
 
-    print("Selected NEW Pexels IDs:")
-    for item in selected:
-        print(" ", item["id"])
-
-    return selected
-
+    return selected[:NUMBER_OF_CLIPS]
 
 def download_video(url, destination):
     print(f"Downloading: {destination}")
