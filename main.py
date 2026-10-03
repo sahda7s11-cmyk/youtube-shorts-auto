@@ -62,7 +62,201 @@ YOUTUBE_MADE_FOR_KIDS = False
 # CONTENT
 # =========================================================
 
-TOPICS = [{'search': 'ميسي والأرقام التي لا تظهر بمجرد عد الأهداف', 'fallback_searches': ['ميسي والأرقام football match', 'ميسي والأرقام action'], 'title': 'أرقام ميسي لا تختصر تأثيره في التسجيل فقط؛ فصناعة الفرص والمراوغات والتمريرات الحاسمة تكشف جانبًا آخر من حجم تأثيره في المباراة.', 'text': 'Lionel Messi chance creation dribbling match', 'hashtags': ['#Shorts', '#كرة_القدم', '#ميسي']}, {'search': 'رونالدو وكيف تحولت أرقامه مع تغير مركزه', 'fallback_searches': ['رونالدو وكيف football match', 'رونالدو وكيف action'], 'title': 'أرقام رونالدو التهديفية ارتبطت أيضًا بتطور مركزه داخل الملعب. انتقاله من الجناح إلى أدوار هجومية أكثر قربًا من المرمى غيّر نوع الفرص التي يحصل عليها.', 'text': 'Cristiano Ronaldo position striker match', 'hashtags': ['#Shorts', '#كرة_القدم', '#رونالدو']}, {'search': 'مبابي والسرعة التي تتحول إلى أرقام', 'fallback_searches': ['مبابي والسرعة football match', 'مبابي والسرعة action'], 'title': 'سرعة مبابي لا تصبح مؤثرة لمجرد أنه سريع؛ قيمتها تظهر عندما يستلم الكرة في المساحة ويحوّل الانطلاقة إلى فرصة أو تسديدة خلال وقت قصير.', 'text': 'Kylian Mbappe sprint attacking football', 'hashtags': ['#Shorts', '#كرة_القدم', '#مبابي']}, {'search': 'هالاند ولماذا تكشف لمساته القليلة شيئًا مهمًا', 'fallback_searches': ['هالاند ولماذا football match', 'هالاند ولماذا action'], 'title': 'عدد لمساته لا يشرح وحده أداء هالاند. المهاجم قد يلمس الكرة مرات قليلة لكنه يختار أماكنه داخل المنطقة بحيث تصبح كل لمسة أخطر.', 'text': 'Erling Haaland striker movement match', 'hashtags': ['#Shorts', '#كرة_القدم', '#هالاند']}, {'search': 'صلاح والأرقام خلف تحركاته من الجناح', 'fallback_searches': ['صلاح والأرقام football match', 'صلاح والأرقام action'], 'title': 'تأثير صلاح لا يعتمد على التسديد فقط؛ دخوله من الجهة إلى العمق يجمع بين التسجيل وصناعة الفرص وإجبار الدفاع على تغيير تمركزه.', 'text': 'Mohamed Salah cutting inside match', 'hashtags': ['#Shorts', '#كرة_القدم', '#صلاح']}, {'search': 'نيمار والأرقام التي تكشف قيمة المراوغة', 'fallback_searches': ['نيمار والأرقام football match', 'نيمار والأرقام action'], 'title': 'المراوغة ليست مجرد لقطة جميلة؛ عندما يتجاوز نيمار لاعبًا بالكرة تتغير زوايا التمرير والمساحة المتاحة لبقية الهجمة.', 'text': 'Neymar dribbling chance creation football', 'hashtags': ['#Shorts', '#كرة_القدم', '#نيمار']}, {'search': 'مودريتش وكيف يظهر تأثيره في عدد التمريرات', 'fallback_searches': ['مودريتش وكيف football match', 'مودريتش وكيف action'], 'title': 'كثرة التمريرات ليست المقياس الوحيد لمودريتش؛ الأهم هو أين يستلم الكرة وإلى أي منطقة ينقل اللعب بعد اللمسة.', 'text': 'Luka Modric passing midfield match', 'hashtags': ['#Shorts', '#كرة_القدم', '#مودريتش']}, {'search': 'دي بروين ولماذا تكون التمريرة الواحدة كافية', 'fallback_searches': ['دي بروين football match', 'دي بروين action'], 'title': 'قد تصنع تمريرة واحدة من دي بروين فرصة أخطر من سلسلة تمريرات قصيرة، لأن توقيتها قد يكسر خطًا كاملًا من الدفاع.', 'text': 'Kevin De Bruyne through pass match', 'hashtags': ['#Shorts', '#كرة_القدم', '#دي_بروين']}, {'search': 'بنزيما والأرقام التي تكشف دوره كمهاجم وصانع لعب', 'fallback_searches': ['بنزيما والأرقام football match', 'بنزيما والأرقام action'], 'title': 'بنزيما لم يكن يعتمد على التسجيل فقط؛ مساهمته في الربط وسحب المدافعين وصناعة المساحة كانت جزءًا من قيمته الهجومية.', 'text': 'Karim Benzema link up play match', 'hashtags': ['#Shorts', '#كرة_القدم', '#بنزيما']}, {'search': 'ليفاندوفسكي وكيف يختصر الطريق إلى التسديدة', 'fallback_searches': ['ليفاندوفسكي وكيف football match', 'ليفاندوفسكي وكيف action'], 'title': 'من أهم جوانب ليفاندوفسكي تقليل الوقت بين استلام الكرة والتسديد. هذا يجعل المدافع أمام فرصة قصيرة جدًا للتدخل.', 'text': 'Robert Lewandowski finishing match', 'hashtags': ['#Shorts', '#كرة_القدم', '#ليفاندوفسكي']}, {'search': 'فينيسيوس وتحول الانطلاقة إلى فرصة', 'fallback_searches': ['فينيسيوس وتحول football match', 'فينيسيوس وتحول action'], 'title': 'أرقام فينيسيوس في الهجوم ترتبط كثيرًا بما يحدث بعد أول مراوغة؛ فالمساحة التي يصنعها لنفسه تتحول بسرعة إلى تمريرة أو تسديدة.', 'text': 'Vinicius Junior dribbling attack match', 'hashtags': ['#Shorts', '#كرة_القدم', '#فينيسيوس']}, {'search': 'بيلينغهام والأرقام التي تأتي من الوسط', 'fallback_searches': ['بيلينغهام والأرقام football match', 'بيلينغهام والأرقام action'], 'title': 'وجود بيلينغهام في مناطق مختلفة يجعل تأثيره يتجاوز التسجيل؛ تحركاته من الوسط نحو الثلث الأخير تضيف خيارًا هجوميًا إضافيًا.', 'text': 'Jude Bellingham midfield attack match', 'hashtags': ['#Shorts', '#كرة_القدم', '#بيلينغهام']}, {'search': 'رونالدو والكرات الهوائية كجزء من سجله', 'fallback_searches': ['رونالدو والكرات football match', 'رونالدو والكرات action'], 'title': 'الكرات الهوائية كانت عنصرًا واضحًا في أسلوب رونالدو، خصوصًا عندما يختار توقيت الركض والارتقاء بدل الاعتماد على القوة وحدها.', 'text': 'Cristiano Ronaldo aerial header football', 'hashtags': ['#Shorts', '#كرة_القدم', '#رونالدو']}, {'search': 'ميسي وعدد اللمسات في المساحات الضيقة', 'fallback_searches': ['ميسي وعدد football match', 'ميسي وعدد action'], 'title': 'عندما تكون المساحة ضيقة، تصبح اللمسات القصيرة وتغيير الاتجاه أهم من السرعة القصوى، وهذا يفسر جانبًا من قوة ميسي في المواقف الفردية.', 'text': 'Lionel Messi close control dribbling', 'hashtags': ['#Shorts', '#كرة_القدم', '#ميسي']}, {'search': 'هالاند والتمركز الذي يسبق الإحصائية', 'fallback_searches': ['هالاند والتمركز football match', 'هالاند والتمركز action'], 'title': 'قبل أن يظهر اسم هالاند في جدول الهدافين، هناك حركة بدون كرة تساعده على الوصول إلى المكان المناسب قبل المدافع.', 'text': 'Erling Haaland off ball movement', 'hashtags': ['#Shorts', '#كرة_القدم', '#هالاند']}, {'search': 'صلاح ولماذا تبدأ بعض أهدافه من أول لمسة', 'fallback_searches': ['صلاح ولماذا football match', 'صلاح ولماذا action'], 'title': 'في كثير من هجمات صلاح، اللمسة الأولى تحدد اتجاه الهجمة. إذا جاءت للأمام أو إلى الداخل، يصبح لديه وقت ومساحة أكبر للقرار التالي.', 'text': 'Mohamed Salah first touch attack', 'hashtags': ['#Shorts', '#كرة_القدم', '#صلاح']}, {'search': 'ميسي والركلة الحرة التي تحتاج أكثر من قوة', 'fallback_searches': ['ميسي والركلة football match', 'ميسي والركلة action'], 'title': 'تنفيذ الركلة الحرة يعتمد على زاوية القدم ومسار الكرة وارتفاعها، وميسي طوّر أسلوبًا يعتمد كثيرًا على الدقة أكثر من القوة الخام.', 'text': 'Lionel Messi free kick football', 'hashtags': ['#Shorts', '#كرة_القدم', '#ميسي']}, {'search': 'رونالدو ووقفة الركلة الحرة قبل التسديد', 'fallback_searches': ['رونالدو ووقفة football match', 'رونالدو ووقفة action'], 'title': 'الوقفة الشهيرة قبل الركلات الحرة ليست الجزء المهم وحده؛ الأهم هو طريقة الاقتراب من الكرة ونقطة ضربها والتحكم في المسار.', 'text': 'Cristiano Ronaldo free kick football', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'مبابي واحتفاله الذي أصبح علامة معروفة', 'fallback_searches': ['مبابي واحتفاله football match', 'مبابي واحتفاله action'], 'title': 'حركة احتفال مبابي بسيطة، لكنها ارتبطت به بسرعة وأصبحت من اللقطات التي يتعرف عليها الجمهور مباشرة بعد أهدافه.', 'text': 'Kylian Mbappe celebration football', 'hashtags': ['#Shorts', '#كرة_القدم', '#مبابي']}, {'search': 'هالاند واحتفال التأمل الهادئ', 'fallback_searches': ['هالاند واحتفال football match', 'هالاند واحتفال action'], 'title': 'اختار هالاند في عدة مناسبات وضعية هادئة بعد التسجيل، وهو ما جعل الاحتفال مختلفًا بصريًا عن الاحتفالات المعتادة.', 'text': 'Erling Haaland meditation celebration', 'hashtags': ['#Shorts', '#كرة_القدم', '#هالاند']}, {'search': 'نيمار والحركة التي تجعل المدافع يتحرك قبل المراوغة', 'fallback_searches': ['نيمار والحركة football match', 'نيمار والحركة action'], 'title': 'الخداع عند نيمار يبدأ أحيانًا من حركة الجسم قبل لمس الكرة، فيجعل المدافع يتوقع اتجاهًا ثم يغيره بسرعة.', 'text': 'Neymar body feint dribbling', 'hashtags': ['#Shorts', '#كرة_القدم', '#نيمار']}, {'search': 'صلاح وتغيير السرعة بعد المراوغة', 'fallback_searches': ['صلاح وتغيير football match', 'صلاح وتغيير action'], 'title': 'اللقطة الخطيرة ليست دائمًا في المراوغة نفسها؛ تغيير السرعة مباشرة بعدها هو ما يصنع الفارق في كثير من مواجهات صلاح الفردية.', 'text': 'Mohamed Salah acceleration dribbling', 'hashtags': ['#Shorts', '#كرة_القدم', '#صلاح']}, {'search': 'مودريتش والتمرير بالقدم الخارجية', 'fallback_searches': ['مودريتش والتمرير football match', 'مودريتش والتمرير action'], 'title': 'استخدام القدم الخارجية يسمح بتمرير الكرة من زاوية غير معتادة، وهو أحد التفاصيل الفنية التي تجعل بعض تمريرات مودريتش لافتة.', 'text': 'Luka Modric outside foot pass', 'hashtags': ['#Shorts', '#كرة_القدم', '#مودريتش']}, {'search': 'دي بروين والتمريرة التي تصل قبل المدافع', 'fallback_searches': ['دي بروين football match', 'دي بروين action'], 'title': 'عندما يرسل دي بروين الكرة إلى المساحة قبل وصول المهاجم إليها، يعتمد نجاح الهجمة على قراءة اللحظة لا على قوة التمريرة فقط.', 'text': 'Kevin De Bruyne through ball', 'hashtags': ['#Shorts', '#كرة_القدم', '#دي_بروين']}, {'search': 'بنزيما واللمسة التي تحافظ على استمرار الهجمة', 'fallback_searches': ['بنزيما واللمسة football match', 'بنزيما واللمسة action'], 'title': 'اللمسة الأولى قد تكون للربط مع زميل بدل التوجه للمرمى، وهذه من التفاصيل التي ظهرت كثيرًا في طريقة لعب بنزيما.', 'text': 'Karim Benzema first touch football', 'hashtags': ['#Shorts', '#كرة_القدم', '#بنزيما']}, {'search': 'ليفاندوفسكي وكيف يجهز جسمه قبل وصول الكرة', 'fallback_searches': ['ليفاندوفسكي وكيف football match', 'ليفاندوفسكي وكيف action'], 'title': 'التمركز الجيد يجعل المهاجم مستعدًا للتسديد قبل وصول الكرة، وهذا يقلل عدد الحركات التي يحتاجها بعد الاستلام.', 'text': 'Robert Lewandowski positioning finishing', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'فينيسيوس والوقوف أمام المدافع قبل الانطلاق', 'fallback_searches': ['فينيسيوس والوقوف football match', 'فينيسيوس والوقوف action'], 'title': 'في المواجهة الفردية، يمكن لتوقف قصير أن يجبر المدافع على تثبيت قدمه، ثم تأتي الانطلاقة لتستغل لحظة التردد.', 'text': 'Vinicius Junior one on one dribbling', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'بيلينغهام واستخدام الجسم تحت الضغط', 'fallback_searches': ['بيلينغهام واستخدام football match', 'بيلينغهام واستخدام action'], 'title': 'التحكم بالجسم يساعد بيلينغهام على حماية الكرة ثم الدوران نحو المساحة بدل فقدانها عند أول ضغط.', 'text': 'Jude Bellingham ball control match', 'hashtags': ['#Shorts', '#كرة_القدم', '#بيلينغهام']}, {'search': 'رونالدو والقفز في اللحظة المناسبة', 'fallback_searches': ['رونالدو والقفز football match', 'رونالدو والقفز action'], 'title': 'الكرات العالية تحتاج توقيتًا دقيقًا؛ الارتقاء المبكر أو المتأخر قد يلغي أفضلية اللاعب مهما كانت قدرته البدنية.', 'text': 'Cristiano Ronaldo header timing', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'ميسي واللمسة التي تسبق تغيير الاتجاه', 'fallback_searches': ['ميسي واللمسة football match', 'ميسي واللمسة action'], 'title': 'في المساحات الضيقة، دفع الكرة مسافة صغيرة يسمح لميسي بتغيير اتجاهه دون فقدان السيطرة.', 'text': 'Lionel Messi close control football', 'hashtags': ['#Shorts', '#كرة_القدم', '#ميسي']}, {'search': 'نيمار والخداع قبل لمس الكرة', 'fallback_searches': ['نيمار والخداع football match', 'نيمار والخداع action'], 'title': 'نظرة اللاعب واتجاه جسمه قد يوحيان بقرار مختلف عن القرار الحقيقي، وهذه التفاصيل تساعد نيمار على خلق المساحة للمراوغة.', 'text': 'Neymar feint football skill', 'hashtags': ['#Shorts', '#كرة_القدم', '#نيمار']}, {'search': 'هالاند والحركة خلف المدافع قبل العرضية', 'fallback_searches': ['هالاند والحركة football match', 'هالاند والحركة action'], 'title': 'المهاجم الذي يتحرك قبل وصول العرضية يملك أفضلية زمنية، وهالاند يعتمد كثيرًا على اختيار المسار داخل المنطقة.', 'text': 'Erling Haaland movement cross', 'hashtags': ['#Shorts', '#كرة_القدم', '#هالاند']}, {'search': 'كيف تحول رونالدو من جناح مهاري إلى هداف متكامل', 'fallback_searches': ['كيف تحول football match', 'كيف تحول action'], 'title': 'بدايات رونالدو اعتمدت كثيرًا على المراوغة والسرعة، ثم أصبح أكثر تركيزًا على التحرك والتسجيل وإنهاء الهجمات.', 'text': 'Cristiano Ronaldo early career Manchester United', 'hashtags': ['#Shorts', '#كرة_القدم', '#رونالدو']}, {'search': 'المرحلة التي غيرت طريقة لعب ميسي', 'fallback_searches': ['المرحلة التي football match', 'المرحلة التي action'], 'title': 'مع تطور مسيرته تغيّر دور ميسي من لاعب يعتمد على التحرك والمراوغة إلى لاعب يشارك في صناعة اللعب والتسجيل معًا.', 'text': 'Lionel Messi career playing style', 'hashtags': ['#Shorts', '#كرة_القدم', '#ميسي']}, {'search': 'كيف تطور مبابي من موهبة شابة إلى مهاجم متعدد الأدوار', 'fallback_searches': ['كيف تطور football match', 'كيف تطور action'], 'title': 'مع مرور الوقت أضاف مبابي إلى سرعته مهارات في صناعة الفرص وإنهاء الهجمات والتحرك في أكثر من مركز هجومي.', 'text': 'Kylian Mbappe career development', 'hashtags': ['#Shorts', '#كرة_القدم', '#مبابي']}, {'search': 'لماذا كان انتقال هالاند بين الأندية مهمًا لأسلوبه', 'fallback_searches': ['لماذا كان football match', 'لماذا كان action'], 'title': 'تدرج هالاند بين مستويات مختلفة من المنافسة منحه خبرة في أنظمة هجومية متنوعة، مع بقاء قوته الأساسية في التحرك والحسم.', 'text': 'Erling Haaland career development', 'hashtags': ['#Shorts', '#كرة_القدم', '#هالاند']}, {'search': 'رحلة صلاح قبل الوصول إلى قمة مستواه', 'fallback_searches': ['رحلة صلاح football match', 'رحلة صلاح action'], 'title': 'مر صلاح بعدة مراحل احترافية ساعدته على تطوير السرعة والقرار الأخير والقدرة على التسجيل من الجهة.', 'text': 'Mohamed Salah career early football', 'hashtags': ['#Shorts', '#كرة_القدم', '#صلاح']}, {'search': 'كيف تغير دور بنزيما مع الخبرة', 'fallback_searches': ['كيف تغير football match', 'كيف تغير action'], 'title': 'مع تقدم مسيرته أصبح بنزيما يشارك أكثر في بناء الهجمة والربط وفتح المساحات إلى جانب إنهاء الفرص.', 'text': 'Karim Benzema career playing style', 'hashtags': ['#Shorts', '#كرة_القدم', '#بنزيما']}, {'search': 'لماذا أصبح ليفاندوفسكي أكثر تنوعًا كمهاجم', 'fallback_searches': ['لماذا أصبح football match', 'لماذا أصبح action'], 'title': 'تطور ليفاندوفسكي في التمركز والإنهاء واللعب بظهره للمرمى، ما جعله قادرًا على التعامل مع أنواع مختلفة من الفرص.', 'text': 'Robert Lewandowski career development', 'hashtags': ['#Shorts', '#كرة_القدم', '#ليفاندوفسكي']}, {'search': 'كيف حافظ مودريتش على أسلوبه رغم تغير أدواره', 'fallback_searches': ['كيف حافظ football match', 'كيف حافظ action'], 'title': 'خبرة مودريتش سمحت له بتعديل موقعه وطريقة تحركه مع الحفاظ على أهم عناصر لعبه: الرؤية والتحكم بإيقاع الهجمة.', 'text': 'Luka Modric career playing style', 'hashtags': ['#Shorts', '#كرة_القدم', '#مودريتش']}, {'search': 'نيمار بين المراوغة وصناعة اللعب', 'fallback_searches': ['نيمار بين football match', 'نيمار بين action'], 'title': 'مع ارتفاع مستوى المنافسة، لم يعد دور نيمار قائمًا على المراوغة فقط؛ أصبح مطالبًا بصناعة الفرص والتسجيل والربط بين الخطوط.', 'text': 'Neymar career playing style', 'hashtags': ['#Shorts', '#كرة_القدم', '#نيمار']}, {'search': 'تطور فينيسيوس من السرعة إلى القرار', 'fallback_searches': ['تطور فينيسيوس football match', 'تطور فينيسيوس action'], 'title': 'من أبرز جوانب تطور فينيسيوس تحسين قراره في اللحظة الأخيرة، سواء بالتمرير أو التسديد بدل الاعتماد على الانطلاقة وحدها.', 'text': 'Vinicius Junior career development', 'hashtags': ['#Shorts', '#كرة_القدم', '#فينيسيوس']}, {'search': 'كيف أصبح بيلينغهام أخطر من منطقة الوسط', 'fallback_searches': ['كيف أصبح football match', 'كيف أصبح action'], 'title': 'قدرة بيلينغهام على التحرك من الخلف أضافت بعدًا هجوميًا إلى دوره كلاعب وسط، خصوصًا عندما يصل إلى الثلث الأخير.', 'text': 'Jude Bellingham career playing style', 'hashtags': ['#Shorts', '#كرة_القدم', '#بيلينغهام']}, {'search': 'دي بروين وبناء أسلوبه حول صناعة الفرص', 'fallback_searches': ['دي بروين football match', 'دي بروين action'], 'title': 'أسلوب دي بروين يعتمد على الرؤية والتمرير المباشر واستغلال المساحات، وهي عناصر ظهرت بوضوح مع تطور مسيرته.', 'text': 'Kevin De Bruyne career playing style', 'hashtags': ['#Shorts', '#كرة_القدم', '#دي_بروين']}, {'search': 'لماذا تغيرت طريقة لعب رونالدو داخل منطقة الجزاء', 'fallback_searches': ['لماذا تغيرت football match', 'لماذا تغيرت action'], 'title': 'مع مرور السنوات أصبح التحرك داخل المنطقة والتمركز لإنهاء الهجمة أهم من الاعتماد على المراوغة لمسافات طويلة.', 'text': 'Cristiano Ronaldo striker evolution', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'ميسي وكيف جمع بين صانع اللعب والهداف', 'fallback_searches': ['ميسي وكيف football match', 'ميسي وكيف action'], 'title': 'أحد أكثر جوانب مسيرة ميسي تميزًا هو قدرته على الانتقال بين صناعة الهجمة وإنهائها بنفسه.', 'text': 'Lionel Messi playmaker goals', 'hashtags': ['#Shorts', '#كرة_القدم', '#ميسي']}, {'search': 'هالاند وكيف صقل أسلوبه بدون كرة', 'fallback_searches': ['هالاند وكيف football match', 'هالاند وكيف action'], 'title': 'جزء مهم من تطور هالاند هو الحركة قبل استلام الكرة، لأنها تساعده على الوصول إلى مناطق التسجيل بأفضلية زمنية.', 'text': 'Erling Haaland off ball development', 'hashtags': ['#Shorts', '#كرة_القدم', '#هالاند']}, {'search': 'صلاح وكيف أصبح أكثر هدوءًا في القرار الأخير', 'fallback_searches': ['صلاح وكيف football match', 'صلاح وكيف action'], 'title': 'مع الخبرة أصبح صلاح أكثر قدرة على اختيار اللحظة المناسبة بين التسديد والتمرير والانطلاق.', 'text': 'Mohamed Salah decision making career', 'hashtags': ['#Shorts', '#كرة_القدم', '#صلاح']}, {'search': 'رقم رونالدو التاريخي في دوري أبطال أوروبا', 'fallback_searches': ['رقم رونالدو football match', 'رقم رونالدو action'], 'title': 'رونالدو يملك الرقم القياسي في عدد أهداف دوري أبطال أوروبا، وهو رقم جمعه عبر سنوات طويلة من المشاركة في البطولة.', 'text': 'Cristiano Ronaldo Champions League goals record', 'hashtags': ['#Shorts', '#كرة_القدم', '#رونالدو']}, {'search': 'رقم ميسي في الكرة الذهبية', 'fallback_searches': ['رقم ميسي football match', 'رقم ميسي action'], 'title': 'ميسي يملك الرقم القياسي في عدد مرات الفوز بالكرة الذهبية، وهو إنجاز امتد عبر مراحل مختلفة من مسيرته.', 'text': "Lionel Messi Ballon d'Or record", 'hashtags': ['#Shorts', '#كرة_القدم', '#ميسي']}, {'search': 'رقم رونالدو مع منتخب البرتغال', 'fallback_searches': ['رقم رونالدو football match', 'رقم رونالدو action'], 'title': 'رونالدو يملك الرقم القياسي العالمي في الأهداف الدولية للرجال، وهو من أبرز أرقامه مع المنتخب.', 'text': 'Cristiano Ronaldo international goals record', 'hashtags': ['#Shorts', '#كرة_القدم', '#رونالدو']}, {'search': 'ميسي وكأس العالم الذي أكمل مسيرته الدولية', 'fallback_searches': ['ميسي وكأس football match', 'ميسي وكأس action'], 'title': 'فوز ميسي بكأس العالم مع الأرجنتين عام 2022 أضاف أهم لقب دولي إلى سجل مسيرته.', 'text': 'Lionel Messi World Cup trophy 2022', 'hashtags': ['#Shorts', '#كرة_القدم', '#ميسي']}, {'search': 'مبابي والإنجاز المبكر في كأس العالم', 'fallback_searches': ['مبابي والإنجاز football match', 'مبابي والإنجاز action'], 'title': 'فوز مبابي بكأس العالم مع فرنسا وهو في سن صغيرة جعله يدخل مبكرًا في قائمة اللاعبين الذين حققوا أكبر ألقاب المنتخبات.', 'text': 'Kylian Mbappe World Cup 2018', 'hashtags': ['#Shorts', '#كرة_القدم', '#مبابي']}, {'search': 'هالاند والأرقام التهديفية السريعة', 'fallback_searches': ['هالاند والأرقام football match', 'هالاند والأرقام action'], 'title': 'من أبرز ما يميز هالاند قدرته على الوصول إلى أرقام تهديفية كبيرة خلال عدد قليل نسبيًا من المباريات.', 'text': 'Erling Haaland scoring records', 'hashtags': ['#Shorts', '#كرة_القدم', '#هالاند']}, {'search': 'صلاح وموسم غيّر أرقامه في الدوري الإنجليزي', 'fallback_searches': ['صلاح وموسم football match', 'صلاح وموسم action'], 'title': 'موسم صلاح الأول مع ليفربول كان نقطة تحول تهديفية كبيرة، وسجل خلاله رقمًا بارزًا في الدوري الإنجليزي بنظام 38 مباراة.', 'text': 'Mohamed Salah 2017 2018 Premier League record', 'hashtags': ['#Shorts', '#كرة_القدم', '#صلاح']}, {'search': 'ليفاندوفسكي والرقم القياسي في موسم واحد بالدوري الألماني', 'fallback_searches': ['ليفاندوفسكي والرقم football match', 'ليفاندوفسكي والرقم action'], 'title': 'سجل ليفاندوفسكي 41 هدفًا في موسم واحد من الدوري الألماني، محققًا رقمًا قياسيًا في المسابقة.', 'text': 'Robert Lewandowski 41 goals Bundesliga record', 'hashtags': ['#Shorts', '#كرة_القدم', '#ليفاندوفسكي']}, {'search': 'بنزيما والكرة الذهبية بعد موسم استثنائي', 'fallback_searches': ['بنزيما والكرة football match', 'بنزيما والكرة action'], 'title': 'حصل بنزيما على الكرة الذهبية بعد موسم بارز مع ريال مدريد، ليضيف الجائزة الفردية الكبرى إلى مسيرته.', 'text': "Karim Benzema Ballon d'Or 2022", 'hashtags': ['#Shorts', '#كرة_القدم', '#بنزيما']}, {'search': 'مودريتش والكرة الذهبية كلاعب وسط', 'fallback_searches': ['مودريتش والكرة football match', 'مودريتش والكرة action'], 'title': 'فوز مودريتش بالكرة الذهبية عام 2018 كان إنجازًا لافتًا للاعب وسط في عصر هيمن فيه المهاجمون على الجائزة.', 'text': "Luka Modric Ballon d'Or 2018", 'hashtags': ['#Shorts', '#كرة_القدم', '#مودريتش']}, {'search': 'رونالدو وعدد ألقاب دوري الأبطال', 'fallback_searches': ['رونالدو وعدد football match', 'رونالدو وعدد action'], 'title': 'حقق رونالدو دوري أبطال أوروبا عدة مرات، وارتبط اسمه بالبطولة أكثر من أي لاعب آخر من حيث الأهداف والمشاركة في مراحلها الحاسمة.', 'text': 'Cristiano Ronaldo Champions League trophies', 'hashtags': ['#Shorts', '#كرة_القدم', '#رونالدو']}, {'search': 'ميسي وأرقام التسجيل مع برشلونة', 'fallback_searches': ['ميسي وأرقام football match', 'ميسي وأرقام action'], 'title': 'حقق ميسي أرقامًا تهديفية استثنائية مع برشلونة خلال سنواته الطويلة مع النادي، وأصبح الهداف التاريخي للنادي.', 'text': 'Lionel Messi Barcelona scoring record', 'hashtags': ['#Shorts', '#كرة_القدم', '#ميسي']}, {'search': 'هالاند وأسرع الوصول إلى أرقام كبيرة في إنجلترا', 'fallback_searches': ['هالاند وأسرع football match', 'هالاند وأسرع action'], 'title': 'قدرة هالاند على التسجيل بمعدل مرتفع جعلته يصل إلى أرقام تهديفية في الدوري الإنجليزي بسرعة لافتة.', 'text': 'Erling Haaland Premier League scoring record', 'hashtags': ['#Shorts', '#كرة_القدم', '#هالاند']}, {'search': 'مبابي وأرقامه التهديفية في كأس العالم', 'fallback_searches': ['مبابي وأرقامه football match', 'مبابي وأرقامه action'], 'title': 'سجل مبابي عددًا كبيرًا من الأهداف في كأس العالم رغم صغر سنه، وأصبح من أبرز الهدافين الشباب في تاريخ البطولة.', 'text': 'Kylian Mbappe World Cup goals', 'hashtags': ['#Shorts', '#كرة_القدم', '#مبابي']}, {'search': 'ميسي وعدد الأهداف الدولية', 'fallback_searches': ['ميسي وعدد football match', 'ميسي وعدد action'], 'title': 'واصل ميسي تسجيل الأهداف مع الأرجنتين عبر سنوات طويلة، وأصبح من أبرز الهدافين الدوليين في تاريخ كرة القدم للرجال.', 'text': 'Lionel Messi Argentina international goals', 'hashtags': ['#Shorts', '#كرة_القدم', '#ميسي']}, {'search': 'رونالدو والهداف التاريخي للمنتخبات', 'fallback_searches': ['رونالدو والهداف football match', 'رونالدو والهداف action'], 'title': 'استمر رونالدو في تسجيل الأهداف الدولية عبر عدة أجيال من لاعبي المنتخب البرتغالي، حتى وصل إلى الرقم القياسي العالمي.', 'text': 'Cristiano Ronaldo Portugal international record', 'hashtags': ['#Shorts', '#كرة_القدم', '#رونالدو']}, {'search': 'ميسي ورونالدو: اختلاف الطريقة قبل اختلاف الأرقام', 'fallback_searches': ['ميسي ورونالدو: football match', 'ميسي ورونالدو: action'], 'title': 'ميسي يعتمد كثيرًا على المراوغة وصناعة اللعب والتمرير، بينما برز رونالدو في التسجيل والتحرك والكرات الهوائية.', 'text': 'Messi Ronaldo comparison football', 'hashtags': ['#Shorts', '#كرة_القدم', '#ميسي', '#رونالدو']}, {'search': 'مبابي وهالاند: كيف يصل كل منهما إلى المرمى', 'fallback_searches': ['مبابي وهالاند: football match', 'مبابي وهالاند: action'], 'title': 'مبابي يستفيد من السرعة والمساحات، بينما يعتمد هالاند أكثر على التمركز والقوة والحسم داخل المنطقة.', 'text': 'Mbappe Haaland comparison football', 'hashtags': ['#Shorts', '#كرة_القدم', '#مبابي', '#هالاند']}, {'search': 'صلاح ومبابي: من الأخطر في المساحة؟', 'fallback_searches': ['صلاح ومبابي: football match', 'صلاح ومبابي: action'], 'title': 'كلاهما يستطيع استغلال المساحة خلف الدفاع، لكن طريقة الوصول إليها تختلف بين تحرك صلاح من الجهة وانطلاق مبابي المباشر.', 'text': 'Salah Mbappe comparison football', 'hashtags': ['#Shorts', '#كرة_القدم', '#مبابي', '#صلاح']}, {'search': 'نيمار وميسي: المراوغة بطريقتين مختلفتين', 'fallback_searches': ['نيمار وميسي: football match', 'نيمار وميسي: action'], 'title': 'كلاهما يمتلك تحكمًا عاليًا بالكرة، لكن ميسي يميل إلى تغيير الاتجاه بسرعة بينما يعتمد نيمار أكثر على الخداع وتغيير الإيقاع.', 'text': 'Neymar Messi dribbling comparison', 'hashtags': ['#Shorts', '#كرة_القدم', '#ميسي', '#نيمار']}, {'search': 'رونالدو وهالاند: مهاجمان بخصائص مختلفة', 'fallback_searches': ['رونالدو وهالاند: football match', 'رونالدو وهالاند: action'], 'title': 'رونالدو جمع بين التسديد واللعب الهوائي والتحرك، بينما يعتمد هالاند بصورة كبيرة على التمركز والإنهاء داخل المنطقة.', 'text': 'Ronaldo Haaland striker comparison', 'hashtags': ['#Shorts', '#كرة_القدم', '#رونالدو', '#هالاند']}, {'search': 'دي بروين ومودريتش: صناعة اللعب من زاويتين', 'fallback_searches': ['دي بروين football match', 'دي بروين action'], 'title': 'دي بروين يميل إلى التمريرات المباشرة وصناعة الفرص، بينما يركز مودريتش أكثر على التحكم بالإيقاع وتغيير اتجاه اللعب.', 'text': 'De Bruyne Modric comparison', 'hashtags': ['#Shorts', '#كرة_القدم', '#مودريتش', '#دي_بروين']}, {'search': 'بنزيما وليفاندوفسكي: كيف يخدم المهاجم فريقه؟', 'fallback_searches': ['بنزيما وليفاندوفسكي: football match', 'بنزيما وليفاندوفسكي: action'], 'title': 'ليفاندوفسكي يبرز في التمركز والإنهاء، بينما يجمع بنزيما بين التسجيل والربط وصناعة المساحات.', 'text': 'Benzema Lewandowski comparison', 'hashtags': ['#Shorts', '#كرة_القدم', '#بنزيما', '#ليفاندوفسكي']}, {'search': 'فينيسيوس ونيمار: ماذا يحدث بعد المراوغة؟', 'fallback_searches': ['فينيسيوس ونيمار: football match', 'فينيسيوس ونيمار: action'], 'title': 'فينيسيوس يعتمد كثيرًا على التسارع بعد تجاوز المدافع، بينما يستخدم نيمار الخداع وتغيير الإيقاع للحفاظ على السيطرة.', 'text': 'Vinicius Neymar comparison', 'hashtags': ['#Shorts', '#كرة_القدم', '#نيمار', '#فينيسيوس']}, {'search': 'ميسي ومبابي: التحكم مقابل الانفجار', 'fallback_searches': ['ميسي ومبابي: football match', 'ميسي ومبابي: action'], 'title': 'ميسي يعتمد على التحكم الدقيق وتغيير الاتجاه، بينما يمتلك مبابي ميزة واضحة في التسارع واستغلال المساحة.', 'text': 'Messi Mbappe comparison', 'hashtags': ['#Shorts', '#كرة_القدم', '#ميسي', '#مبابي']}, {'search': 'صلاح ورونالدو: الجناح الذي يتحول إلى هداف', 'fallback_searches': ['صلاح ورونالدو: football match', 'صلاح ورونالدو: action'], 'title': 'كلاهما استطاع تطوير دوره الهجومي، لكن طريقة الوصول إلى المرمى مختلفة بحسب الحركة والتسديد والتمركز.', 'text': 'Salah Ronaldo comparison', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'هالاند وليفاندوفسكي: قراءة منطقة الجزاء', 'fallback_searches': ['هالاند وليفاندوفسكي: football match', 'هالاند وليفاندوفسكي: action'], 'title': 'كلاهما من أبرز المهاجمين في التمركز، لكن طريقة تحرك كل لاعب قبل التسديد تختلف حسب المساحة والمدافع.', 'text': 'Haaland Lewandowski comparison', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'مودريتش ودي بروين: التمريرة الحاسمة ليست شكلًا واحدًا', 'fallback_searches': ['مودريتش ودي football match', 'مودريتش ودي action'], 'title': 'دي بروين يبرع في تمريرات المساحة المباشرة، بينما يتميز مودريتش بقدرته على تغيير اتجاه اللعب وصناعة زوايا جديدة.', 'text': 'Modric De Bruyne passing comparison', 'hashtags': ['#Shorts', '#كرة_القدم', '#مودريتش', '#دي_بروين']}, {'search': 'بيلينغهام ومودريتش: لاعب وسط من جيلين', 'fallback_searches': ['بيلينغهام ومودريتش: football match', 'بيلينغهام ومودريتش: action'], 'title': 'مودريتش يعتمد على التحكم والإيقاع والخبرة، بينما يضيف بيلينغهام الحركة والقوة والوصول المتأخر إلى منطقة الجزاء.', 'text': 'Bellingham Modric midfield comparison', 'hashtags': ['#Shorts', '#كرة_القدم', '#مودريتش', '#بيلينغهام']}, {'search': 'مبابي وفينيسيوس: السرعة مع الكرة', 'fallback_searches': ['مبابي وفينيسيوس: football match', 'مبابي وفينيسيوس: action'], 'title': 'كلاهما خطير في المواجهات الفردية، لكن توقيت تغيير الاتجاه وطريقة استغلال المساحة تختلف بينهما.', 'text': 'Mbappe Vinicius comparison', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'نيمار وصلاح: صناعة الخطورة من الجناح', 'fallback_searches': ['نيمار وصلاح: football match', 'نيمار وصلاح: action'], 'title': 'نيمار يعتمد أكثر على الخداع والمهارة، بينما يميل صلاح إلى السرعة والتحرك إلى الداخل والبحث عن التسديد.', 'text': 'Neymar Salah comparison', 'hashtags': ['#Shorts', '#كرة_القدم', '#صلاح', '#نيمار']}, {'search': 'رونالدو وبنزيما: مهاجمان في منظومة واحدة بطريقتين', 'fallback_searches': ['رونالدو وبنزيما: football match', 'رونالدو وبنزيما: action'], 'title': 'رونالدو ركز كثيرًا على إنهاء الهجمات، بينما كان بنزيما يجمع بين الربط وصناعة المساحة والتسجيل.', 'text': 'Ronaldo Benzema comparison', 'hashtags': ['#Shorts', '#كرة_القدم', '#رونالدو', '#بنزيما']}, {'search': 'هدف واحد غيّر ليلة ميسي في مباراة كبيرة', 'fallback_searches': ['هدف واحد football match', 'هدف واحد action'], 'title': 'في المباريات المتقاربة، لحظة واحدة قد تكون أهم من عدد الفرص، وميسي اشتهر بصناعة هذه اللحظات بالتمريرة أو المراوغة أو التسديد.', 'text': 'Lionel Messi decisive goal match', 'hashtags': ['#Shorts', '#كرة_القدم', '#ميسي']}, {'search': 'رونالدو واللحظة التي ينتظرها في المباريات الكبيرة', 'fallback_searches': ['رونالدو واللحظة football match', 'رونالدو واللحظة action'], 'title': 'عندما تضيق المساحات، يصبح التحرك دون كرة مهمًا، ورونالدو كثيرًا ما بحث عن اللحظة التي يستطيع فيها الانفصال عن المدافع.', 'text': 'Cristiano Ronaldo big match movement', 'hashtags': ['#Shorts', '#كرة_القدم', '#رونالدو']}, {'search': 'مبابي وكيف يمكن لهجمة واحدة أن تقلب المباراة', 'fallback_searches': ['مبابي وكيف football match', 'مبابي وكيف action'], 'title': 'السرعة تجعل الهجمة تتحول بسرعة من استلام الكرة إلى مواجهة مباشرة مع الدفاع، وهذا ما يجعل بعض لحظات مبابي قصيرة وحاسمة.', 'text': 'Kylian Mbappe decisive attack match', 'hashtags': ['#Shorts', '#كرة_القدم', '#مبابي']}, {'search': 'هالاند والهدف الذي يبدأ قبل وصول الكرة', 'fallback_searches': ['هالاند والهدف football match', 'هالاند والهدف action'], 'title': 'التحرك إلى المكان المناسب قبل وصول التمريرة قد يحسم الهجمة قبل أن تبدأ التسديدة أصلًا.', 'text': 'Erling Haaland goal movement match', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'صلاح والهجمة التي تبدأ من الجهة', 'fallback_searches': ['صلاح والهجمة football match', 'صلاح والهجمة action'], 'title': 'عندما يستلم صلاح في الجهة ثم يدخل إلى العمق بسرعة، قد تتحول الهجمة إلى فرصة قبل أن يتمكن الدفاع من إعادة تمركزه.', 'text': 'Mohamed Salah decisive attack match', 'hashtags': ['#Shorts', '#كرة_القدم', '#صلاح']}, {'search': 'نيمار واللمسة التي كسرت ضغط الدفاع', 'fallback_searches': ['نيمار واللمسة football match', 'نيمار واللمسة action'], 'title': 'استلام الكرة تحت الضغط ثم الخروج منها بالمراوغة قد يحول وضعية دفاعية إلى هجمة في ثوانٍ.', 'text': 'Neymar pressure dribble match', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'مودريتش والتمريرة التي قلبت اتجاه اللعب', 'fallback_searches': ['مودريتش والتمريرة football match', 'مودريتش والتمريرة action'], 'title': 'تغيير جهة اللعب بسرعة يمكن أن يفتح مساحة كبيرة في الطرف المقابل قبل أن يتحرك الدفاع إليها.', 'text': 'Luka Modric switch pass match', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'دي بروين والتمريرة قبل ظهور المساحة', 'fallback_searches': ['دي بروين football match', 'دي بروين action'], 'title': 'أحيانًا تكون أفضل تمريرة هي التي تأتي قبل أن يلاحظ الجميع الفراغ، وهذا جزء من سرعة قراءة دي بروين للهجمة.', 'text': 'Kevin De Bruyne decisive pass match', 'hashtags': ['#Shorts', '#كرة_القدم', '#دي_بروين']}, {'search': 'بنزيما والعودة التي تبدأ من مهاجم', 'fallback_searches': ['بنزيما والعودة football match', 'بنزيما والعودة action'], 'title': 'تراجع المهاجم لاستلام الكرة قد يسحب المدافع ويخلق طريقًا لزميل قادم من الخلف، وهي إحدى أفكار بنزيما الهجومية.', 'text': 'Karim Benzema link up match', 'hashtags': ['#Shorts', '#كرة_القدم', '#بنزيما']}, {'search': 'ليفاندوفسكي واللمسة التي تحسم داخل المنطقة', 'fallback_searches': ['ليفاندوفسكي واللمسة football match', 'ليفاندوفسكي واللمسة action'], 'title': 'في منطقة الجزاء لا يوجد وقت طويل للتفكير، لذلك تصبح زاوية اللمسة الأولى والتسديد السريع حاسمة.', 'text': 'Robert Lewandowski decisive finish', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'فينيسيوس والمرتدة التي تتحول إلى سباق', 'fallback_searches': ['فينيسيوس والمرتدة football match', 'فينيسيوس والمرتدة action'], 'title': 'عندما يحصل فينيسيوس على المساحة، يمكن أن تصبح المرتدة مواجهة سرعة مباشرة بينه وبين خط الدفاع.', 'text': 'Vinicius Junior counter attack match', 'hashtags': ['#Shorts', '#كرة_القدم', '#فينيسيوس']}, {'search': 'بيلينغهام والوصول المتأخر الذي يفاجئ الدفاع', 'fallback_searches': ['بيلينغهام والوصول football match', 'بيلينغهام والوصول action'], 'title': 'التحرك من الخلف يجعل مراقبة اللاعب أصعب، خصوصًا عندما ينشغل المدافع بالمهاجم الموجود أمامه.', 'text': 'Jude Bellingham late run match', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'رونالدو والعودة في مباراة دوري الأبطال', 'fallback_searches': ['رونالدو والعودة football match', 'رونالدو والعودة action'], 'title': 'بعض مباريات دوري الأبطال ارتبطت بأهداف رونالدو الحاسمة في لحظات ضغط عالية، وهو ما جعل حضوره في الأدوار الإقصائية لافتًا.', 'text': 'Cristiano Ronaldo Champions League comeback match', 'hashtags': ['#Shorts', '#كرة_القدم', '#رونالدو']}, {'search': 'ميسي والتمريرة التي سبقت الهدف', 'fallback_searches': ['ميسي والتمريرة football match', 'ميسي والتمريرة action'], 'title': 'في بعض الهجمات تكون التمريرة قبل الأخيرة هي التي تفتح كل شيء، وليس اللمسة الأخيرة فقط.', 'text': 'Lionel Messi key pass match', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'هالاند والهجمة التي تحتاج ثانيتين فقط', 'fallback_searches': ['هالاند والهجمة football match', 'هالاند والهجمة action'], 'title': 'عندما يتحرك هالاند خلف المدافع في اللحظة المناسبة، قد تختصر الهجمة إلى تمريرة واحدة وتسديدة مباشرة.', 'text': 'Erling Haaland quick attack match', 'hashtags': ['#Shorts', '#كرة_القدم', '#هالاند']}, {'search': 'صلاح وكيف تتحول أول لمسة إلى فرصة', 'fallback_searches': ['صلاح وكيف football match', 'صلاح وكيف action'], 'title': 'استلام صلاح باتجاه المرمى بدل الوقوف على الكرة يسمح له بتحويل المساحة الصغيرة إلى هجمة سريعة.', 'text': 'Mohamed Salah first touch attack match', 'hashtags': ['#Shorts', '#كرة_القدم', '#صلاح']}, {'search': 'ميسي وكيف يحافظ على الكرة قريبة من قدمه', 'fallback_searches': ['ميسي وكيف football match', 'ميسي وكيف action'], 'title': 'المسافة القصيرة بين الكرة والقدم تمنح ميسي فرصة لتغيير الاتجاه بسرعة عندما يقترب المدافع.', 'text': 'Lionel Messi close control dribbling', 'hashtags': ['#Shorts', '#كرة_القدم', '#ميسي']}, {'search': 'رونالدو وحركة القدم حول الكرة', 'fallback_searches': ['رونالدو وحركة football match', 'رونالدو وحركة action'], 'title': 'حركات القدم السريعة تجبر المدافع على قراءة اتجاه محتمل قبل أن يقرر رونالدو الانطلاق.', 'text': 'Cristiano Ronaldo stepovers football', 'hashtags': ['#Shorts', '#كرة_القدم', '#رونالدو']}, {'search': 'مبابي وتغيير السرعة أثناء المراوغة', 'fallback_searches': ['مبابي وتغيير football match', 'مبابي وتغيير action'], 'title': 'الانتقال من سرعة متوسطة إلى انطلاقة مفاجئة قد يكون أصعب على المدافع من الجري بأقصى سرعة طوال الوقت.', 'text': 'Kylian Mbappe acceleration dribbling', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'هالاند واللمسة الأولى داخل المنطقة', 'fallback_searches': ['هالاند واللمسة football match', 'هالاند واللمسة action'], 'title': 'اللمسة الأولى الجيدة تجعل الجسم في وضعية مناسبة للتسديد قبل أن يصل المدافع إلى اللاعب.', 'text': 'Erling Haaland first touch finishing', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'صلاح والدخول إلى الداخل بعد استلام الكرة', 'fallback_searches': ['صلاح والدخول football match', 'صلاح والدخول action'], 'title': 'التحرك من الجهة إلى العمق يفتح زاوية للتسديد ويجبر المدافع على تغيير اتجاهه.', 'text': 'Mohamed Salah cutting inside', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'نيمار والخداع قبل تغيير الاتجاه', 'fallback_searches': ['نيمار والخداع football match', 'نيمار والخداع action'], 'title': 'إشارة الجسم إلى اتجاه ثم تغيير القرار في اللحظة الأخيرة يمكن أن تفقد المدافع توازنه.', 'text': 'Neymar feint dribbling skill', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'فينيسيوس والسرعة بعد تجاوز المدافع', 'fallback_searches': ['فينيسيوس والسرعة football match', 'فينيسيوس والسرعة action'], 'title': 'بعد نجاح المراوغة، يصبح التسارع هو الجزء الذي يمنع المدافع من العودة إلى المواجهة.', 'text': 'Vinicius Junior acceleration dribbling', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'بيلينغهام وحماية الكرة بالجسم', 'fallback_searches': ['بيلينغهام وحماية football match', 'بيلينغهام وحماية action'], 'title': 'استخدام الجسم في المساحات الضيقة يسمح له بالحفاظ على الكرة ثم الدوران نحو المساحة المتاحة.', 'text': 'Jude Bellingham shielding ball', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'مودريتش والقدم الخارجية في التمرير', 'fallback_searches': ['مودريتش والقدم football match', 'مودريتش والقدم action'], 'title': 'القدم الخارجية تتيح تمرير الكرة من زاوية مختلفة مع إبقاء اتجاه الجسم أقل وضوحًا للمدافع.', 'text': 'Luka Modric outside foot pass', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'دي بروين والتمريرة البينية في توقيتها الصحيح', 'fallback_searches': ['دي بروين football match', 'دي بروين action'], 'title': 'التمريرة البينية الناجحة تحتاج أن تغادر القدم في اللحظة التي يبدأ فيها المهاجم بالتحرك.', 'text': 'Kevin De Bruyne through ball technique', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'ليفاندوفسكي وكيف يسبق المدافع بخطوة', 'fallback_searches': ['ليفاندوفسكي وكيف football match', 'ليفاندوفسكي وكيف action'], 'title': 'اختيار نقطة التحرك داخل المنطقة قبل وصول الكرة يعطي المهاجم أفضلية زمنية.', 'text': 'Robert Lewandowski positioning', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'بنزيما واللمسة التي تربط الخطوط', 'fallback_searches': ['بنزيما واللمسة football match', 'بنزيما واللمسة action'], 'title': 'التحكم بالكرة واللعب بلمسة أو لمستين يساعد المهاجم على ربط الوسط بالثلث الهجومي.', 'text': 'Karim Benzema link up play', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'ميسي وتغيير الاتجاه من دون إيقاف الكرة', 'fallback_searches': ['ميسي وتغيير football match', 'ميسي وتغيير action'], 'title': 'دفع الكرة أمام القدم أثناء الجري يسمح بتغيير المسار من دون فقدان السرعة بالكامل.', 'text': 'Lionel Messi change direction dribbling', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'رونالدو والتحرك قبل العرضية', 'fallback_searches': ['رونالدو والتحرك football match', 'رونالدو والتحرك action'], 'title': 'الركض نحو نقطة مختلفة قبل وصول العرضية يجعل المدافع مضطرًا إلى تغيير اتجاهه في وقت قصير.', 'text': 'Cristiano Ronaldo movement cross', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'مبابي وكيف يستخدم المساحة خلف الظهير', 'fallback_searches': ['مبابي وكيف football match', 'مبابي وكيف action'], 'title': 'الانطلاق خلف الظهير تحتاج توقيتًا دقيقًا حتى لا يبدأ اللاعب من وضعية تسلل أو يغلق المدافع المسار.', 'text': 'Kylian Mbappe movement behind defense', 'hashtags': ['#Shorts', '#كرة_القدم']}, {'search': 'هالاند واختيار نقطة التسديد', 'fallback_searches': ['هالاند واختيار football match', 'هالاند واختيار action'], 'title': 'داخل المنطقة، اختيار مكان استقبال الكرة قبل التسديد قد يكون أهم من قوة التسديدة نفسها.', 'text': 'Erling Haaland finishing technique', 'hashtags': ['#Shorts', '#كرة_القدم']}]
+TOPICS = [
+    # =========================
+    # كرة القدم والرياضة
+    # =========================
+    {"search":"football match player action","fallback_searches":["soccer match action","football player running"],"title":"اللاعب يقطع عدة كيلومترات أثناء المباراة","text":"يقطع لاعب كرة القدم المحترف عدة كيلومترات خلال المباراة، لكن المسافة ليست العامل الوحيد. اللاعب ينتقل باستمرار بين المشي والركض والجري السريع، ويغيّر سرعته بحسب مكان الكرة وحركة زملائه والمنافسين.","hashtags":["#Shorts","#كرة_القدم","#رياضة","#معلومات"]},
+    {"search":"football goalkeeper save","fallback_searches":["soccer goalkeeper","goalkeeper training"],"title":"حارس المرمى يبدأ الحركة قبل وصول الكرة","text":"يستطيع حارس المرمى أحيانًا توقع اتجاه التسديدة قبل أن تصل الكرة إليه. فهو يراقب وضعية جسم المهاجم واتجاه قدمه ومكان الكرة، ثم يبدأ الاستجابة خلال جزء قصير جدًا من الثانية.","hashtags":["#Shorts","#كرة_القدم","#حراس_المرمى"]},
+    {"search":"football penalty kick goalkeeper","fallback_searches":["soccer penalty","football goalkeeper penalty"],"title":"ركلة الجزاء أسرع من قدرة العين على التتبع","text":"تتحرك الكرة في ركلة الجزاء بسرعة كبيرة، لذلك لا يعتمد الحارس على رؤية الكرة وحدها. قراءة حركة اللاعب واتجاه جسده قبل التسديد تساعده على اختيار اتجاه القفز خلال وقت قصير جدًا.","hashtags":["#Shorts","#كرة_القدم","#رياضة"]},
+    {"search":"football passing training","fallback_searches":["soccer passing","football training"],"title":"التمرير الدقيق يحتاج إلى أكثر من قوة القدم","text":"يعتمد التمرير الدقيق في كرة القدم على زاوية القدم وسرعة الكرة وتوقيت التمريرة. ولهذا يتدرب اللاعب على التمرير في ظروف مختلفة حتى يستطيع تنفيذ الحركة بسرعة أثناء المباراة.","hashtags":["#Shorts","#كرة_القدم","#تدريب"]},
+    {"search":"football stadium modern","fallback_searches":["soccer stadium","modern football stadium"],"title":"تصميم الملعب يؤثر في تجربة المشجع","text":"تصميم ملعب كرة القدم لا يتعلق بشكل المدرجات فقط. توزيع المقاعد ومواقع الشاشات وممرات الحركة وأنظمة الإضاءة والصوت كلها تُخطط لتجعل متابعة المباراة أكثر وضوحًا وتنظيمًا.","hashtags":["#Shorts","#كرة_القدم","#ملاعب"]},
+    {"search":"football VAR referee technology","fallback_searches":["soccer referee technology","football video review"],"title":"الكاميرات تساعد الحكم في مراجعة اللقطات","text":"تستخدم أنظمة التحكيم الحديثة عدة كاميرات لمراجعة بعض الحالات المهمة في المباراة. تُجمع الصور من زوايا مختلفة، ثم تُعرض اللقطة للحكم لمساعدته على اتخاذ القرار وفق قوانين اللعبة.","hashtags":["#Shorts","#كرة_القدم","#تقنية"]},
+    {"search":"football ball spin close up","fallback_searches":["soccer ball spinning","football free kick"],"title":"دوران الكرة يغيّر مسارها في الهواء","text":"عندما تدور كرة القدم أثناء تحركها في الهواء، تتغير طريقة تفاعل الهواء معها. هذا التأثير يمكن أن يجعل الكرة تنحرف عن مسارها المتوقع، ولذلك يستطيع اللاعبون استغلال دوران الكرة في الركلات والتمريرات.","hashtags":["#Shorts","#كرة_القدم","#علوم"]},
+    {"search":"football sprint player","fallback_searches":["soccer sprint","football speed"],"title":"الانطلاق السريع في كرة القدم يحتاج إلى طاقة كبيرة","text":"الجري السريع يستهلك طاقة أكبر من الركض الهادئ، ولذلك لا يستطيع اللاعب الحفاظ على أقصى سرعة طوال المباراة. يعتمد الأداء على تكرار انطلاقات قصيرة مع فترات من الحركة الأقل سرعة.","hashtags":["#Shorts","#كرة_القدم","#رياضة"]},
+    {"search":"football tactics team training","fallback_searches":["soccer tactics","football team training"],"title":"تحرك لاعب واحد قد يفتح مساحة لزميله","text":"في كرة القدم، لا يتحرك اللاعب دائمًا للحصول على الكرة. أحيانًا يجذب تحركه أحد المدافعين إلى منطقة معينة، فينشأ فراغ يستطيع زميل آخر استغلاله. هذه الفكرة جزء أساسي من العمل الجماعي في الهجوم.","hashtags":["#Shorts","#كرة_القدم","#تكتيك"]},
+    {"search":"football boot close up","fallback_searches":["soccer boots","football player feet"],"title":"شكل حذاء كرة القدم يؤثر في طريقة الحركة","text":"يؤثر تصميم حذاء كرة القدم في الاحتكاك بين القدم والأرض. المسامير الموجودة أسفل الحذاء تساعد اللاعب على الثبات أثناء التسارع وتغيير الاتجاه، ويختلف تصميمها بحسب نوع الملعب.","hashtags":["#Shorts","#كرة_القدم","#رياضة"]},
+
+    # =========================
+    # العلوم
+    # =========================
+    {"search":"lightning storm","fallback_searches":["lightning science","thunderstorm"],"title":"البرق يسخن الهواء المحيط به بسرعة هائلة","text":"ترتفع درجة حرارة قناة البرق إلى مستويات شديدة الارتفاع خلال زمن قصير جدًا. يؤدي التسخين السريع إلى تمدد الهواء المحيط فجأة، وينتج عن ذلك موجة ضغط نسمعها على شكل صوت الرعد.","hashtags":["#Shorts","#علوم","#برق"]},
+    {"search":"volcano eruption close up","fallback_searches":["volcano science","volcano crater"],"title":"الضغط داخل البركان يمكن أن يدفع الصهارة إلى الأعلى","text":"توجد الصهارة تحت سطح الأرض في درجات حرارة مرتفعة، وقد تحتوي على غازات مذابة. عندما يتغير الضغط وتتحرك الصهارة نحو الأعلى، تتمدد الغازات، ويمكن أن تساهم في دفع المواد البركانية إلى السطح.","hashtags":["#Shorts","#علوم","#براكين"]},
+    {"search":"human eye close up","fallback_searches":["eye science","human vision"],"title":"العين تحول الضوء إلى إشارات يفسرها الدماغ","text":"تدخل أشعة الضوء إلى العين وتصل إلى الشبكية، حيث توجد خلايا حساسة للضوء. هذه الخلايا تحول المعلومات الضوئية إلى إشارات عصبية تنتقل عبر العصب البصري إلى الدماغ لتكوين الصورة التي نراها.","hashtags":["#Shorts","#علوم","#جسم_الإنسان"]},
+    {"search":"human brain neurons","fallback_searches":["brain science","neurons"],"title":"الدماغ يعالج معلومات كثيرة في الوقت نفسه","text":"يستقبل الدماغ إشارات من الحواس المختلفة ويعالجها باستمرار. فهو ينسق الحركة والانتباه والذاكرة واتخاذ القرار من خلال شبكة ضخمة من الخلايا العصبية التي تتواصل فيما بينها.","hashtags":["#Shorts","#علوم","#دماغ"]},
+    {"search":"plant photosynthesis leaves","fallback_searches":["photosynthesis","green leaves science"],"title":"النبات يصنع غذاءه باستخدام الضوء","text":"تستخدم النباتات ضوء الشمس وثاني أكسيد الكربون والماء لإنتاج الطاقة الكيميائية التي تحتاج إليها. تحدث هذه العملية في خلايا تحتوي على الكلوروفيل، وتُعرف باسم البناء الضوئي.","hashtags":["#Shorts","#علوم","#نباتات"]},
+    {"search":"water droplet surface tension","fallback_searches":["water science","surface tension"],"title":"قطرة الماء تميل إلى اتخاذ شكل قريب من الكرة","text":"تؤثر قوى التماسك بين جزيئات الماء في شكل القطرة. عند سقوط قطرة صغيرة بعيدًا عن الأسطح، تميل هذه القوى إلى تقليل مساحة سطحها، ولذلك يصبح شكلها قريبًا من الكرة.","hashtags":["#Shorts","#علوم","#فيزياء"]},
+    {"search":"ice melting close up","fallback_searches":["ice science","water freezing"],"title":"الجليد يطفو لأن كثافته أقل من الماء","text":"عندما يتجمد الماء، تنتظم جزيئاته في بنية تحتوي على فراغات أكثر من الماء السائل. لذلك تصبح كثافة الجليد أقل، فيطفو على سطح الماء بدلًا من الغوص إلى القاع.","hashtags":["#Shorts","#علوم","#ماء"]},
+    {"search":"magnet iron filings","fallback_searches":["magnet science","magnetic field"],"title":"المغناطيس يستطيع التأثير في بعض المعادن من دون لمسها","text":"ينتج المغناطيس مجالًا مغناطيسيًا يمكنه التأثير في مواد معينة مثل الحديد. لهذا يمكن للمغناطيس جذب جسم معدني من مسافة قصيرة حتى من دون تلامس مباشر.","hashtags":["#Shorts","#علوم","#مغناطيس"]},
+    {"search":"sound wave speaker","fallback_searches":["sound science","speaker vibration"],"title":"الصوت يحتاج إلى وسط لينتقل عبره","text":"ينتقل الصوت على شكل اهتزازات خلال مادة مثل الهواء أو الماء أو الأجسام الصلبة. في الفراغ لا توجد جزيئات كافية لنقل هذه الاهتزازات، ولذلك لا ينتقل الصوت بالطريقة المعتادة.","hashtags":["#Shorts","#علوم","#فيزياء"]},
+    {"search":"rain water droplets cloud","fallback_searches":["cloud science","rain formation"],"title":"قطرات المطر تبدأ من قطرات ماء صغيرة داخل السحب","text":"تحتوي السحب على قطرات ماء دقيقة وبلورات جليد. عندما تتجمع هذه الجسيمات وتنمو وتصبح أثقل من قدرة الهواء على إبقائها معلقة، تبدأ بالسقوط نحو الأرض على شكل هطول.","hashtags":["#Shorts","#علوم","#طقس"]},
+    {"search":"shark underwater","fallback_searches":["shark swimming","marine science"],"title":"أسماك القرش تعتمد على حواس متعددة للعثور على فرائسها","text":"تمتلك أسماك القرش حواسًا تساعدها على اكتشاف الحركة والروائح والتغيرات في البيئة المحيطة. وبعض أنواعها تستطيع أيضًا استشعار إشارات كهربائية ضعيفة تنتجها الكائنات الحية.","hashtags":["#Shorts","#علوم","#حيوانات"]},
+    {"search":"cheetah running","fallback_searches":["cheetah speed","wildlife running"],"title":"الفهد يعتمد على تسارع قصير للوصول إلى سرعة عالية","text":"يمتلك الفهد جسمًا مهيأ للجري السريع، مع أطراف طويلة وعمود فقري مرن وذيل يساعده على التوازن. لكنه يعتمد على انطلاقات قصيرة لأن الجري بأقصى سرعة يستهلك طاقة كبيرة.","hashtags":["#Shorts","#علوم","#حيوانات"]},
+    {"search":"octopus underwater","fallback_searches":["octopus science","marine animal"],"title":"الأخطبوط يستطيع تغيير لون جلده بسرعة","text":"يحتوي جلد الأخطبوط على خلايا متخصصة تحتوي على أصباغ، ويمكنه تغيير مظهره بسرعة للمساعدة في التمويه والتواصل. وتعمل هذه الخلايا مع أنظمة عصبية وعضلية دقيقة.","hashtags":["#Shorts","#علوم","#بحار"]},
+    {"search":"butterfly wings close up","fallback_searches":["butterfly science","insect wings"],"title":"ألوان أجنحة بعض الفراشات لا تأتي من الصبغة فقط","text":"تحتوي أجنحة بعض الفراشات على تراكيب مجهرية تغير طريقة انعكاس الضوء. لذلك قد تظهر ألوان لامعة أو متغيرة بحسب زاوية النظر، حتى عندما تكون كمية الصبغة قليلة.","hashtags":["#Shorts","#علوم","#حشرات"]},
+    {"search":"space stars night sky","fallback_searches":["astronomy stars","space science"],"title":"ضوء النجوم يصل إلينا بعد رحلة طويلة عبر الفضاء","text":"الضوء ينتقل بسرعة كبيرة، لكنه يحتاج إلى وقت حتى يصل من النجوم البعيدة إلى الأرض. لذلك عندما ننظر إلى بعض النجوم، فنحن نرى ضوءًا غادر تلك النجوم قبل سنوات أو أكثر بحسب المسافة.","hashtags":["#Shorts","#علوم","#فضاء"]},
+
+    # =========================
+    # الهندسة والتقنية
+    # =========================
+    {"search":"bridge engineering structure","fallback_searches":["bridge construction","engineering bridge"],"title":"شكل الجسر يوزع الأحمال بطريقة محسوبة","text":"يصمم المهندسون الجسور بحيث تنتقل الأحمال من سطح الجسر إلى العناصر الحاملة ثم إلى الدعامات والأساسات. اختيار الشكل والمواد يحدد مقدار القوى التي يستطيع الجسر تحملها بأمان.","hashtags":["#Shorts","#هندسة","#جسور"]},
+    {"search":"construction crane building","fallback_searches":["engineering construction","tower crane"],"title":"الرافعة البرجية تستطيع رفع أوزان ضخمة إلى ارتفاعات كبيرة","text":"تستخدم الرافعات البرجية ذراعًا طويلًا ونظامًا من الموازنة والكوابل لتوزيع الأحمال. ويحدد المهندسون وزن الحمولة وموقعها بدقة حتى لا تتجاوز الرافعة حدود التشغيل الآمنة.","hashtags":["#Shorts","#هندسة","#بناء"]},
+    {"search":"train high speed engineering","fallback_searches":["high speed train","railway engineering"],"title":"القطارات السريعة تحتاج إلى مسار مصمم بدقة","text":"كلما زادت سرعة القطار أصبحت جودة المسار والهندسة المحيطة به أكثر أهمية. تُستخدم منحنيات محسوبة وأنظمة تحكم وإشارات دقيقة للمساعدة في الحفاظ على حركة مستقرة وآمنة.","hashtags":["#Shorts","#هندسة","#قطارات"]},
+    {"search":"airplane cockpit flight instruments","fallback_searches":["aircraft navigation","pilot cockpit"],"title":"أنظمة الطائرة تجمع بيانات كثيرة أثناء الرحلة","text":"تعتمد الطائرة على أجهزة وأنظمة تقيس الارتفاع والسرعة والاتجاه ومعلومات أخرى. تُجمع هذه البيانات وتُعرض للطيار وأنظمة التحكم لمساعدتهم على متابعة حالة الرحلة.","hashtags":["#Shorts","#هندسة","#طيران"]},
+    {"search":"rocket launch engineering","fallback_searches":["rocket engine","spacecraft launch"],"title":"الصاروخ يحتاج إلى دفع يتغلب على الجاذبية أثناء الإطلاق","text":"ينتج محرك الصاروخ قوة دفع من خلال دفع الغازات بسرعة كبيرة في الاتجاه المعاكس. عند الإطلاق يجب أن تكون قوة الدفع كافية لتسريع الصاروخ ورفع كتلته بعيدًا عن سطح الأرض.","hashtags":["#Shorts","#هندسة","#فضاء"]},
+    {"search":"solar panels electricity","fallback_searches":["solar energy panels","photovoltaic cells"],"title":"الألواح الشمسية تحول الضوء إلى طاقة كهربائية","text":"تحتوي الألواح الشمسية على خلايا كهروضوئية تمتص الفوتونات القادمة من ضوء الشمس. تؤدي هذه العملية إلى توليد تيار كهربائي يمكن استخدامه مباشرة أو تخزينه في البطاريات.","hashtags":["#Shorts","#هندسة","#طاقة_شمسية"]},
+    {"search":"3d printer engineering","fallback_searches":["three dimensional printer","3d printing"],"title":"الطابعة ثلاثية الأبعاد تبني الجسم طبقة فوق طبقة","text":"تعمل الطابعة ثلاثية الأبعاد بإضافة المادة تدريجيًا وفق نموذج رقمي. تُنشئ طبقة رقيقة ثم تضيف طبقات أخرى فوقها حتى يتكون الجسم بالشكل المطلوب.","hashtags":["#Shorts","#هندسة","#تقنية"]},
+    {"search":"robot arm factory","fallback_searches":["robotics engineering","industrial robot"],"title":"الروبوت الصناعي يستطيع تكرار حركة دقيقة آلاف المرات","text":"تستخدم الروبوتات الصناعية محركات وحساسات وأنظمة تحكم لتنفيذ حركات محددة بدقة. ويمكن برمجتها لتكرار المهمة نفسها مرات كثيرة مع الحفاظ على المسار والسرعة المطلوبين.","hashtags":["#Shorts","#هندسة","#روبوتات"]},
+    {"search":"computer processor close up","fallback_searches":["computer chip","processor technology"],"title":"المعالج ينفذ التعليمات بسرعة كبيرة داخل الحاسوب","text":"يستقبل المعالج تعليمات من البرامج ثم ينفذ عمليات حسابية ومنطقية وينقل البيانات بين أجزاء النظام. وتعمل داخله أعداد هائلة من الترانزستورات لتنفيذ هذه العمليات خلال أزمنة قصيرة جدًا.","hashtags":["#Shorts","#تقنية","#حاسوب"]},
+    {"search":"smartphone sensors close up","fallback_searches":["phone sensors","smartphone technology"],"title":"الهاتف يعرف اتجاهه باستخدام حساسات صغيرة","text":"يحتوي الهاتف على حساسات تقيس الحركة والدوران وأحيانًا المجال المغناطيسي. تجمع البرامج هذه القراءات لتحديد اتجاه الجهاز وحركته، ولذلك تتغير الشاشة تلقائيًا عند تدوير الهاتف.","hashtags":["#Shorts","#تقنية","#هواتف"]},
+    {"search":"electric car motor engineering","fallback_searches":["electric vehicle motor","electric car technology"],"title":"المحرك الكهربائي يحول الطاقة الكهربائية إلى حركة","text":"يستخدم المحرك الكهربائي تفاعل المجالات المغناطيسية لإنتاج دوران. تنتقل الطاقة من البطارية إلى النظام الكهربائي ثم إلى المحرك، الذي يحولها إلى حركة تدير عجلات المركبة.","hashtags":["#Shorts","#هندسة","#سيارات"]},
+    {"search":"wind turbine engineering","fallback_searches":["wind turbine","renewable energy engineering"],"title":"توربينات الرياح تحول حركة الهواء إلى كهرباء","text":"عندما يدفع الهواء شفرات التوربين تبدأ بالدوران. ينقل العمود هذه الحركة إلى مولد كهربائي، فيحوّل الطاقة الحركية الناتجة عن الرياح إلى طاقة كهربائية.","hashtags":["#Shorts","#هندسة","#طاقة"]},
+    {"search":"dam engineering water","fallback_searches":["hydroelectric dam","dam construction"],"title":"السدود تستخدم فرق الارتفاع لتوليد الطاقة","text":"عندما تتحرك المياه من مستوى مرتفع إلى مستوى منخفض يمكن استغلال طاقتها الحركية. في محطات الطاقة الكهرومائية تمر المياه عبر توربينات تدور بدورها مولدات كهربائية.","hashtags":["#Shorts","#هندسة","#طاقة"]},
+    {"search":"fiber optic cable close up","fallback_searches":["fiber optics","internet cable"],"title":"الألياف الضوئية تنقل البيانات باستخدام الضوء","text":"تنتقل البيانات داخل الألياف الضوئية على هيئة نبضات ضوئية عبر ألياف دقيقة جدًا. وتساعد خصائص المادة وتصميم الليف على إبقاء الضوء داخل مساره لمسافات طويلة.","hashtags":["#Shorts","#تقنية","#إنترنت"]},
+    {"search":"satellite orbit earth","fallback_searches":["satellite engineering","space satellite"],"title":"القمر الصناعي يبقى في المدار بسبب توازن السرعة والجاذبية","text":"يدور القمر الصناعي بسرعة أفقية كبيرة بينما تجذبه جاذبية الأرض نحوها. يؤدي الجمع بين الحركة الأمامية والجاذبية إلى مسار مداري بدلًا من سقوطه مباشرة نحو سطح الأرض.","hashtags":["#Shorts","#هندسة","#فضاء"]},
+
+    # =========================
+    # الألعاب الإلكترونية
+    # =========================
+    {"search":"esports gaming competition","fallback_searches":["competitive gaming","esports players"],"title":"الألعاب التنافسية تعتمد على سرعة القرار وليس سرعة اليد فقط","text":"في الألعاب التنافسية يحتاج اللاعب إلى قراءة الموقف بسرعة ثم اختيار القرار المناسب. التوقيت ومعرفة الخريطة وتوقع حركة الخصم قد تكون عوامل مهمة إلى جانب سرعة الاستجابة.","hashtags":["#Shorts","#ألعاب","#رياضات_إلكترونية"]},
+    {"search":"video game controller close up","fallback_searches":["gaming controller","gamepad"],"title":"يد التحكم ترسل أوامر اللاعب إلى اللعبة خلال أجزاء من الثانية","text":"عند الضغط على زر في يد التحكم تتحول الحركة إلى إشارة يقرأها الجهاز. ثم يعالج النظام الأمر ويرسل النتيجة إلى اللعبة، وتظهر الاستجابة على الشاشة خلال زمن قصير جدًا.","hashtags":["#Shorts","#ألعاب","#تقنية"]},
+    {"search":"gaming computer graphics card","fallback_searches":["gaming pc","graphics card"],"title":"بطاقة الرسومات تعالج جزءًا كبيرًا من الصورة التي تراها في اللعبة","text":"تعالج بطاقة الرسومات العمليات المتعلقة بالرسم وإظهار المشاهد ثلاثية الأبعاد. كلما زادت تفاصيل المشهد احتاجت عملية الرسم إلى قدرة حسابية أكبر للحفاظ على سلاسة العرض.","hashtags":["#Shorts","#ألعاب","#حاسوب"]},
+    {"search":"video game loading screen","fallback_searches":["game loading","gaming technology"],"title":"تظهر شاشة التحميل عندما يحتاج الجهاز إلى تجهيز بيانات جديدة","text":"أثناء تحميل مرحلة جديدة تنقل اللعبة بيانات من وحدة التخزين إلى الذاكرة وتجهز النماذج والأصوات والخرائط المطلوبة. تعتمد مدة التحميل على حجم البيانات وسرعة مكونات الجهاز.","hashtags":["#Shorts","#ألعاب","#تقنية"]},
+    {"search":"video game physics simulation","fallback_searches":["game physics","gaming simulation"],"title":"محركات الألعاب تحاكي الحركة والاصطدامات باستخدام الرياضيات","text":"تعتمد الألعاب الحديثة على محركات فيزيائية لحساب الحركة والجاذبية والاصطدامات. تُجرى هذه الحسابات باستمرار حتى تبدو الأجسام داخل اللعبة وكأنها تتفاعل مع البيئة بطريقة واقعية.","hashtags":["#Shorts","#ألعاب","#علوم"]},
+    {"search":"game development coding","fallback_searches":["video game programming","game developer"],"title":"كل حركة داخل اللعبة تبدأ بتعليمات برمجية","text":"تحدد البرمجيات ما يحدث عندما يتحرك اللاعب أو يضغط زرًا أو يصطدم جسمان داخل اللعبة. يترجم محرك اللعبة هذه التعليمات إلى أحداث وصور وأصوات تظهر للمستخدم.","hashtags":["#Shorts","#ألعاب","#برمجة"]},
+    {"search":"gaming network multiplayer","fallback_searches":["online multiplayer gaming","game server"],"title":"اللعب الجماعي عبر الإنترنت يحتاج إلى تبادل البيانات بسرعة","text":"عندما تلعب عبر الإنترنت تُرسل معلومات عن حركتك وأوامرك إلى الخادم، ثم تعود إليك بيانات اللاعبين الآخرين. كلما زاد زمن انتقال البيانات أصبحت الاستجابة بين حركة اللاعب وما يظهر على الشاشة أبطأ.","hashtags":["#Shorts","#ألعاب","#إنترنت"]},
+    {"search":"gaming monitor high refresh rate","fallback_searches":["gaming display","high refresh monitor"],"title":"معدل التحديث يحدد عدد مرات تحديث الصورة في الثانية","text":"يعبر معدل تحديث الشاشة عن عدد المرات التي يمكن فيها تحديث الصورة خلال ثانية واحدة. المعدل الأعلى يمكن أن يجعل الحركة تبدو أكثر سلاسة عندما يستطيع الجهاز إنتاج عدد مناسب من الإطارات.","hashtags":["#Shorts","#ألعاب","#شاشات"]},
+    {"search":"game console hardware","fallback_searches":["gaming console","console technology"],"title":"أجهزة الألعاب تجمع المعالج والرسومات والذاكرة في نظام واحد","text":"يحتوي جهاز الألعاب على معالج وذاكرة ووحدة لمعالجة الرسومات ووحدات أخرى تعمل معًا. صممت هذه المكونات لتشغيل الألعاب ومعالجة الرسومات والصوت وإدارة البيانات في الوقت نفسه.","hashtags":["#Shorts","#ألعاب","#تقنية"]},
+    {"search":"video game artificial intelligence enemies","fallback_searches":["game enemy ai","game artificial intelligence"],"title":"الشخصيات غير القابلة للتحكم تعتمد على خوارزميات لاتخاذ قراراتها","text":"تستخدم الألعاب خوارزميات مختلفة لتحديد كيفية تحرك الشخصيات التي لا يتحكم بها اللاعب. يمكن للنظام اختيار مسار أو البحث عن اللاعب أو تغيير السلوك وفق الأحداث التي تحدث داخل اللعبة.","hashtags":["#Shorts","#ألعاب","#ذكاء_اصطناعي"]},
+    {"search":"racing video game steering","fallback_searches":["racing game","driving simulator"],"title":"ألعاب السباق تحاكي تأثير السرعة والاحتكاك على السيارة","text":"تحسب ألعاب السباق عوامل مثل السرعة والتسارع والاحتكاك وتغير الاتجاه. هذه الحسابات تجعل استجابة السيارة مختلفة عند الكبح أو التسارع أو دخول المنعطفات.","hashtags":["#Shorts","#ألعاب","#سيارات"]},
+    {"search":"virtual reality gaming headset","fallback_searches":["vr gaming","virtual reality headset"],"title":"نظارة الواقع الافتراضي تتتبع حركة الرأس لتغيير المشهد","text":"تحتوي نظارات الواقع الافتراضي على حساسات تتابع دوران الرأس وحركته. يستخدم النظام هذه البيانات لتحديث زاوية المشهد بسرعة، فيبدو للمستخدم أن البيئة الافتراضية تتحرك مع اتجاه نظره.","hashtags":["#Shorts","#ألعاب","#واقع_افتراضي"]},
+    {"search":"gaming mouse close up","fallback_searches":["computer gaming mouse","gaming peripherals"],"title":"حساس الفأرة يحول حركة اليد إلى بيانات رقمية","text":"يستخدم فأرة الحاسوب حساسًا بصريًا لالتقاط التغير في موضعها على السطح. يحول الجهاز هذه الحركة إلى بيانات يفسرها الحاسوب لتحريك المؤشر أو تنفيذ الأوامر داخل اللعبة.","hashtags":["#Shorts","#ألعاب","#تقنية"]},
+    {"search":"video game sound design headphones","fallback_searches":["game audio design","gaming headphones"],"title":"الصوت في الألعاب يساعد اللاعب على فهم ما يحدث حوله","text":"تستخدم الألعاب المؤثرات الصوتية لتحديد اتجاه الأحداث والتنبيه إلى أشياء قد لا تظهر مباشرة أمام اللاعب. لذلك يمكن للصوت أن يضيف معلومات مهمة إلى المشهد البصري.","hashtags":["#Shorts","#ألعاب","#صوت"]},
+    {"search":"game animation character","fallback_searches":["video game animation","game character animation"],"title":"الحركة داخل اللعبة تتكون من سلسلة من الإطارات","text":"تظهر حركة الشخصية داخل اللعبة نتيجة عرض سلسلة من الصور أو الحالات المتغيرة بسرعة. كلما كانت الانتقالات بين الإطارات أكثر سلاسة بدت الحركة طبيعية للمشاهد.","hashtags":["#Shorts","#ألعاب","#رسوم"]},
+    {"search":"gaming cooling pc fans","fallback_searches":["gaming pc cooling","computer cooling fans"],"title":"تبريد الحاسوب مهم أثناء تشغيل الألعاب الثقيلة","text":"تنتج المعالجات وبطاقات الرسومات حرارة أثناء العمل، وتزداد الحرارة عند ارتفاع الحمل. تستخدم أجهزة الحاسوب المراوح والمشتتات الحرارية وأنظمة أخرى لنقل الحرارة بعيدًا عن المكونات.","hashtags":["#Shorts","#ألعاب","#حاسوب"]},
+    {"search":"game map level design","fallback_searches":["video game level design","game environment design"],"title":"تصميم مراحل الألعاب يوجه اللاعب من دون إعطائه التعليمات دائمًا","text":"يمكن للمصمم استخدام الإضاءة والألوان وشكل البيئة ومواقع العناصر لتوجيه انتباه اللاعب. بهذه الطريقة يفهم اللاعب المسار أو الهدف من خلال تصميم المرحلة نفسه.","hashtags":["#Shorts","#ألعاب","#تصميم"]},
+    {"search":"esports reaction gaming","fallback_searches":["esports reaction time","competitive gaming"],"title":"زمن الاستجابة جزء مهم من الأداء في الألعاب السريعة","text":"زمن الاستجابة هو الوقت بين ظهور المعلومة واتخاذ الإجراء المناسب. في الألعاب السريعة قد تحدث عدة أحداث خلال فترة قصيرة، لذلك يحتاج اللاعب إلى الانتباه ومعالجة المعلومات بسرعة.","hashtags":["#Shorts","#ألعاب","#رياضات_إلكترونية"]},
+    {"search":"game save data storage","fallback_searches":["game save system","gaming storage"],"title":"ملف الحفظ يخزن معلومات تقدم اللاعب","text":"تخزن الألعاب في ملف الحفظ بيانات مثل المرحلة التي وصل إليها اللاعب والعناصر التي حصل عليها وبعض إعدادات اللعبة. عند العودة إلى اللعبة تُقرأ هذه البيانات لاستعادة حالة التقدم.","hashtags":["#Shorts","#ألعاب","#تقنية"]},
+
+    # =========================
+    # علوم وتقنية إضافية
+    # =========================
+    {"search":"battery charging lithium ion","fallback_searches":["battery technology","lithium ion battery"],"title":"البطارية تخزن الطاقة في صورة طاقة كيميائية","text":"تخزن البطاريات الطاقة من خلال تفاعلات كيميائية قابلة للعكس في كثير من الأنواع الحديثة. عند توصيل الجهاز تتحول هذه الطاقة إلى تيار كهربائي يغذي الدائرة الإلكترونية.","hashtags":["#Shorts","#علوم","#تقنية"]},
+    {"search":"microscope cells science","fallback_searches":["microscope biology","cells under microscope"],"title":"الخلايا هي وحدات البناء الأساسية في الكائنات الحية","text":"تتكون الكائنات الحية من خلايا تؤدي وظائف مختلفة. بعض الخلايا تنقل الإشارات، وبعضها ينتج الطاقة أو يبني الأنسجة، وتعمل هذه الخلايا معًا للحفاظ على وظائف الجسم.","hashtags":["#Shorts","#علوم","#أحياء"]},
+    {"search":"DNA molecular model","fallback_searches":["DNA science","genetics molecule"],"title":"الحمض النووي يحمل تعليمات وراثية داخل الخلايا","text":"يحتوي الحمض النووي على معلومات وراثية تستخدمها الخلايا لإنتاج بروتينات وتنظيم وظائفها. وتُخزن هذه المعلومات في ترتيب وحدات كيميائية متتابعة داخل الجزيء.","hashtags":["#Shorts","#علوم","#أحياء"]},
+    {"search":"telescope astronomy night","fallback_searches":["astronomy telescope","space telescope"],"title":"التلسكوب يجمع ضوءًا أكثر من العين المجردة","text":"يستخدم التلسكوب عدسات أو مرايا لجمع الضوء وتركيزه، ولذلك يستطيع إظهار أجسام فلكية خافتة لا يمكن رؤيتها بسهولة بالعين المجردة. بعض التلسكوبات تعمل خارج الغلاف الجوي للحصول على صور أوضح.","hashtags":["#Shorts","#فضاء","#علوم"]},
+    {"search":"laser light beam","fallback_searches":["laser technology","laser physics"],"title":"ضوء الليزر يختلف عن الضوء العادي في خصائصه","text":"ينتج الليزر ضوءًا منظمًا يمكن أن يكون شديد التركيز وله خصائص تختلف عن مصادر الضوء المعتادة. لذلك يستخدم في الاتصالات والطب والصناعة والقياس العلمي.","hashtags":["#Shorts","#علوم","#تقنية"]},
+    {"search":"computer cooling fan","fallback_searches":["cpu cooling","computer heat"],"title":"المشتت الحراري يساعد المعالج على التخلص من الحرارة","text":"عند تنفيذ العمليات تنتج الدوائر الإلكترونية حرارة. ينقل المشتت الحراري هذه الحرارة من المعالج إلى مساحة أكبر، ثم تساعد المروحة أو نظام التبريد على إخراجها إلى الهواء.","hashtags":["#Shorts","#تقنية","#حاسوب"]},
+    {"search":"drone flying engineering","fallback_searches":["drone technology","quadcopter"],"title":"الطائرة المسيرة تغير اتجاهها بتعديل سرعة المراوح","text":"تستخدم الطائرات المسيرة عدة مراوح لإنتاج قوة رفع والتحكم في الحركة. عند تغيير سرعة بعض المراوح مقارنة بغيرها يتغير اتجاه القوة، فتستطيع الطائرة الصعود أو الدوران أو التحرك.","hashtags":["#Shorts","#هندسة","#تقنية"]},
+    {"search":"3d animation rendering computer","fallback_searches":["computer rendering","3d graphics"],"title":"الرسم ثلاثي الأبعاد يحتاج إلى حساب شكل الضوء والسطوح","text":"عند إنشاء مشهد ثلاثي الأبعاد يحسب الحاسوب شكل الأجسام ومواقعها واتجاه الضوء والمواد المستخدمة على الأسطح. ثم يحول هذه المعلومات إلى صورة ثنائية الأبعاد تظهر على الشاشة.","hashtags":["#Shorts","#تقنية","#رسوم"]},
+]
+
+
+# =========================================================
+# EXTENDED CONTENT POOL
+# =========================================================
+# Additional evergreen topics. These are intentionally different from the
+# original pool and stay inside the channel categories: football, science,
+# engineering/technology, and electronic gaming.
+TOPICS.extend([
+    # -----------------------------------------------------
+    # كرة القدم والرياضة
+    # -----------------------------------------------------
+    {"search":"football goalkeeper gloves close up","fallback_searches":["soccer goalkeeper gloves","goalkeeper equipment"],"title":"قفازات حارس المرمى تزيد الاحتكاك بين اليد والكرة","text":"تحتوي قفازات حراس المرمى على طبقات مصممة لزيادة الاحتكاك والمساعدة على الإمساك بالكرة. ويختلف تأثيرها بحسب نوع السطح والطقس وطريقة ملامسة الكرة.","hashtags":["#Shorts","#كرة_القدم","#رياضة"]},
+    {"search":"football corner kick stadium","fallback_searches":["soccer corner kick","football set piece"],"title":"الركلة الركنية تمنح الفريق فرصة لصنع مساحة داخل منطقة الجزاء","text":"عند تنفيذ الركلة الركنية تتحرك مجموعة من اللاعبين في مسارات محددة لمحاولة الوصول إلى الكرة أو فتح مساحة لزميل. التوقيت والمسافة بين اللاعبين يؤثران في نجاح التحرك.","hashtags":["#Shorts","#كرة_القدم","#تكتيك"]},
+    {"search":"football ball pressure gauge","fallback_searches":["soccer ball inflation","football ball close up"],"title":"ضغط الهواء داخل الكرة يغيّر طريقة ارتدادها","text":"يؤثر ضغط الهواء داخل كرة القدم في مقدار ارتدادها واستجابتها عند الركل. لذلك تحتاج الكرة إلى نطاق ضغط محدد حتى تحافظ على سلوك متوقع أثناء اللعب.","hashtags":["#Shorts","#كرة_القدم","#علوم"]},
+    {"search":"football referee whistle match","fallback_searches":["soccer referee","football match official"],"title":"صافرة الحكم تحول قرارًا سريعًا إلى إشارة واضحة للجميع","text":"تساعد الصافرة الحكم على إرسال إشارة مسموعة للاعبين والمشاهدين داخل الملعب. ويختلف توقيت استخدامها بحسب الحالة والقانون الذي ينظم اللعب.","hashtags":["#Shorts","#كرة_القدم","#رياضة"]},
+    {"search":"football stadium grass close up","fallback_searches":["soccer pitch grass","football field turf"],"title":"عشب الملعب يؤثر في سرعة حركة الكرة","text":"تؤثر حالة سطح الملعب في الاحتكاك بين الكرة والعشب، كما تؤثر الرطوبة وطول العشب في سرعة الكرة وتغير اتجاهها. لهذا تتم صيانة أرضية الملعب باستمرار.","hashtags":["#Shorts","#كرة_القدم","#ملاعب"]},
+    {"search":"football midfielder scanning pitch","fallback_searches":["soccer player scanning","football midfielder"],"title":"بعض اللاعبين يرفعون رؤوسهم قبل استلام الكرة","text":"ينظر اللاعب حوله قبل استلام الكرة ليعرف أماكن زملائه والمساحات المتاحة. هذه العادة تساعده على اتخاذ قرار أسرع بعد وصول الكرة إلى قدمه.","hashtags":["#Shorts","#كرة_القدم","#تكتيك"]},
+    {"search":"football header training","fallback_searches":["soccer heading","football aerial duel"],"title":"توجيه الكرة بالرأس يعتمد على توقيت الحركة","text":"عند لعب الكرة بالرأس ينسق اللاعب حركة الجسم والرقبة مع لحظة ملامسة الكرة. ويؤثر اتجاه الجبهة وزاوية الجسم في مسار الكرة بعد اللمس.","hashtags":["#Shorts","#كرة_القدم","#رياضة"]},
+    {"search":"football ball trajectory slow motion","fallback_searches":["soccer ball flight","football physics"],"title":"مسار الكرة يتغير بسبب السرعة والدوران والهواء","text":"لا تتحرك كرة القدم في الهواء بسبب الركل وحده. تؤثر سرعتها ودورانها ومقاومة الهواء والجاذبية في المسار الذي تسلكه حتى تصل إلى الأرض أو إلى لاعب آخر.","hashtags":["#Shorts","#كرة_القدم","#فيزياء"]},
+    {"search":"football warm up training cones","fallback_searches":["soccer warm up","football training cones"],"title":"الإحماء يرفع جاهزية العضلات قبل النشاط الرياضي","text":"تساعد تمارين الإحماء على رفع درجة حرارة العضلات وتجهيز الجسم للحركة. ويستخدم اللاعبون حركات تدريجية قبل الدخول في الجهد الأعلى خلال التدريب أو المباراة.","hashtags":["#Shorts","#رياضة","#كرة_القدم"]},
+    {"search":"football stadium floodlights night","fallback_searches":["soccer stadium lights","stadium lighting engineering"],"title":"إضاءة الملعب تحتاج إلى توزيع متوازن للضوء","text":"توزع أنظمة إضاءة الملاعب الضوء من زوايا متعددة حتى تقل المناطق المظلمة وتظهر الكرة واللاعبون بوضوح. كما تراعي التصميمات متطلبات البث التلفزيوني.","hashtags":["#Shorts","#كرة_القدم","#هندسة"]},
+    {"search":"football training reaction lights","fallback_searches":["soccer reaction training","sports reaction lights"],"title":"تمارين الإضاءة السريعة تختبر سرعة اتخاذ القرار","text":"تستخدم بعض تدريبات كرة القدم إشارات ضوئية متغيرة لطلب حركة أو تمرير سريع. الفكرة هي تدريب اللاعب على ملاحظة الإشارة ثم اختيار الاستجابة المناسبة خلال وقت قصير.","hashtags":["#Shorts","#كرة_القدم","#تدريب"]},
+    {"search":"football jersey fabric close up","fallback_searches":["soccer shirt fabric","sports clothing technology"],"title":"أقمشة الملابس الرياضية مصممة لتسهيل تبخر العرق","text":"تستخدم بعض الملابس الرياضية أقمشة خفيفة تسمح بمرور الهواء ونقل الرطوبة بعيدًا عن سطح الجلد. الهدف هو تحسين الراحة أثناء النشاط والحركة المستمرة.","hashtags":["#Shorts","#رياضة","#تقنية"]},
+    {"search":"football substitution board referee","fallback_searches":["soccer substitution board","football match substitution"],"title":"لوحة التبديل الإلكترونية تعرض رقم اللاعب بسرعة","text":"تعرض لوحة التبديل رقم اللاعب الذي سيغادر ورقم اللاعب الذي سيدخل. وتسمح الإشارة الرقمية للحكم واللاعبين بمعرفة التبديل بوضوح من مسافة بعيدة.","hashtags":["#Shorts","#كرة_القدم","#تقنية"]},
+    {"search":"football ball goalkeeper training machine","fallback_searches":["soccer ball launcher","goalkeeper training equipment"],"title":"آلات التدريب تستطيع تكرار التسديدات بسرعة ثابتة","text":"تستخدم بعض معدات التدريب آليات تقذف الكرة بسرعات واتجاهات مختلفة. هذا يسمح بتكرار تمرين معين عدة مرات مع تغيير المسافة أو زاوية وصول الكرة.","hashtags":["#Shorts","#كرة_القدم","#هندسة"]},
+    {"search":"football player GPS training vest","fallback_searches":["soccer tracking device","sports GPS tracker"],"title":"أجهزة التتبع تقيس حركة اللاعب أثناء التدريب","text":"تستخدم بعض الفرق أجهزة صغيرة لتسجيل المسافة والسرعة وتغيرات الحركة أثناء التدريب. تساعد البيانات المدربين على فهم حجم الجهد المبذول خلال الحصة الرياضية.","hashtags":["#Shorts","#كرة_القدم","#تقنية"]},
+
+    # -----------------------------------------------------
+    # العلوم
+    # -----------------------------------------------------
+    {"search":"soap bubbles close up","fallback_searches":["bubble surface tension","soap bubble science"],"title":"فقاعة الصابون تحافظ على شكلها بسبب توتر السطح","text":"يتكون غشاء فقاعة الصابون من طبقة رقيقة من السائل، وتعمل قوى التوتر السطحي على تقليل مساحة الغشاء. لهذا تميل الفقاعة إلى الشكل الكروي.","hashtags":["#Shorts","#علوم","#فيزياء"]},
+    {"search":"shadow sunlight science","fallback_searches":["shadow physics","light and shadow"],"title":"طول الظل يتغير مع زاوية سقوط الضوء","text":"يتغير طول الظل عندما يتغير اتجاه مصدر الضوء بالنسبة إلى الجسم. عندما يكون الضوء أكثر ارتفاعًا يصبح الظل أقصر، وعندما ينخفض مصدر الضوء يمتد الظل لمسافة أكبر.","hashtags":["#Shorts","#علوم","#فيزياء"]},
+    {"search":"prism rainbow light","fallback_searches":["light dispersion prism","rainbow science"],"title":"المنشور الزجاجي يستطيع فصل الضوء إلى ألوان مختلفة","text":"عندما يمر الضوء عبر منشور زجاجي تتغير سرعته واتجاهه بطريقة تعتمد على طول الموجة. لذلك تنفصل مكونات الضوء وتظهر ألوان الطيف بوضوح.","hashtags":["#Shorts","#علوم","#ضوء"]},
+    {"search":"static electricity balloon hair","fallback_searches":["static electricity science","electric charge"],"title":"الكهرباء الساكنة تنتج من تراكم شحنات على سطح الجسم","text":"يمكن للاحتكاك بين مادتين أن ينقل إلكترونات من سطح إلى آخر. يؤدي ذلك إلى اختلاف في الشحنة الكهربائية، وقد يظهر على شكل جذب أجسام خفيفة أو شرارة صغيرة.","hashtags":["#Shorts","#علوم","#كهرباء"]},
+    {"search":"boiling water steam close up","fallback_searches":["water boiling science","steam physics"],"title":"غليان الماء يحدث عندما تتكون فقاعات البخار داخل السائل","text":"عند وصول الماء إلى درجة الغليان المناسبة للضغط المحيط تتكون فقاعات من بخار الماء داخل السائل. تصعد الفقاعات إلى السطح وتطلق البخار في الهواء.","hashtags":["#Shorts","#علوم","#ماء"]},
+    {"search":"metal thermal expansion experiment","fallback_searches":["thermal expansion metal","heat expansion science"],"title":"المعادن تتمدد عندما ترتفع درجة حرارتها","text":"عند تسخين معظم المعادن تزداد حركة ذراتها قليلًا، فيزداد متوسط المسافة بينها. لذلك يتمدد المعدن، ويؤخذ هذا التأثير في الاعتبار عند تصميم الجسور والأنابيب والآلات.","hashtags":["#Shorts","#علوم","#هندسة"]},
+    {"search":"pendulum physics experiment","fallback_searches":["pendulum motion","physics pendulum"],"title":"زمن حركة البندول يتأثر بطول خيطه","text":"في البندول البسيط يرتبط زمن الدورة بطول الخيط وتسارع الجاذبية. عند زيادة طول الخيط تستغرق الدورة وقتًا أطول، مع ثبات العوامل الأخرى تقريبًا.","hashtags":["#Shorts","#علوم","#فيزياء"]},
+    {"search":"water pressure deep ocean","fallback_searches":["ocean pressure science","deep water pressure"],"title":"ضغط الماء يزداد كلما زاد العمق","text":"يزداد وزن عمود الماء الموجود فوق نقطة معينة كلما نزلنا إلى عمق أكبر. لذلك يرتفع الضغط في المياه العميقة، وتحتاج المعدات المستخدمة هناك إلى تصميم يتحمل هذه القوة.","hashtags":["#Shorts","#علوم","#بحار"]},
+    {"search":"sound waves oscilloscope","fallback_searches":["sound waveform","audio physics"],"title":"يمكن تحويل الصوت إلى موجة تظهر على شاشة القياس","text":"عند التقاط الصوت بميكروفون تتحول الاهتزازات إلى إشارة كهربائية. يمكن لجهاز القياس عرض هذه الإشارة على شكل موجة توضح تغيرها مع الزمن.","hashtags":["#Shorts","#علوم","#صوت"]},
+    {"search":"ultraviolet light science","fallback_searches":["uv light experiment","ultraviolet spectrum"],"title":"الأشعة فوق البنفسجية جزء من الطيف الكهرومغناطيسي","text":"الأشعة فوق البنفسجية موجات كهرومغناطيسية ذات أطوال موجية أقصر من الضوء البنفسجي المرئي. تصل بعض هذه الأشعة من الشمس إلى سطح الأرض، ولذلك تُستخدم وسائل حماية مناسبة عند التعرض القوي.","hashtags":["#Shorts","#علوم","#ضوء"]},
+    {"search":"infrared thermal camera","fallback_searches":["thermal imaging","infrared camera science"],"title":"الكاميرا الحرارية تعرض فروق الإشعاع الحراري","text":"تلتقط الكاميرات الحرارية الأشعة تحت الحمراء المنبعثة من الأجسام، ثم تحول البيانات إلى صورة توضح اختلاف درجات الحرارة. تستخدم هذه التقنية في الفحص والهندسة والمراقبة العلمية.","hashtags":["#Shorts","#علوم","#تقنية"]},
+    {"search":"solar eclipse safe viewing science","fallback_searches":["eclipse science","solar observation"],"title":"الكسوف يحدث عندما يحجب القمر جزءًا من ضوء الشمس عن منطقة من الأرض","text":"يحدث كسوف الشمس عندما يمر القمر بين الشمس والأرض ويقع ظله على جزء من سطح الأرض. يختلف مقدار الحجب بحسب موقع الراصد بالنسبة إلى مسار الظل.","hashtags":["#Shorts","#علوم","#فضاء"]},
+    {"search":"moon phases night sky","fallback_searches":["moon phase science","lunar phases"],"title":"أطوار القمر تنتج من تغير الجزء المضيء المرئي من الأرض","text":"القمر لا يصنع ضوءه بنفسه بل يعكس ضوء الشمس. ومع دوران القمر حول الأرض يتغير الجزء المضيء الذي نراه، فتظهر الأطوار المختلفة خلال الشهر القمري.","hashtags":["#Shorts","#علوم","#فضاء"]},
+    {"search":"satellite orbit earth animation","fallback_searches":["satellite orbit science","space satellite"],"title":"القمر الصناعي يبقى في المدار بسبب توازن السرعة والجاذبية","text":"يتحرك القمر الصناعي بسرعة أفقية بينما تجذبه الجاذبية نحو الأرض. هذا التفاعل يجعل مساره منحنيًا حول الأرض بدلًا من سقوطه مباشرة نحو سطحها.","hashtags":["#Shorts","#فضاء","#فيزياء"]},
+    {"search":"solar panel sunlight close up","fallback_searches":["solar cell technology","photovoltaic panel"],"title":"الخلايا الشمسية تحول جزءًا من ضوء الشمس إلى كهرباء","text":"تستخدم الخلايا الشمسية مواد شبه موصلة لتحويل طاقة الضوء إلى طاقة كهربائية. عند وصول الفوتونات إلى الخلية يمكن أن تساهم في توليد تيار كهربائي داخل الدائرة.","hashtags":["#Shorts","#علوم","#تقنية"]},
+    {"search":"earth atmosphere blue sky","fallback_searches":["atmosphere science","blue sky physics"],"title":"السماء تبدو زرقاء بسبب تشتت الضوء في الغلاف الجوي","text":"تتفاعل أشعة الشمس مع جزيئات الغازات في الغلاف الجوي، وتتشتت الأطوال الموجية القصيرة من الضوء المرئي بقوة أكبر من الأطوال الأطول. لهذا يغلب اللون الأزرق على السماء في النهار الصافي.","hashtags":["#Shorts","#علوم","#فضاء"]},
+    {"search":"plant seed germination time lapse","fallback_searches":["seed germination","plant growth science"],"title":"البذرة تبدأ الإنبات عندما تتوافر لها ظروف مناسبة","text":"تمتص البذرة الماء وتبدأ عمليات داخلية تسمح للجنين بالنمو. ومع توافر الحرارة والأكسجين والظروف المناسبة تظهر الجذور ثم يبدأ الجزء العلوي من النبات في النمو.","hashtags":["#Shorts","#علوم","#نباتات"]},
+    {"search":"tree rings close up","fallback_searches":["tree growth rings","plant biology"],"title":"حلقات جذع الشجرة تسجل مراحل من نموها","text":"ينتج الخشب الجديد في كثير من الأشجار أنماطًا يمكن رؤيتها على شكل حلقات في مقطع الجذع. تختلف هذه الحلقات في السماكة بحسب ظروف النمو خلال الفترات المختلفة.","hashtags":["#Shorts","#علوم","#نباتات"]},
+    {"search":"gecko feet macro","fallback_searches":["gecko feet science","animal adhesion"],"title":"أقدام الوزغ تستطيع الالتصاق بالأسطح بآلية دقيقة","text":"تحتوي أقدام الوزغ على تراكيب مجهرية كثيرة تزيد مساحة التلامس مع السطح. تنشأ قوى جذب ضعيفة بين هذه التراكيب والسطح، وتتجمع لتساعد الحيوان على التسلق.","hashtags":["#Shorts","#علوم","#حيوانات"]},
+    {"search":"bird feather macro","fallback_searches":["feather structure science","bird feather close up"],"title":"ريشة الطائر تحتوي على فروع دقيقة مترابطة","text":"تتكون الريشة من ساق رئيسية تخرج منها فروع أصغر تحمل تراكيب دقيقة مترابطة. يساعد هذا التنظيم على تكوين سطح خفيف ومتماسك يخدم الطائر أثناء الحركة في الهواء.","hashtags":["#Shorts","#علوم","#حيوانات"]},
+    {"search":"fish underwater gills close up","fallback_searches":["fish gills science","aquatic respiration"],"title":"الخياشيم تستخلص الأكسجين المذاب في الماء","text":"يمر الماء عبر الخياشيم فتنتقل جزيئات الأكسجين من الماء إلى الدم عبر أسطح رقيقة جدًا. يسمح هذا الترتيب للأسماك باستخلاص الأكسجين من البيئة المائية.","hashtags":["#Shorts","#علوم","#بحار"]},
+
+    # -----------------------------------------------------
+    # الهندسة والتقنية
+    # -----------------------------------------------------
+    {"search":"robotic arm factory engineering","fallback_searches":["industrial robot arm","robotics manufacturing"],"title":"الذراع الآلية تتحرك عبر مفاصل يتحكم بها الحاسوب","text":"تحتوي الأذرع الآلية على مفاصل ومحركات وحساسات تسمح لها بتغيير موضعها بدقة. يرسل نظام التحكم أوامر لكل محرك للوصول إلى الوضع المطلوب.","hashtags":["#Shorts","#هندسة","#روبوتات"]},
+    {"search":"3d printer printing close up","fallback_searches":["3d printing technology","additive manufacturing"],"title":"الطابعة ثلاثية الأبعاد تبني الجسم طبقة فوق طبقة","text":"تحول الطابعة ثلاثية الأبعاد نموذجًا رقميًا إلى جسم حقيقي عبر إضافة مادة على طبقات متتابعة. يختلف نوع المادة وطريقة الإضافة بحسب تقنية الطباعة المستخدمة.","hashtags":["#Shorts","#تقنية","#هندسة"]},
+    {"search":"fiber optic cable light","fallback_searches":["fiber optic technology","optical fiber close up"],"title":"الألياف الضوئية تنقل البيانات باستخدام نبضات ضوئية","text":"تمر الإشارات الضوئية داخل ألياف دقيقة مصممة لحبس الضوء داخلها. يمكن استخدام هذه النبضات لتمثيل البيانات ونقلها لمسافات طويلة بسرعة عالية.","hashtags":["#Shorts","#تقنية","#اتصالات"]},
+    {"search":"computer motherboard circuit close up","fallback_searches":["motherboard technology","computer circuit board"],"title":"اللوحة الأم تربط مكونات الحاسوب ببعضها","text":"تحتوي اللوحة الأم على مسارات ودوائر وموصلات تسمح بتبادل البيانات والطاقة بين المعالج والذاكرة ووحدات التخزين وغيرها من المكونات.","hashtags":["#Shorts","#تقنية","#حاسوب"]},
+    {"search":"computer processor chip macro","fallback_searches":["cpu chip close up","processor technology"],"title":"المعالج ينفذ التعليمات من خلال مليارات العمليات الإلكترونية","text":"يحتوي المعالج الحديث على عدد هائل من الترانزستورات التي تتحكم في الإشارات الكهربائية. تعمل هذه الترانزستورات معًا لتنفيذ العمليات التي تحتاج إليها البرامج.","hashtags":["#Shorts","#تقنية","#حاسوب"]},
+    {"search":"computer RAM memory module","fallback_searches":["ram memory technology","computer memory"],"title":"الذاكرة العشوائية تحفظ بيانات يحتاج إليها المعالج بسرعة","text":"تستخدم الذاكرة العشوائية مساحة سريعة لتخزين البيانات والتعليمات التي يحتاج إليها المعالج أثناء تشغيل البرامج. وتفقد هذه البيانات عند انقطاع الطاقة عنها.","hashtags":["#Shorts","#تقنية","#حاسوب"]},
+    {"search":"SSD storage drive close up","fallback_searches":["solid state drive","SSD technology"],"title":"وحدة التخزين الصلبة تحفظ البيانات من دون أجزاء ميكانيكية متحركة","text":"تستخدم وحدات التخزين الصلبة شرائح ذاكرة لتخزين البيانات بدل الأقراص الدوارة الموجودة في بعض الأنواع الأقدم. هذا التصميم يسمح باستجابة سريعة ويقلل الأجزاء المتحركة.","hashtags":["#Shorts","#تقنية","#حاسوب"]},
+    {"search":"wireless charging phone coil","fallback_searches":["wireless charging technology","charging coil"],"title":"الشحن اللاسلكي ينقل الطاقة عبر مجال مغناطيسي متغير","text":"يستخدم الشحن اللاسلكي ملفًا داخل قاعدة الشحن وملفًا آخر داخل الجهاز. يؤدي تغير المجال المغناطيسي إلى توليد تيار كهربائي في الملف الموجود داخل الجهاز.","hashtags":["#Shorts","#تقنية","#هندسة"]},
+    {"search":"smartphone camera lens macro","fallback_searches":["phone camera technology","camera lens close up"],"title":"عدسات الهاتف توجه الضوء نحو حساس الصورة","text":"تجمع عدسة الكاميرا الضوء وتوجهه نحو حساس إلكتروني يحول الضوء إلى بيانات رقمية. وتستخدم الهواتف عدة عدسات في بعض الموديلات للحصول على خصائص تصوير مختلفة.","hashtags":["#Shorts","#تقنية","#هواتف"]},
+    {"search":"camera image sensor macro","fallback_searches":["camera sensor technology","CMOS sensor"],"title":"حساس الكاميرا يحول الضوء إلى إشارات كهربائية","text":"يتكون حساس الصورة من عدد كبير من العناصر الحساسة للضوء. تستقبل هذه العناصر الفوتونات وتحول المعلومات إلى إشارات تستخدم لبناء الصورة الرقمية.","hashtags":["#Shorts","#تقنية","#تصوير"]},
+    {"search":"computer network router lights","fallback_searches":["router technology","network equipment"],"title":"الموجه ينظم مرور البيانات بين الشبكات","text":"يستقبل الموجه حزم البيانات ويحدد المسار المناسب لإرسالها نحو الشبكة أو الجهاز المطلوب. تعتمد عملية الاختيار على معلومات موجودة في جداول التوجيه وإعدادات الشبكة.","hashtags":["#Shorts","#تقنية","#شبكات"]},
+    {"search":"wifi router signal illustration","fallback_searches":["wifi technology","wireless network"],"title":"شبكة الواي فاي تنقل البيانات عبر موجات راديوية","text":"يحول جهاز الشبكة البيانات الرقمية إلى إشارات راديوية ثم يستقبلها الجهاز الآخر ويعيد تحويلها إلى بيانات. تتأثر جودة الاتصال بالمسافة والعوائق والتداخل بين الإشارات.","hashtags":["#Shorts","#تقنية","#شبكات"]},
+    {"search":"server data center racks","fallback_searches":["data center technology","server room"],"title":"مراكز البيانات تحتاج إلى تبريد مستمر للحفاظ على الأجهزة","text":"تعمل الخوادم لفترات طويلة وتنتج حرارة أثناء معالجة البيانات. لذلك تستخدم مراكز البيانات أنظمة تبريد ومراقبة للحرارة للحفاظ على ظروف تشغيل مناسبة للمعدات.","hashtags":["#Shorts","#تقنية","#حاسوب"]},
+    {"search":"computer keyboard switches macro","fallback_searches":["mechanical keyboard switch","keyboard technology"],"title":"المفاتيح الميكانيكية تستخدم آلية منفصلة لكل زر","text":"يحتوي المفتاح الميكانيكي عادة على آلية مستقلة تحت كل زر. عند الضغط يتحرك المفتاح ويغلق الدائرة أو يرسل إشارة إلى الحاسوب لتسجيل الإدخال.","hashtags":["#Shorts","#تقنية","#حاسوب"]},
+    {"search":"bluetooth wireless headphones technology","fallback_searches":["bluetooth connection","wireless audio technology"],"title":"البلوتوث يرسل البيانات لاسلكيًا عبر موجات راديوية قصيرة المدى","text":"يستخدم البلوتوث موجات راديوية لنقل البيانات بين الأجهزة القريبة. ويقسم الاتصال البيانات إلى حزم ويستخدم آليات تنظيم تساعد الأجهزة على تبادل المعلومات.","hashtags":["#Shorts","#تقنية","#اتصالات"]},
+    {"search":"electric motor rotor close up","fallback_searches":["electric motor engineering","motor rotor"],"title":"المحرك الكهربائي يحول الطاقة الكهربائية إلى حركة دورانية","text":"تتفاعل المجالات المغناطيسية داخل المحرك الكهربائي لإنتاج قوة على الجزء الدوار. تتحول هذه القوة إلى حركة دورانية يمكن استخدامها لتشغيل المراوح والعجلات والآلات.","hashtags":["#Shorts","#هندسة","#كهرباء"]},
+    {"search":"wind turbine blades engineering","fallback_searches":["wind turbine technology","wind energy engineering"],"title":"شكل شفرات التوربين يساعد على تحويل حركة الهواء إلى دوران","text":"تصمم شفرات توربينات الرياح بشكل يشبه الأجنحة لتوليد قوة من مرور الهواء حولها. هذه القوة تدير الدوار، ثم يحول المولد الحركة إلى طاقة كهربائية.","hashtags":["#Shorts","#هندسة","#طاقة"]},
+    {"search":"hydroelectric dam turbine","fallback_searches":["hydropower engineering","water turbine"],"title":"محطة الطاقة المائية تستخدم حركة الماء لتدوير التوربين","text":"عندما يمر الماء بسرعة عبر التوربين يدفع شفراته ويجعلها تدور. تنتقل الحركة إلى مولد كهربائي يحول الطاقة الميكانيكية إلى طاقة كهربائية.","hashtags":["#Shorts","#هندسة","#طاقة"]},
+    {"search":"solar tracker panels engineering","fallback_searches":["solar tracking system","solar panel tracker"],"title":"نظام تتبع الشمس يغير زاوية الألواح خلال اليوم","text":"تستخدم بعض الأنظمة محركات وحساسات لتغيير زاوية الألواح الشمسية مع تغير موقع الشمس في السماء. الهدف هو توجيه السطح نحو الضوء بصورة أفضل خلال ساعات التشغيل.","hashtags":["#Shorts","#هندسة","#طاقة"]},
+    {"search":"electric car motor close up","fallback_searches":["electric vehicle motor","EV powertrain"],"title":"السيارة الكهربائية تستخدم محركًا لتحويل الطاقة المخزنة إلى حركة","text":"تنتقل الطاقة من البطارية إلى نظام التحكم ثم إلى المحرك الكهربائي. ينتج المحرك عزمًا يدير العجلات، وتختلف طريقة التحكم في العزم بحسب سرعة السيارة وحالة القيادة.","hashtags":["#Shorts","#تقنية","#هندسة"]},
+    {"search":"car regenerative braking animation","fallback_searches":["regenerative braking technology","electric car braking"],"title":"الكبح المتجدد يستطيع استعادة جزء من الطاقة أثناء التباطؤ","text":"عند تباطؤ السيارة الكهربائية يمكن للمحرك أن يعمل بطريقة مختلفة ويحول جزءًا من الحركة إلى طاقة كهربائية. تعود هذه الطاقة إلى البطارية ضمن حدود النظام.","hashtags":["#Shorts","#تقنية","#هندسة"]},
+    {"search":"airplane wing wind tunnel model","fallback_searches":["airfoil engineering","aircraft wing science"],"title":"شكل الجناح يغير حركة الهواء حول الطائرة","text":"يصمم جناح الطائرة بحيث يوجه الهواء حول سطحه بطريقة تولد قوى هوائية. يعتمد أداء الجناح على الشكل والسرعة وزاوية الهجوم وكثافة الهواء.","hashtags":["#Shorts","#هندسة","#طيران"]},
+    {"search":"airplane turbine engine close up","fallback_searches":["jet engine engineering","aircraft engine"],"title":"المحرك النفاث يضغط الهواء ثم يضيف إليه طاقة قبل دفع الغازات للخلف","text":"يدخل الهواء إلى المحرك ثم يمر بمراحل ضغط واحتراق وتمدد داخل نظام مصمم بعناية. تخرج الغازات بسرعة عالية من الخلف فتتولد قوة دفع تدفع الطائرة إلى الأمام.","hashtags":["#Shorts","#هندسة","#طيران"]},
+    {"search":"rocket engine engineering test","fallback_searches":["space engine technology","rocket propulsion"],"title":"محرك المركبة الفضائية يحول طاقة الوقود إلى قوة دفع","text":"يخلط المحرك الوقود والمؤكسد بطريقة تنتج غازات عالية الطاقة. تندفع الغازات عبر فوهة مصممة لتسريعها، فتتولد قوة دفع تحرك المركبة في الاتجاه المعاكس.","hashtags":["#Shorts","#هندسة","#فضاء"]},
+    {"search":"satellite solar panels engineering","fallback_searches":["satellite power system","spacecraft solar panels"],"title":"الألواح الشمسية تزود القمر الصناعي بالطاقة أثناء وجوده في الضوء","text":"تحول الألواح الشمسية الضوء إلى كهرباء لتشغيل الأنظمة الموجودة على القمر الصناعي. ويمكن تخزين جزء من الطاقة في البطاريات لاستخدامه عندما لا تصل أشعة الشمس إلى الألواح.","hashtags":["#Shorts","#فضاء","#هندسة"]},
+    {"search":"robot vacuum sensors technology","fallback_searches":["robot vacuum navigation","home robot sensors"],"title":"المكنسة الروبوتية تستخدم حساسات لمعرفة ما حولها","text":"تجمع المكنسة الروبوتية بيانات من حساسات تساعدها على اكتشاف العوائق وتقدير موقعها. تستخدم الخوارزميات هذه البيانات لتحديد مسار الحركة داخل المكان.","hashtags":["#Shorts","#روبوتات","#تقنية"]},
+    {"search":"smartwatch sensors close up","fallback_searches":["wearable technology sensors","smart watch technology"],"title":"الساعة الذكية تجمع بيانات الحركة باستخدام حساسات صغيرة","text":"تحتوي الساعات الذكية على حساسات تقيس الحركة والدوران وبعض المؤشرات الفيزيائية الأخرى. تستخدم البرامج هذه البيانات لتحديد النشاط وعرض معلومات للمستخدم.","hashtags":["#Shorts","#تقنية","#أجهزة"]},
+    {"search":"microchip fabrication cleanroom","fallback_searches":["semiconductor manufacturing","chip fabrication"],"title":"تصنيع الشرائح الإلكترونية يحتاج إلى بيئة شديدة النظافة","text":"تحتوي الشرائح الإلكترونية على تفاصيل صغيرة جدًا، لذلك يمكن لجسيمات الغبار أن تؤثر في عملية التصنيع. تستخدم المصانع غرفًا نظيفة وأنظمة ترشيح دقيقة لتقليل الملوثات.","hashtags":["#Shorts","#تقنية","#هندسة"]},
+    {"search":"led light bulb close up","fallback_searches":["LED technology","LED circuit"],"title":"مصباح ليد يحول الطاقة الكهربائية إلى ضوء داخل مادة شبه موصلة","text":"يصدر مصباح ليد الضوء عندما تمر الشحنات داخل مادة شبه موصلة مصممة لهذا الغرض. تختلف خصائص الضوء بحسب المادة وتركيب المصباح والدائرة المستخدمة.","hashtags":["#Shorts","#تقنية","#كهرباء"]},
+    {"search":"touchscreen smartphone finger close up","fallback_searches":["capacitive touchscreen","touch screen technology"],"title":"شاشة اللمس السعوية تكتشف تغيرًا كهربائيًا عند لمسها","text":"تحتوي الشاشة السعوية على طبقة تستطيع رصد تغيرات في المجال الكهربائي عند اقتراب الإصبع. يعالج الجهاز موقع التغير ليحدد النقطة التي تم لمسها.","hashtags":["#Shorts","#تقنية","#هواتف"]},
+    {"search":"qr code scanner phone","fallback_searches":["QR code technology","barcode scanner"],"title":"رمز الاستجابة السريعة يخزن المعلومات في نمط من المربعات","text":"يتكون رمز الاستجابة السريعة من وحدات مربعة مرتبة بطريقة تمثل بيانات رقمية. عند تصوير الرمز تستطيع البرامج قراءة النمط وتحويله إلى المعلومات المخزنة فيه.","hashtags":["#Shorts","#تقنية","#برمجة"]},
+    {"search":"machine learning neural network visualization","fallback_searches":["neural network technology","machine learning model"],"title":"الشبكة العصبية الاصطناعية تتعلم الأنماط من البيانات","text":"تتكون الشبكات العصبية الاصطناعية من طبقات من وحدات حسابية مترابطة. أثناء التدريب تتغير أوزان هذه الروابط لتقليل الخطأ في النتائج على أمثلة التدريب.","hashtags":["#Shorts","#تقنية","#ذكاء_اصطناعي"]},
+    {"search":"computer graphics GPU rendering","fallback_searches":["graphics processor","GPU rendering"],"title":"معالج الرسومات ينفذ عمليات كثيرة بالتوازي لإظهار الصور","text":"صمم معالج الرسومات لتنفيذ عدد كبير من العمليات المتشابهة في الوقت نفسه. لهذا يستخدم في رسم المشاهد ثلاثية الأبعاد ومعالجة الصور وبعض العمليات الحسابية المتوازية.","hashtags":["#Shorts","#تقنية","#ألعاب"]},
+    {"search":"game console controller close up","fallback_searches":["gaming controller technology","gamepad buttons"],"title":"يد التحكم تحول ضغط الأزرار إلى إشارات يفهمها الجهاز","text":"تحتوي يد التحكم على مفاتيح وحساسات تلتقط ضغط الأزرار وحركة العصي. ترسل الدائرة الإلكترونية هذه المدخلات إلى الجهاز لتتحول إلى أوامر داخل اللعبة.","hashtags":["#Shorts","#ألعاب","#تقنية"]},
+    {"search":"game physics engine simulation","fallback_searches":["video game physics","game physics simulation"],"title":"محرك الفيزياء يحسب حركة الأجسام داخل اللعبة","text":"يستخدم محرك الفيزياء معادلات لحساب الحركة والتصادم والجاذبية وغيرها من التأثيرات. ثم تُستخدم النتائج لتحديث مواقع الأجسام مع مرور الوقت داخل اللعبة.","hashtags":["#Shorts","#ألعاب","#برمجة"]},
+    {"search":"game texture rendering close up","fallback_searches":["video game textures","game graphics rendering"],"title":"الخامات الرقمية تضيف تفاصيل إلى أسطح الأجسام داخل اللعبة","text":"تستخدم الألعاب صورًا أو بيانات رقمية لتحديد لون وملمس أسطح الأجسام. يطبق محرك الرسومات هذه الخامات على النماذج ثلاثية الأبعاد أثناء رسم المشهد.","hashtags":["#Shorts","#ألعاب","#رسوم"]},
+    {"search":"game frame rate monitor","fallback_searches":["gaming fps counter","frame rate gaming"],"title":"معدل الإطارات يحدد عدد الصور التي تظهر خلال الثانية","text":"معدل الإطارات هو عدد الإطارات التي يرسمها الجهاز في الثانية. عندما يكون المعدل مستقرًا تبدو الحركة أكثر سلاسة، بينما قد تظهر تقطعات عند انخفاضه أو عدم استقراره.","hashtags":["#Shorts","#ألعاب","#تقنية"]},
+    {"search":"gaming monitor refresh rate","fallback_searches":["monitor refresh rate gaming","gaming display"],"title":"معدل تحديث الشاشة يحدد عدد مرات تحديث الصورة في الثانية","text":"يقيس معدل التحديث عدد مرات تحديث الشاشة للصورة خلال الثانية. يمكن لمعدل أعلى أن يجعل الحركة السريعة أكثر سلاسة عندما يستطيع الجهاز توفير عدد إطارات مناسب.","hashtags":["#Shorts","#ألعاب","#تقنية"]},
+    {"search":"game loading screen SSD","fallback_searches":["game loading technology","SSD gaming"],"title":"سرعة التخزين تؤثر في وقت تحميل بعض الألعاب","text":"عند تشغيل مرحلة جديدة تحتاج اللعبة إلى قراءة ملفات من وحدة التخزين ونقلها إلى الذاكرة. كلما تحسنت سرعة القراءة يمكن تقليل الوقت المطلوب لهذه العملية في بعض الحالات.","hashtags":["#Shorts","#ألعاب","#حاسوب"]},
+    {"search":"game procedural generation terrain","fallback_searches":["procedural generation games","game world generation"],"title":"التوليد الإجرائي يستطيع إنشاء أجزاء من عالم اللعبة باستخدام قواعد حسابية","text":"بدل تخزين كل تفصيل يدويًا، يمكن للعبة استخدام خوارزميات تولد تضاريس أو عناصر وفق قواعد محددة. يسمح ذلك بإنشاء مساحات كبيرة ومتنوعة من عدد صغير نسبيًا من القواعد والبيانات.","hashtags":["#Shorts","#ألعاب","#برمجة"]},
+    {"search":"game server multiplayer network","fallback_searches":["multiplayer game server","online gaming network"],"title":"الخادم ينسق حالة المباراة في الألعاب الجماعية عبر الإنترنت","text":"ترسل أجهزة اللاعبين بيانات عن أفعالهم إلى الخادم، ثم يعالج الخادم الحالة المشتركة ويرسل تحديثات إلى الأجهزة الأخرى. تساعد هذه العملية على إبقاء اللاعبين داخل المباراة على حالة متقاربة.","hashtags":["#Shorts","#ألعاب","#شبكات"]},
+    {"search":"game animation motion capture suit","fallback_searches":["motion capture animation","game character mocap"],"title":"التقاط الحركة يحول حركات الجسم إلى بيانات تستخدم في الرسوم","text":"تستخدم أنظمة التقاط الحركة حساسات أو كاميرات لتسجيل مواقع أجزاء الجسم أثناء الحركة. يمكن تحويل هذه البيانات إلى حركات لشخصية رقمية داخل لعبة أو مشهد ثلاثي الأبعاد.","hashtags":["#Shorts","#ألعاب","#رسوم"]},
+    {"search":"game audio spatial sound headphones","fallback_searches":["spatial audio gaming","3d game sound"],"title":"الصوت المكاني يحاكي اتجاه وصول الصوت داخل اللعبة","text":"تعالج بعض الألعاب الصوت بحيث يبدو للمستمع أن المؤثر يأتي من اتجاه معين. تعتمد الطريقة على اختلافات التوقيت والشدة بين الأذنين لإنتاج إحساس بالموقع.","hashtags":["#Shorts","#ألعاب","#صوت"]},
+    {"search":"gaming pc liquid cooling loop","fallback_searches":["liquid cooling computer","PC cooling system"],"title":"التبريد السائل ينقل الحرارة من المعالج إلى المشعاع","text":"في أنظمة التبريد السائل تنتقل الحرارة من المعالج إلى سائل داخل كتلة تبريد، ثم يتحرك السائل إلى مشعاع يبدد الحرارة إلى الهواء. بعدها يعود السائل لإعادة الدورة.","hashtags":["#Shorts","#تقنية","#حاسوب"]},
+    {"search":"game ray tracing graphics","fallback_searches":["ray tracing gaming","real time graphics"],"title":"تتبع الأشعة يحاكي مسارات الضوء لإظهار انعكاسات وإضاءة أكثر تفصيلًا","text":"تتبع الأشعة خوارزمية تحاكي مسار أشعة الضوء من المشهد إلى الكاميرا أو العكس. يمكن استخدامها لحساب الانعكاسات والظلال وبعض تأثيرات الإضاءة بصورة أكثر تفصيلًا.","hashtags":["#Shorts","#ألعاب","#تقنية"]},
+    {"search":"game artificial intelligence pathfinding","fallback_searches":["game pathfinding ai","NPC navigation"],"title":"خوارزمية البحث عن المسار تساعد الشخصية الرقمية على الوصول إلى هدفها","text":"تستخدم الألعاب خوارزميات للبحث عن طريق مناسب بين نقطة البداية والهدف. تعتمد الخوارزمية على شكل البيئة والعوائق والقواعد التي يحددها مطور اللعبة.","hashtags":["#Shorts","#ألعاب","#برمجة"]},
+    {"search":"game level lighting design","fallback_searches":["video game lighting","game environment lighting"],"title":"الإضاءة داخل اللعبة تساعد على توضيح العمق واتجاه المشهد","text":"تستخدم الإضاءة الرقمية لإظهار شكل الأجسام ومواقعها وإضافة إحساس بالعمق. ويمكن تغيير شدة الضوء ولونه واتجاهه بحسب تصميم المرحلة.","hashtags":["#Shorts","#ألعاب","#رسوم"]},
+    {"search":"game inventory system interface","fallback_searches":["game inventory UI","video game interface"],"title":"واجهة اللعبة تحول البيانات المعقدة إلى عناصر يمكن للاعب فهمها بسرعة","text":"تعرض واجهة المستخدم معلومات مثل الأدوات والمهام والموارد بطريقة منظمة. يختار المصمم مواقع الأيقونات والنصوص والألوان بحيث يستطيع اللاعب الوصول إلى المعلومة أثناء اللعب.","hashtags":["#Shorts","#ألعاب","#تصميم"]},
+    {"search":"game controller haptic vibration","fallback_searches":["haptic feedback gaming","controller vibration"],"title":"الاهتزاز في يد التحكم يحول بعض أحداث اللعبة إلى إحساس ملموس","text":"تحتوي بعض أيدي التحكم على محركات صغيرة تولد اهتزازات بدرجات مختلفة. يرسل الجهاز أوامر لهذه المحركات عندما تحدث أحداث معينة داخل اللعبة.","hashtags":["#Shorts","#ألعاب","#تقنية"]},
+])
+
 
 # =========================================================
 # GENERAL HELPERS
@@ -290,18 +484,29 @@ def topic_is_allowed(topic):
 def validate_topic_pool():
     """Validate the active pool before generation.
 
-    The pool intentionally contains football-only, player-focused topics from the active categories.
-    Science, engineering, technology, gaming, history, and geography are excluded.
+    The pool intentionally contains only football, science, engineering/technology,
+    and electronic-gaming topics. Historical and geographic topics are excluded.
     """
     if not TOPICS:
         raise RuntimeError("TOPICS is empty.")
 
     seen = set()
     for index, topic in enumerate(TOPICS, start=1):
-        title = sanitize_script(topic.get("title", "")) if "sanitize_script" in globals() else str(topic.get("title", ""))
-        text = sanitize_script(topic.get("text", "")) if "sanitize_script" in globals() else str(topic.get("text", ""))
-        if not title or not text:
+        # Validate the actual stored fields first. Sanitizing must never make a
+        # valid topic appear empty just because it contains punctuation/symbols.
+        raw_title = str(topic.get("title", "") or "").strip()
+        raw_text = str(topic.get("text", "") or "").strip()
+        if not raw_title or not raw_text:
             raise RuntimeError(f"Topic {index} has an empty title or script.")
+
+        # Clean for TTS/subtitles, but safely fall back to the original field
+        # if an over-aggressive cleanup ever removes everything.
+        title = sanitize_script(raw_title) if "sanitize_script" in globals() else raw_title
+        text = sanitize_script(raw_text) if "sanitize_script" in globals() else raw_text
+        if not title:
+            title = raw_title
+        if not text:
+            text = raw_text
 
         allowed, blocked = topic_is_allowed({"title": title, "text": text})
         if not allowed:
@@ -429,351 +634,108 @@ def choose_video_file(video):
     return None
 
 
+def build_visual_queries(topic):
+    """Build concept-focused Pexels queries instead of generic repeated searches."""
+    primary = clean_text(topic.get("search", ""))
+    fallbacks = [
+        clean_text(x)
+        for x in topic.get("fallback_searches", [])
+        if clean_text(x)
+    ]
 
-# ---------------------------------------------------------
-# SMART VISUAL RELEVANCE
-# ---------------------------------------------------------
-# Pexels search can return generic football footage even when the query
-# contains a famous player's name. These profiles let the pipeline build
-# several precise searches around the actual player(s) and the visual
-# context of the topic, then select clips from those relevant groups.
-VISUAL_PLAYER_PROFILES = {
-    "messi": {
-        "names": ["lionel messi", "messi"],
-        "arabic": ["ميسي", "ليونيل ميسي"],
-    },
-    "ronaldo": {
-        "names": ["cristiano ronaldo", "ronaldo"],
-        "arabic": ["رونالدو", "كريستيانو رونالدو"],
-    },
-    "mbappe": {
-        "names": ["kylian mbappe", "mbappe"],
-        "arabic": ["مبابي", "كيليان مبابي"],
-    },
-    "haaland": {
-        "names": ["erling haaland", "haaland"],
-        "arabic": ["هالاند", "إيرلينغ هالاند"],
-    },
-    "salah": {
-        "names": ["mohamed salah", "salah"],
-        "arabic": ["صلاح", "محمد صلاح"],
-    },
-    "neymar": {
-        "names": ["neymar", "neymar jr"],
-        "arabic": ["نيمار"],
-    },
-    "modric": {
-        "names": ["luka modric", "modric"],
-        "arabic": ["مودريتش", "لوكا مودريتش"],
-    },
-    "de_bruyne": {
-        "names": ["kevin de bruyne", "de bruyne"],
-        "arabic": ["دي بروين", "كيفين دي بروين"],
-    },
-    "benzema": {
-        "names": ["karim benzema", "benzema"],
-        "arabic": ["بنزيما", "كريم بنزيما"],
-    },
-    "lewandowski": {
-        "names": ["robert lewandowski", "lewandowski"],
-        "arabic": ["ليفاندوفسكي", "روبرت ليفاندوفسكي"],
-    },
-    "vinicius": {
-        "names": ["vinicius junior", "vinicius jr", "vinicius"],
-        "arabic": ["فينيسيوس", "فينيسيوس جونيور"],
-    },
-    "bellingham": {
-        "names": ["jude bellingham", "bellingham"],
-        "arabic": ["بيلينغهام", "جود بيلينغهام"],
-    },
-}
+    queries = []
+    for query in [primary] + fallbacks:
+        if query and query.lower() not in {q.lower() for q in queries}:
+            queries.append(query)
 
-VISUAL_CONTEXT_TERMS = [
-    ("dribble", ["dribbling", "football match action"]),
-    ("dribbling", ["dribbling", "football match action"]),
-    ("goal", ["goal celebration", "football match action"]),
-    ("celebration", ["goal celebration", "football match"]),
-    ("shoot", ["shooting", "football match action"]),
-    ("shot", ["shooting", "football match action"]),
-    ("free kick", ["free kick", "football match"]),
-    ("header", ["header", "football match"]),
-    ("pass", ["passing", "football match action"]),
-    ("assist", ["assist", "football match action"]),
-    ("cross", ["crossing", "football match"]),
-    ("sprint", ["sprinting", "football match action"]),
-    ("speed", ["sprinting", "football match action"]),
-    ("skills", ["football skills", "dribbling"]),
-    ("skill", ["football skill", "dribbling"]),
-    ("ball control", ["ball control", "football match"]),
-    ("first touch", ["first touch", "football match"]),
-    ("finishing", ["finishing", "football match action"]),
-    ("striker", ["striker", "football match action"]),
-    ("midfield", ["midfielder", "football match action"]),
-    ("passing", ["passing", "football match action"]),
-    ("through ball", ["through ball", "football match"]),
-    ("trophy", ["football trophy", "player celebration"]),
-    ("ballon d'or", ["football awards", "football player ceremony"]),
-    ("world cup", ["world cup football", "football match"]),
-    ("champions league", ["champions league football", "football match"]),
-    ("premier league", ["premier league football", "football match"]),
-]
-
-def _topic_search_text(topic):
-    return " ".join(
-        clean_text(str(topic.get(key, "")))
-        for key in ("search", "title", "text")
-    ).lower()
-
-
-def detect_visual_players(topic):
-    """Return the famous-player profiles explicitly present in this topic."""
-    combined = _topic_search_text(topic)
-    found = []
-
-    for key, profile in VISUAL_PLAYER_PROFILES.items():
-        if any(name.lower() in combined for name in profile["names"]):
-            found.append(key)
-            continue
-
-        if any(name in combined for name in profile["arabic"]):
-            found.append(key)
-
-    return found
-
-
-def detect_visual_context(topic):
-    """Extract the concrete football action/event from the topic."""
-    combined = _topic_search_text(topic)
-    found = []
-
-    for trigger, variants in VISUAL_CONTEXT_TERMS:
-        if trigger in combined:
-            found.extend(variants)
+    # Ask for a few additional visual variants using the same subject.
+    words = primary.split()
+    if words:
+        queries.extend([
+            " ".join(words) + " close up",
+            " ".join(words) + " slow motion",
+            " ".join(words) + " cinematic",
+        ])
 
     unique = []
     seen = set()
-    for item in found:
-        key = item.lower()
-        if key not in seen:
+    for query in queries:
+        key = query.lower().strip()
+        if key and key not in seen:
             seen.add(key)
-            unique.append(item)
+            unique.append(query)
 
-    return unique[:4]
-
-
-def build_visual_query_groups(topic):
-    """
-    Build relevance-first query groups.
-
-    A group belongs to one explicit player. Comparison topics therefore
-    produce separate player groups instead of one vague comparison query.
-    """
-    players = detect_visual_players(topic)
-    context = detect_visual_context(topic)
-
-    primary = clean_text(topic.get("search", ""))
-    groups = []
-
-    if not players:
-        fallback = [primary] if primary else []
-        for query in topic.get("fallback_searches", []):
-            query = clean_text(query)
-            if query and query not in fallback:
-                fallback.append(query)
-        return [fallback[:5]] if fallback else []
-
-    for player_key in players:
-        profile = VISUAL_PLAYER_PROFILES[player_key]
-        full_name = profile["names"][0]
-
-        queries = [
-            f"{full_name} football match action",
-            f"{full_name} professional football match",
-        ]
-
-        for action in context:
-            queries.append(f"{full_name} {action}")
-
-        if primary and any(
-            name.lower() in primary.lower() for name in profile["names"]
-        ):
-            queries.insert(0, primary)
-
-        unique = []
-        seen = set()
-        for query in queries:
-            query = clean_text(query)
-            key = query.lower()
-            if query and key not in seen:
-                seen.add(key)
-                unique.append(query)
-
-        groups.append(unique[:6])
-
-    return groups
-
-
-def build_visual_queries(topic):
-    """Compatibility wrapper: return all relevance-first searches."""
-    groups = build_visual_query_groups(topic)
-    queries = []
-
-    for group in groups:
-        for query in group:
-            if query.lower() not in {q.lower() for q in queries}:
-                queries.append(query)
-
-    return queries[:18]
-
-
-def _candidate_score(video, query_rank, group_rank, portrait, resolution_score):
-    """Score relevance before resolution."""
-    relevance = max(0, 1000 - (query_rank * 90) - (group_rank * 25))
-    format_bonus = 180 if portrait else 0
-    quality = min(160, resolution_score / 25000)
-    return relevance + format_bonus + quality
+    return unique[:7]
 
 
 def select_unique_videos(topic, used_clips):
-    groups = build_visual_query_groups(topic)
+    search_queries = build_visual_queries(topic)
+    candidates = {}
 
-    if not groups:
-        raise RuntimeError("Could not build relevant visual searches for the topic.")
+    for query in search_queries:
+        print(f"Searching Pexels: {query}")
 
-    players = detect_visual_players(topic)
-    print("Visual subjects:", ", ".join(players) if players else "fallback")
-
-    candidates_by_group = []
-    global_candidates = {}
-
-    for group_index, queries in enumerate(groups):
-        group_candidates = {}
-
-        for query_rank, query in enumerate(queries):
-            print(
-                f"Searching Pexels [subject {group_index + 1}, "
-                f"query {query_rank + 1}]: {query}"
-            )
-
-            for page in range(1, 4):
-                try:
-                    videos = search_pexels(query, page)
-                except Exception as error:
-                    print("Pexels search error:", error)
-                    continue
-
-                for video in videos:
-                    video_id = str(video.get("id", ""))
-                    if not video_id or video_id in used_clips:
-                        continue
-
-                    video_file = choose_video_file(video)
-                    if not video_file:
-                        continue
-
-                    width = int(video_file.get("width") or video.get("width") or 0)
-                    height = int(video_file.get("height") or video.get("height") or 0)
-                    portrait = height > width
-                    resolution_score = min(width, 1080) * min(height, 1920)
-
-                    score = _candidate_score(
-                        video,
-                        query_rank,
-                        group_index,
-                        portrait,
-                        resolution_score,
-                    )
-
-                    item = {
-                        "id": video_id,
-                        "link": video_file["link"],
-                        "width": width,
-                        "height": height,
-                        "portrait": portrait,
-                        "score": score,
-                        "subject_group": group_index,
-                        "query_rank": query_rank,
-                        "query": query,
-                    }
-
-                    old = group_candidates.get(video_id)
-                    if old is None or item["score"] > old["score"]:
-                        group_candidates[video_id] = item
-
-                    old_global = global_candidates.get(video_id)
-                    if old_global is None or item["score"] > old_global["score"]:
-                        global_candidates[video_id] = item
-
-                if len(group_candidates) >= 30:
-                    break
-
-            if len(group_candidates) >= 30:
-                break
-
-        candidates_by_group.append(
-            sorted(
-                group_candidates.values(),
-                key=lambda item: item["score"],
-                reverse=True,
-            )
-        )
-
-    # Guarantee subject coverage first. For comparison topics this prevents
-    # nine clips of one player when the topic explicitly names two players.
-    selected = []
-    selected_ids = set()
-
-    while len(selected) < NUMBER_OF_CLIPS:
-        added_this_round = False
-
-        for group in candidates_by_group:
-            if len(selected) >= NUMBER_OF_CLIPS:
-                break
-
-            while group and group[0]["id"] in selected_ids:
-                group.pop(0)
-
-            if not group:
+        for page in range(1, 4):
+            try:
+                videos = search_pexels(query, page)
+            except Exception as error:
+                print("Pexels search error:", error)
                 continue
 
-            item = group.pop(0)
-            selected.append(item)
-            selected_ids.add(item["id"])
-            added_this_round = True
+            for video in videos:
+                video_id = str(video.get("id", ""))
+                if not video_id or video_id in used_clips:
+                    continue
 
-        if not added_this_round:
+                video_file = choose_video_file(video)
+                if not video_file:
+                    continue
+
+                width = int(video_file.get("width") or video.get("width") or 0)
+                height = int(video_file.get("height") or video.get("height") or 0)
+
+                # Prefer large portrait sources. Keep a landscape fallback,
+                # because forcing only portrait results can fail for niche topics.
+                portrait = height > width
+                resolution_score = min(width, 1080) * min(height, 1920)
+
+                candidates[video_id] = {
+                    "id": video_id,
+                    "link": video_file["link"],
+                    "width": width,
+                    "height": height,
+                    "portrait": portrait,
+                    "score": (1000000000 if portrait else 0) + resolution_score,
+                }
+
+            if len(candidates) >= 60:
+                break
+
+        if len(candidates) >= max(NUMBER_OF_CLIPS * 4, 36):
             break
 
-    # Fill remaining slots only from other high-relevance candidates for
-    # this exact topic, never from an unrelated generic pool.
-    if len(selected) < NUMBER_OF_CLIPS:
-        remaining = [
-            item for item in global_candidates.values()
-            if item["id"] not in selected_ids
-        ]
-        remaining.sort(key=lambda item: item["score"], reverse=True)
+    candidates_list = list(candidates.values())
 
-        for item in remaining:
-            if len(selected) >= NUMBER_OF_CLIPS:
-                break
-            selected.append(item)
-            selected_ids.add(item["id"])
+    # Keep variety: first rank by quality, then sample from the strongest pool
+    # rather than blindly shuffling all results.
+    candidates_list.sort(key=lambda item: item["score"], reverse=True)
+    quality_pool = candidates_list[:max(NUMBER_OF_CLIPS * 4, 36)]
+    random.shuffle(quality_pool)
 
-    if len(selected) < NUMBER_OF_CLIPS:
+    if len(quality_pool) < NUMBER_OF_CLIPS:
         raise RuntimeError(
-            f"Not enough NEW relevant Pexels clips. Found {len(selected)}, "
+            f"Not enough NEW Pexels clips. Found {len(quality_pool)}, "
             f"need {NUMBER_OF_CLIPS}."
         )
 
-    print("\nSELECTED RELEVANT PEXELS CLIPS:")
-    for index, item in enumerate(selected, start=1):
-        print(
-            f"  {index:02d}. ID={item['id']} | "
-            f"subject_group={item['subject_group'] + 1} | "
-            f"score={item['score']:.1f} | query={item['query']}"
-        )
+    selected = quality_pool[:NUMBER_OF_CLIPS]
 
-    return selected[:NUMBER_OF_CLIPS]
+    print("Selected NEW Pexels IDs:")
+    for item in selected:
+        print(" ", item["id"])
+
+    return selected
+
 
 def download_video(url, destination):
     print(f"Downloading: {destination}")
