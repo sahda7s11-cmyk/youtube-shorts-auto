@@ -1,41 +1,19 @@
 name: Daily YouTube Short
 
+on:
+  schedule:
+    - cron: "0 14 * * *"
+    - cron: "0 16 * * *"
+    - cron: "0 18 * * *"
+    - cron: "0 20 * * *"
+  workflow_dispatch:
+
 permissions:
   contents: write
 
 concurrency:
   group: youtube-shorts-automation
   cancel-in-progress: false
-
-on:
-  schedule:
-    - cron: "0 0 * * *"
-    - cron: "0 1 * * *"
-    - cron: "0 2 * * *"
-    - cron: "0 3 * * *"
-    - cron: "0 4 * * *"
-    - cron: "0 5 * * *"
-    - cron: "0 6 * * *"
-    - cron: "0 7 * * *"
-    - cron: "0 8 * * *"
-    - cron: "0 9 * * *"
-    - cron: "0 10 * * *"
-    - cron: "0 11 * * *"
-    - cron: "0 12 * * *"
-    - cron: "0 13 * * *"
-    - cron: "0 14 * * *"
-    - cron: "0 15 * * *"
-    - cron: "0 16 * * *"
-    - cron: "0 17 * * *"
-    - cron: "0 18 * * *"
-    - cron: "0 19 * * *"
-    - cron: "0 20 * * *"
-    - cron: "0 21 * * *"
-    - cron: "0 22 * * *"
-    - cron: "0 23 * * *"
-    - cron: "30 23 * * *"
-
-  workflow_dispatch:
 
 jobs:
   generate-and-upload:
@@ -47,7 +25,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -57,15 +35,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ffmpeg
 
-      - name: Install Python dependencies
+      - name: Install Python requirements
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run YouTube Shorts automation
+      - name: Generate and upload Short
         env:
-          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
@@ -80,20 +56,13 @@ jobs:
             exit 1
           fi
 
-          echo "Video created successfully:"
+          echo "short.mp4 found."
           ls -lh short.mp4
 
-          echo "Video information:"
-          ffprobe -v error \
-            -show_entries stream=width,height,codec_name,codec_type \
-            -show_entries format=duration,size \
-            -of default=noprint_wrappers=1 \
-            short.mp4
-
-      - name: Save content and clips memory
+      - name: Save memory safely
+        shell: bash
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          set -euo pipefail
 
           echo "Checking memory files..."
 
@@ -109,20 +78,183 @@ jobs:
             echo "WARNING: used_content.json not found."
           fi
 
-          git add used_pexels.json used_content.json
+          # حفظ نسخة الذاكرة الناتجة من هذا التشغيل خارج Git
+          # حتى لا تضيع عند مزامنة آخر نسخة من GitHub.
+          mkdir -p "$RUNNER_TEMP/generated-memory"
 
-          if git diff --cached --quiet; then
-            echo "No memory changes to save."
-          else
-            echo "Memory changes detected."
-            git commit -m "Update Shorts content memory"
-            git push
-            echo "Memory successfully saved to repository."
+          if [ -f "used_pexels.json" ]; then
+            cp used_pexels.json "$RUNNER_TEMP/generated-memory/used_pexels.json"
           fi
 
-      - name: Save generated Short
+          if [ -f "used_content.json" ]; then
+            cp used_content.json "$RUNNER_TEMP/generated-memory/used_content.json"
+          fi
+
+          # نحاول المزامنة والدفع حتى 5 مرات.
+          # كل مرة نأخذ أحدث نسخة من GitHub ثم ندمج ذاكرة هذا التشغيل معها.
+          for attempt in 1 2 3 4 5; do
+            echo "========================================"
+            echo "Memory sync attempt: $attempt / 5"
+            echo "========================================"
+
+            git fetch origin main
+
+            # نضع المستودع على أحدث نسخة موجودة فعليًا في GitHub.
+            # لا نستخدم git clean حتى لا نحذف short.mp4 أو ملفات الإنتاج.
+            git reset --hard origin/main
+
+            python - <<'PY'
+          import json
+          import os
+
+          memory_dir = os.path.join(
+              os.environ["RUNNER_TEMP"],
+              "generated-memory"
+          )
+
+          files = [
+              "used_pexels.json",
+              "used_content.json",
+          ]
+
+          for filename in files:
+              remote_file = filename
+              generated_file = os.path.join(memory_dir, filename)
+
+              if not os.path.exists(generated_file):
+                  print(f"{filename}: no generated file to merge.")
+                  continue
+
+              def load_json(path):
+                  if not os.path.exists(path):
+                      return []
+
+                  try:
+                      with open(path, "r", encoding="utf-8") as f:
+                          data = json.load(f)
+                  except Exception:
+                      print(f"WARNING: Could not read {path}; treating it as empty.")
+                      return []
+
+                  if isinstance(data, list):
+                      return data
+
+                  if isinstance(data, dict):
+                      return data
+
+                  return []
+
+              remote_data = load_json(remote_file)
+              generated_data = load_json(generated_file)
+
+              # دمج القوائم بدون حذف أي سجل.
+              if isinstance(remote_data, list) and isinstance(generated_data, list):
+                  merged = []
+                  seen = set()
+
+                  for item in remote_data + generated_data:
+                      try:
+                          key = json.dumps(
+                              item,
+                              ensure_ascii=False,
+                              sort_keys=True,
+                              separators=(",", ":")
+                          )
+                      except Exception:
+                          key = repr(item)
+
+                      if key not in seen:
+                          seen.add(key)
+                          merged.append(item)
+
+                  output = merged
+
+              # دعم الملفات التي تكون على شكل قاموس.
+              elif isinstance(remote_data, dict) and isinstance(generated_data, dict):
+                  output = dict(remote_data)
+
+                  for key, value in generated_data.items():
+                      if key not in output:
+                          output[key] = value
+                      elif isinstance(output[key], list) and isinstance(value, list):
+                          combined = output[key] + value
+                          unique = []
+                          seen = set()
+
+                          for item in combined:
+                              try:
+                                  item_key = json.dumps(
+                                      item,
+                                      ensure_ascii=False,
+                                      sort_keys=True,
+                                      separators=(",", ":")
+                                  )
+                              except Exception:
+                                  item_key = repr(item)
+
+                              if item_key not in seen:
+                                  seen.add(item_key)
+                                  unique.append(item)
+
+                          output[key] = unique
+                      else:
+                          # لا نستبدل قيمة موجودة في GitHub بلا حاجة.
+                          pass
+
+              else:
+                  # في حالة اختلاف النوع، نحافظ على نسخة GitHub
+                  # ولا نمسحها ببيانات التشغيل.
+                  output = remote_data if remote_data else generated_data
+
+              with open(remote_file, "w", encoding="utf-8") as f:
+                  json.dump(
+                      output,
+                      f,
+                      ensure_ascii=False,
+                      indent=2
+                  )
+                  f.write("\n")
+
+              print(f"Merged memory: {filename}")
+          PY
+
+            git add used_pexels.json used_content.json
+
+            if git diff --cached --quiet; then
+              echo "No memory changes detected."
+              exit 0
+            fi
+
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+            git commit -m "Update Shorts content memory"
+
+            echo "Attempting push..."
+
+            if git push origin HEAD:main; then
+              echo "Memory pushed successfully."
+              exit 0
+            fi
+
+            echo "Push rejected because GitHub changed during the run."
+            echo "Fetching the newest remote memory and retrying..."
+
+            sleep 2
+          done
+
+          echo "ERROR: Could not synchronize memory after 5 attempts."
+          exit 1
+
+      - name: Upload generated Short artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: generated-short-${{ github.run_number }}
-          path: short.mp4
-          if-no-files-found: error
+          path: |
+            short.mp4
+            voice.mp3
+            subtitles.ass
+            used_pexels.json
+            used_content.json
+          if-no-files-found: warn
