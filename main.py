@@ -1326,37 +1326,115 @@ def load_word_timings(text, duration):
 
 
 def create_subtitle_file(text, duration):
-    """Create word-accurate Arabic ASS captions; no guessed character timing."""
+    """Create clean Arabic captions: max 2 lines, correct visual word order,
+    and one active-word highlight at a time.
+
+    The narration order is never changed. Only the ASS display token order is
+    adapted for libass Arabic bidi rendering, which previously showed the words
+    backwards. Each active word gets its own event, so the highlight follows the
+    actual timing instead of appearing one word late.
+    """
     words = load_word_timings(text, duration)
     if not words:
         raise RuntimeError("No word timings available for subtitles.")
 
-    # New visual style: modern Arabic font, white base text, cyan active word.
-    # ASS uses explicit RTL mark to keep Arabic logical order stable in libass.
-    ass_header = """[Script Info]\nScriptType: v4.00+\nPlayResX: 1080\nPlayResY: 1920\nScaledBorderAndShadow: yes\nWrapStyle: 2\n\n[V4+ Styles]\nFormat: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\nStyle: Arabic,Noto Sans Arabic,66,&H00FFFFFF,&H00FFFFFF,&H00181818,&H99000000,-1,0,0,0,100,100,1,0,3,2,1,2,90,90,420,1\n\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n"""
-    rlm='\u200f'
-    def esc(w): return escape_ass_text(w)
-    with open(SUBTITLE_FILE,"w",encoding="utf-8-sig") as file:
+    ass_header = """[Script Info]
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+ScaledBorderAndShadow: yes
+WrapStyle: 2
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Arabic,Noto Sans Arabic,64,&H00FFFFFF,&H00FFFFFF,&H00181818,&H99000000,-1,0,0,0,100,100,0,0,3,2,1,2,70,70,410,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+"""
+
+    def esc(word):
+        return escape_ass_text(word)
+
+    def make_two_lines(group):
+        """Return at most two explicit lines, each in display order."""
+        if len(group) <= 2:
+            return " ".join(esc(x["word"]) for x in reversed(group))
+
+        # Balance the group into two lines while keeping each line short.
+        best_i = 1
+        best_score = 10**9
+        for i in range(1, len(group)):
+            left_len = sum(len(x["word"]) for x in group[:i]) + max(0, i - 1)
+            right_len = sum(len(x["word"]) for x in group[i:]) + max(0, len(group) - i - 1)
+            if left_len <= 22 and right_len <= 22:
+                score = abs(left_len - right_len)
+                if score < best_score:
+                    best_score = score
+                    best_i = i
+
+        line1 = " ".join(esc(x["word"]) for x in reversed(group[:best_i]))
+        line2 = " ".join(esc(x["word"]) for x in reversed(group[best_i:]))
+        return line1 + r"\N" + line2
+
+    # Four words maximum: explicit line break means the renderer can never
+    # create the old five-line stack. There is only ONE Dialogue event at a time.
+    group_size = 4
+    with open(SUBTITLE_FILE, "w", encoding="utf-8-sig") as file:
         file.write(ass_header)
-        # Display up to 5 words at a time, but every event uses actual Edge timing.
-        group_size=5
-        for i in range(0,len(words),group_size):
-            group=words[i:i+group_size]
-            start=group[0]["start"]
-            end=min(duration,group[-1]["end"]+0.02)
-            for j,w in enumerate(group):
-                parts=[]
-                for k,x in enumerate(group):
-                    word=esc(x["word"])
-                    if k==j:
-                        word=r'{\c&H00FFFF00&}'+word+r'{\c&H00FFFFFF&}'
-                    parts.append(word)
-                # Reverse visual token order because libass Arabic bidi otherwise
-                # produced the user's reported reversed on-screen sequence.
-                caption=rlm+" ".join(reversed(parts))
-                # The logical order remains the narration order; only the ASS
-                # visual token order is reversed for stable Arabic rendering.
-                file.write(f"Dialogue: 0,{ass_time(start)},{ass_time(end)},Arabic,,0,0,0,,{caption}\n")
+
+        for i, active in enumerate(words):
+            # Keep a small rolling window around the currently spoken word.
+            group_start = (i // group_size) * group_size
+            group = words[group_start:group_start + group_size]
+
+            # Event lasts only until the next spoken word starts. This prevents
+            # the highlight from being early/late and avoids overlapping events.
+            start_time = max(0.0, float(active["start"]))
+            if i + 1 < len(words):
+                end_time = max(start_time + 0.03, float(words[i + 1]["start"]))
+            else:
+                end_time = min(duration, max(start_time + 0.03, float(active["end"])))
+
+            # Rebuild the caption with the active word highlighted. The displayed
+            # order is reversed for libass Arabic bidi; narration order is intact.
+            rendered = []
+            for x in reversed(group):
+                token = esc(x["word"])
+                if x is active:
+                    token = r"{\c&H00FFFF00&}" + token + r"{\c&H00FFFFFF&}"
+                rendered.append(token)
+
+            if len(group) > 2:
+                split = 1
+                best_score = 10**9
+                for j in range(1, len(group)):
+                    a = group[:j]
+                    b = group[j:]
+                    la = sum(len(x["word"]) for x in a) + max(0, len(a)-1)
+                    lb = sum(len(x["word"]) for x in b) + max(0, len(b)-1)
+                    if la <= 22 and lb <= 22 and abs(la-lb) < best_score:
+                        best_score = abs(la-lb)
+                        split = j
+                # Map the already-reversed tokens to the corresponding two lines.
+                first = []
+                second = []
+                for x in reversed(group):
+                    token = esc(x["word"])
+                    if x is active:
+                        token = r"{\c&H00FFFF00&}" + token + r"{\c&H00FFFFFF&}"
+                    if x in group[split:]:
+                        second.append(token)
+                    else:
+                        first.append(token)
+                caption = " ".join(first) + r"\N" + " ".join(second)
+            else:
+                caption = " ".join(rendered)
+
+            file.write(
+                f"Dialogue: 0,{ass_time(start_time)},{ass_time(end_time)},"
+                f"Arabic,,0,0,0,,{caption}\n"
+            )
 
 
 # =========================================================
