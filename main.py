@@ -1186,7 +1186,27 @@ def load_word_timings(text, duration):
     if not target_words:
         return []
     if not boundaries:
-        raise RuntimeError("Edge-TTS returned no usable word boundaries.")
+        # Some Edge-TTS releases/providers do not emit WordBoundary events for
+        # Arabic even though the audio itself is valid. Do not abort the Short.
+        # Build deterministic word timings from the real audio duration so the
+        # subtitles still start at word 1, preserve the exact narration order,
+        # and highlight each word in sequence.
+        total_weight = sum(max(1, len(_normalize_word_for_alignment(w))) for w in target_words)
+        cursor = 0.0
+        synthetic = []
+        for index, word in enumerate(target_words):
+            weight = max(1, len(_normalize_word_for_alignment(word)))
+            if index == len(target_words) - 1:
+                end = max(cursor + 0.03, float(duration))
+            else:
+                end = cursor + (float(duration) * weight / total_weight)
+            synthetic.append({
+                "word": word,
+                "start": cursor,
+                "end": min(float(duration), max(cursor + 0.03, end)),
+            })
+            cursor = synthetic[-1]["end"]
+        return synthetic
 
     target_norm = [_normalize_word_for_alignment(w) for w in target_words]
     observed_norm = [_normalize_word_for_alignment(w["word"]) for w in boundaries]
