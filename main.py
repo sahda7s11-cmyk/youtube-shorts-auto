@@ -764,8 +764,15 @@ def _visual_query_key(text):
     return re.sub(r"[^a-z0-9 ]+"," ",str(text).lower()).strip()
 
 def _visual_has_banned_term(text):
-    words=set(_visual_query_key(text).split())
-    return any(term in words for term in AUTO_BANNED_VISUAL_TERMS)
+    normalized = _visual_query_key(text)
+    words = set(normalized.split())
+    for term in AUTO_BANNED_VISUAL_TERMS:
+        term_words = term.split()
+        if len(term_words) == 1 and term in words:
+            return True
+        if len(term_words) > 1 and term in normalized:
+            return True
+    return False
 
 def build_visual_queries(topic):
     """Only generate highly specific mechanical-part searches; never generic car searches."""
@@ -1139,29 +1146,163 @@ def escape_ass_text(text):
     )
 
 
+def _normalize_word_for_alignment(value):
+    """Normalize Arabic tokens only for matching Edge boundary text to narration."""
+    value = str(value or "")
+    value = value.replace("\u200f", "").replace("\u200e", "")
+    value = re.sub(r"[\u064B-\u065F\u0670]", "", value)
+    value = re.sub(r"[،؛:؟?!.,\"'()\[\]{}\-—_]+", "", value)
+    value = re.sub(r"\s+", "", value)
+    return value.strip()
+
+
 def load_word_timings(text, duration):
-    """Load Edge-TTS word boundaries and align them to the cleaned script."""
+    """Load Edge boundaries and robustly align them to the exact narration words.
+
+    Edge-TTS may tokenize Arabic differently from Python (for example, attaching
+    punctuation, returning a short multi-word span, or splitting a token). Never
+    refuse subtitles merely because the tokenization differs. We preserve the
+    narration's exact word order and distribute each Edge timing across the
+    matching narration words when necessary.
+    """
     path = WORK_DIR / "word_timings.json"
     if not path.exists():
         raise RuntimeError("Word timing data was not created by Edge-TTS.")
-    data = json.loads(path.read_text(encoding="utf-8"))
-    words = clean_text(text).split()
-    observed = [str(x.get("word", "")).strip() for x in data if str(x.get("word", "")).strip()]
-    # Edge can attach punctuation differently. Compare normalized tokens first.
-    norm = lambda x: re.sub(r"[،؛:؟?!.,\"'()\[\]{}]", "", x).strip()
-    if [norm(x) for x in observed] != [norm(x) for x in words]:
-        raise RuntimeError("Edge word boundaries do not match the narration text exactly; subtitles were refused.")
-    cleaned=[]
-    for i,x in enumerate(data):
-        st=max(0.0,float(x["start"]))
-        en=max(st+0.03,float(x["end"]))
-        if i and st < cleaned[-1]["start"]:
-            raise RuntimeError("Invalid non-monotonic Edge word timing detected.")
-        cleaned.append({"word":words[i],"start":st,"end":en})
-    if cleaned:
-        cleaned[0]["start"]=max(0.0,cleaned[0]["start"]-0.03)
-        cleaned[-1]["end"]=min(duration,cleaned[-1]["end"]+0.04)
-    return cleaned
+
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    boundaries = []
+    for item in raw:
+        word = str(item.get("word", "")).strip()
+        if not word:
+            continue
+        try:
+            start = max(0.0, float(item.get("start", 0.0)))
+            end = max(start + 0.03, float(item.get("end", start + 0.03)))
+        except (TypeError, ValueError):
+            continue
+        boundaries.append({"word": word, "start": start, "end": end})
+
+    target_words = clean_text(text).split()
+    if not target_words:
+        return []
+    if not boundaries:
+        raise RuntimeError("Edge-TTS returned no usable word boundaries.")
+
+    target_norm = [_normalize_word_for_alignment(w) for w in target_words]
+    observed_norm = [_normalize_word_for_alignment(w["word"]) for w in boundaries]
+
+    # Fast path: exact tokenization after normalization.
+    if observed_norm == target_norm:
+        aligned = []
+        for i, item in enumerate(boundaries):
+            aligned.append({
+                "word": target_words[i],
+                "start": item["start"],
+                "end": item["end"],
+            })
+    else:
+        # General path: align Edge spans to the narration in order. Each Edge
+        # boundary is matched against one or more consecutive narration words.
+        aligned = []
+        ti = 0
+        oi = 0
+        while oi < len(boundaries) and ti < len(target_words):
+            ob = observed_norm[oi]
+            if not ob:
+                oi += 1
+                continue
+
+            # Exact one-to-one match.
+            if target_norm[ti] == ob:
+                aligned.append({"word": target_words[ti], "start": boundaries[oi]["start"], "end": boundaries[oi]["end"]})
+                ti += 1
+                oi += 1
+                continue
+
+            # One Edge span can cover multiple narration words. Match the
+            # longest consecutive target span whose normalized concatenation
+            # equals the Edge token.
+            matched = False
+            joined = ""
+            for tj in range(ti, min(len(target_words), ti + 8)):
+                joined += target_norm[tj]
+                if joined == ob:
+                    st = boundaries[oi]["start"]
+                    en = boundaries[oi]["end"]
+                    total = sum(max(1, len(target_words[k])) for k in range(ti, tj + 1))
+                    cursor = st
+                    for k in range(ti, tj + 1):
+                        share = max(0.03, (en - st) * max(1, len(target_words[k])) / total)
+                        next_time = en if k == tj else min(en, cursor + share)
+                        aligned.append({"word": target_words[k], "start": cursor, "end": max(cursor + 0.03, next_time)})
+                        cursor = next_time
+                    ti = tj + 1
+                    oi += 1
+                    matched = True
+                    break
+            if matched:
+                continue
+
+            # Several Edge spans can belong to one narration word. Merge their
+            # time range instead of shifting every following subtitle by a word.
+            combined = ""
+            end_index = oi
+            for oj in range(oi, min(len(boundaries), oi + 8)):
+                combined += observed_norm[oj]
+                if combined == target_norm[ti]:
+                    aligned.append({
+                        "word": target_words[ti],
+                        "start": boundaries[oi]["start"],
+                        "end": boundaries[oj]["end"],
+                    })
+                    ti += 1
+                    oi = oj + 1
+                    matched = True
+                    break
+            if matched:
+                continue
+
+            # Last-resort deterministic alignment: use the next Edge boundary
+            # for the next narration word. This preserves word order and real
+            # speech timing instead of refusing the entire video.
+            aligned.append({
+                "word": target_words[ti],
+                "start": boundaries[oi]["start"],
+                "end": boundaries[oi]["end"],
+            })
+            ti += 1
+            oi += 1
+
+        # If Edge supplied fewer boundaries than narration words, distribute the
+        # missing tail over the remaining audio duration by character weight.
+        if ti < len(target_words):
+            tail_start = aligned[-1]["end"] if aligned else 0.0
+            tail_end = max(tail_start + 0.05, min(duration, duration))
+            remaining = target_words[ti:]
+            total = sum(max(1, len(w)) for w in remaining)
+            cursor = tail_start
+            for idx, word in enumerate(remaining):
+                share = max(0.03, (tail_end - tail_start) * max(1, len(word)) / total)
+                end = tail_end if idx == len(remaining) - 1 else min(tail_end, cursor + share)
+                aligned.append({"word": word, "start": cursor, "end": max(cursor + 0.03, end)})
+                cursor = end
+
+    # Clamp and enforce monotonic timings. A tiny overlap is avoided so the
+    # active-word highlight can never appear one word late.
+    result = []
+    previous_start = 0.0
+    for item in aligned[:len(target_words)]:
+        st = max(previous_start, min(duration, float(item["start"])))
+        en = max(st + 0.03, min(duration, float(item["end"])))
+        if en <= st:
+            en = min(duration, st + 0.03)
+        result.append({"word": item["word"], "start": st, "end": en})
+        previous_start = st
+
+    if result:
+        result[0]["start"] = 0.0
+        result[-1]["end"] = min(duration, max(result[-1]["end"], result[-1]["start"] + 0.03))
+    return result
 
 
 def create_subtitle_file(text, duration):
