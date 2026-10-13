@@ -1033,7 +1033,52 @@ xml:lang="ar-SA">
                 if attempt < 3:
                     time.sleep(2 * attempt)
         else:
-            raise RuntimeError(f"Edge TTS failed after 3 attempts: {last_error}")
+            # Edge TTS can be rejected by Microsoft's public endpoint (HTTP 403)
+            # from hosted CI runners. Fall back to Google Translate TTS so the
+            # daily workflow can still create Arabic narration without secrets.
+            print(f"Edge TTS unavailable after 3 attempts: {last_error}")
+            print("Trying Google TTS Arabic fallback...")
+            try:
+                try:
+                    from gtts import gTTS
+                except ImportError:
+                    subprocess.run(
+                        [sys.executable, "-m", "pip", "install",
+                         "--disable-pip-version-check", "--quiet", "gTTS==2.5.4"],
+                        check=True,
+                    )
+                    from gtts import gTTS
+
+                if VOICE_FILE.exists():
+                    VOICE_FILE.unlink()
+                gTTS(text=str(text), lang="ar", slow=False).save(str(VOICE_FILE))
+
+                # gTTS does not expose word-boundary events. The subtitle system
+                # already builds ordered synthetic timings when this list is empty.
+                with open(WORK_DIR / "word_timings.json", "w", encoding="utf-8") as f:
+                    json.dump([], f, ensure_ascii=False)
+
+                if not VOICE_FILE.exists() or VOICE_FILE.stat().st_size < 1000:
+                    raise RuntimeError("Google TTS returned an empty or undersized audio file.")
+                probe = command_output([
+                    "ffprobe", "-v", "error",
+                    "-show_entries", "format=duration",
+                    "-of", "default=noprint_wrappers=1:nokey=1",
+                    str(VOICE_FILE),
+                ])
+                audio_seconds = float(probe)
+                expected_minimum = max(2.0, len(str(text).split()) * 0.12)
+                if audio_seconds < expected_minimum:
+                    raise RuntimeError(
+                        f"Google TTS audio is too short ({audio_seconds:.2f}s; "
+                        f"expected at least {expected_minimum:.2f}s)."
+                    )
+                print(f"Google TTS fallback succeeded: {audio_seconds:.2f}s")
+            except Exception as fallback_error:
+                raise RuntimeError(
+                    "Edge TTS failed with HTTP 403 and Google TTS fallback also failed: "
+                    f"{fallback_error}. No video will be published."
+                ) from fallback_error
 
     if not VOICE_FILE.exists() or VOICE_FILE.stat().st_size < 1000:
         raise RuntimeError("Voice file was not created correctly.")
