@@ -984,7 +984,24 @@ xml:lang="ar-SA">
                     VOICE_FILE.unlink()
                 asyncio.run(generate())
                 if VOICE_FILE.exists() and VOICE_FILE.stat().st_size >= 1000:
-                    break
+                    # A non-empty MP3 can still contain only a fraction of the
+                    # narration. Verify duration before accepting this attempt.
+                    probe = command_output([
+                        "ffprobe", "-v", "error",
+                        "-show_entries", "format=duration",
+                        "-of", "default=noprint_wrappers=1:nokey=1",
+                        str(VOICE_FILE),
+                    ])
+                    audio_seconds = float(probe)
+                    expected_minimum = max(2.0, len(str(text).split()) * 0.12)
+                    if audio_seconds >= expected_minimum:
+                        break
+                    raise RuntimeError(
+                        f"Edge TTS returned incomplete audio ({audio_seconds:.2f}s); "
+                        f"expected at least {expected_minimum:.2f}s for "
+                        f"{len(str(text).split())} words."
+                    )
+                raise RuntimeError("Edge TTS produced an empty or undersized audio file.")
             except Exception as error:
                 last_error = error
                 print(f"Edge TTS attempt {attempt}/3 failed: {error}")
@@ -1540,6 +1557,15 @@ def create_final_video(silent_video, text):
 
     print(f"Audio duration: {audio_duration:.2f}s")
 
+    # Never render or upload a broken Short when TTS returned only a tiny clip.
+    word_count = len(str(text).split())
+    expected_minimum = max(2.0, word_count * 0.12)
+    if audio_duration < expected_minimum:
+        raise RuntimeError(
+            f"Voice audio is incomplete: {audio_duration:.2f}s for {word_count} words; "
+            f"minimum expected is {expected_minimum:.2f}s. Refusing to render/upload."
+        )
+
     # Make sure the visual track is never shorter than the voice.
     silent_duration = probe_video_duration(silent_video)
 
@@ -1767,8 +1793,8 @@ def validate_final_video():
     print(f"Duration: {duration:.2f}s")
     print(f"Size: {size_mb:.2f} MB")
 
-    if duration < 1:
-        raise RuntimeError("Video is too short.")
+    if duration < 2:
+        raise RuntimeError("Video is too short; refusing to upload an incomplete Short.")
 
     return duration
 
