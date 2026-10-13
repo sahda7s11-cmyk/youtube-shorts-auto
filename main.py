@@ -1,15 +1,40 @@
 import asyncio
+import importlib.metadata
 import json
 import os
 import random
 import re
 import shutil
 import subprocess
+import sys
 import time
 from pathlib import Path
 from urllib.parse import quote
 
 import requests
+
+# Keep Edge TTS current: older releases can fail the Microsoft speech
+# WebSocket handshake with HTTP 403. Pin the latest verified release so the
+# GitHub Actions runner does not silently use a stale version from requirements.
+EDGE_TTS_REQUIRED_VERSION = "7.2.8"
+try:
+    installed_edge_tts = importlib.metadata.version("edge-tts")
+except importlib.metadata.PackageNotFoundError:
+    installed_edge_tts = None
+
+if installed_edge_tts != EDGE_TTS_REQUIRED_VERSION:
+    print(
+        f"Updating edge-tts: {installed_edge_tts or 'not installed'} "
+        f"-> {EDGE_TTS_REQUIRED_VERSION}"
+    )
+    subprocess.run(
+        [
+            sys.executable, "-m", "pip", "install", "--disable-pip-version-check",
+            "--quiet", "--upgrade", f"edge-tts=={EDGE_TTS_REQUIRED_VERSION}"
+        ],
+        check=True,
+    )
+
 import edge_tts
 
 from google.oauth2.credentials import Credentials
