@@ -1,0 +1,127 @@
+name: MoneyPrinterTurbo Isolated Test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mpt-isolated-test
+  cancel-in-progress: false
+
+jobs:
+  generate-test-video:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v4
+
+      - name: Check required secret
+        env:
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+        run: |
+          if [ -z "$PEXELS_API_KEY" ]; then
+            echo "::error::Missing repository secret PEXELS_API_KEY"
+            exit 1
+          fi
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg git curl python3-venv
+
+      - name: Install Ollama and start local service
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+          ollama serve > "$RUNNER_TEMP/ollama.log" 2>&1 &
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:11434/api/tags >/dev/null; then
+              break
+            fi
+            sleep 2
+          done
+          curl -fsS http://127.0.0.1:11434/api/tags >/dev/null
+          ollama pull qwen3:4b-instruct
+
+      - name: Install MoneyPrinterTurbo
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install mpt
+          mpt cli --help | tee "$RUNNER_TEMP/mpt-cli-help.txt"
+
+      - name: Configure MoneyPrinterTurbo for free test
+        env:
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+        run: |
+          mkdir -p "$HOME/.local/share/MoneyPrinterTurbo"
+          cat > "$HOME/.local/share/MoneyPrinterTurbo/config.toml" <<EOF
+          log_level = "INFO"
+          video_source = "pexels"
+          pexels_api_keys = ["${PEXELS_API_KEY}"]
+          llm_provider = "ollama"
+          ollama_base_url = "http://127.0.0.1:11434"
+          ollama_model_name = "qwen3:4b-instruct"
+          subtitle_provider = "edge"
+          EOF
+          echo "MPT_HOME=$HOME/.local/share/MoneyPrinterTurbo" >> "$GITHUB_ENV"
+
+      - name: Generate one Arabic automotive-mechanics test video
+        run: |
+          mpt cli \
+            --video-subject "كيف يعمل صمام المحرك وما دوره في دخول الهواء وخروج العادم" \
+            --video-language "ar-SA" \
+            --video-source pexels \
+            --video-count 1 \
+            --video-aspect "9:16" \
+            --voice-name "ar-SA-HamedNeural" \
+            --bgm-type none \
+            --video-script-prompt "اكتب نصًا عربيًا فصيحًا أصليًا ودقيقًا عن ميكانيكا السيارات فقط. اشرح آلية عمل صمام المحرك. لا تستخدم مقدمة هل تعلم أو تدري. لا تذكر كلمات إنجليزية أو رموزًا في النص المنطوق. اجعل النص مناسبًا لفيديو قصير تعليمي. لا تذكر أشخاصًا أو قيادة أو طرقًا أو موضوعات خارج ميكانيكا السيارات." \
+            --n-threads 2
+
+      - name: Locate and validate generated video
+        run: |
+          set -e
+          VIDEO="$(find "$HOME/.local/share/MoneyPrinterTurbo/storage/tasks" -type f -iname '*.mp4' -printf '%T@ %p\n' 2>/dev/null | sort -nr | head -n1 | cut -d' ' -f2-)"
+          if [ -z "$VIDEO" ] || [ ! -s "$VIDEO" ]; then
+            echo "::error::MoneyPrinterTurbo did not produce an MP4 file"
+            find "$HOME/.local/share/MoneyPrinterTurbo" -maxdepth 5 -type f | head -200
+            exit 1
+          fi
+          DURATION="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$VIDEO")"
+          WIDTH="$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=s=x:p=0 "$VIDEO")"
+          HEIGHT="$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=s=x:p=0 "$VIDEO")"
+          echo "VIDEO=$VIDEO" >> "$GITHUB_ENV"
+          echo "Duration: $DURATION seconds"
+          echo "Resolution: ${WIDTH}x${HEIGHT}"
+          python - "$DURATION" "$WIDTH" "$HEIGHT" <<'PY'
+          import sys
+          duration, width, height = float(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3])
+          if duration < 5:
+              raise SystemExit("Video is too short")
+          if height <= width:
+              raise SystemExit("Video is not portrait")
+          PY
+
+      - name: Upload test output for manual review (no YouTube upload)
+        uses: actions/upload-artifact@v4
+        with:
+          name: mpt-isolated-test-${{ github.run_number }}
+          path: |
+            ${{ env.VIDEO }}
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Upload logs if the test fails
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mpt-test-diagnostics-${{ github.run_number }}
+          path: |
+            ${{ runner.temp }}/ollama.log
+            ${{ runner.temp }}/mpt-cli-help.txt
+            $HOME/.local/share/MoneyPrinterTurbo
+          if-no-files-found: ignore
+          retention-days: 1
