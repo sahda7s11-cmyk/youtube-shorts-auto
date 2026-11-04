@@ -45,6 +45,7 @@ jobs:
           done
           curl -fsS http://127.0.0.1:11434/api/tags >/dev/null
           ollama pull qwen3:4b-instruct
+          ollama list
 
       - name: Install MoneyPrinterTurbo
         run: |
@@ -56,20 +57,67 @@ jobs:
         env:
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
         run: |
-          mkdir -p "$HOME/.local/share/MoneyPrinterTurbo"
-          cat > "$HOME/.local/share/MoneyPrinterTurbo/config.toml" <<EOF
+          set -euo pipefail
+
+          MPT_HOME="$HOME/.local/share/MoneyPrinterTurbo"
+          mkdir -p "$MPT_HOME"
+
+          cat > "$MPT_HOME/config.toml" <<EOF
           log_level = "INFO"
+
+          [app]
           video_source = "pexels"
           pexels_api_keys = ["${PEXELS_API_KEY}"]
+
           llm_provider = "ollama"
           ollama_base_url = "http://127.0.0.1:11434"
           ollama_model_name = "qwen3:4b-instruct"
+
           subtitle_provider = "edge"
           EOF
-          echo "MPT_HOME=$HOME/.local/share/MoneyPrinterTurbo" >> "$GITHUB_ENV"
+
+          echo "MPT_HOME=$MPT_HOME" >> "$GITHUB_ENV"
+
+          python - "$MPT_HOME/config.toml" <<'PY'
+          import sys
+          import tomllib
+          from pathlib import Path
+
+          path = Path(sys.argv[1])
+          data = tomllib.loads(path.read_text(encoding="utf-8"))
+          app = data.get("app", {})
+
+          provider = app.get("llm_provider")
+          model = app.get("ollama_model_name")
+          source = app.get("video_source")
+          subtitle = app.get("subtitle_provider")
+
+          print(f"Config file: {path}")
+          print(f"LLM provider: {provider}")
+          print(f"Ollama model: {model}")
+          print(f"Video source: {source}")
+          print(f"Subtitle provider: {subtitle}")
+
+          if provider != "ollama":
+              raise SystemExit("Configuration check failed: llm_provider is not ollama")
+          if model != "qwen3:4b-instruct":
+              raise SystemExit("Configuration check failed: Ollama model is incorrect")
+          if source != "pexels":
+              raise SystemExit("Configuration check failed: video source is not Pexels")
+          if subtitle != "edge":
+              raise SystemExit("Configuration check failed: subtitle provider is not Edge")
+          PY
+
+      - name: Confirm Ollama responds before generation
+        run: |
+          set -euo pipefail
+          curl -fsS http://127.0.0.1:11434/api/tags
+          ollama run qwen3:4b-instruct "اكتب جملة عربية قصيرة عن صمام المحرك."
 
       - name: Generate one Arabic automotive-mechanics test video
         run: |
+          set -euo pipefail
+          echo "Using MPT_HOME=$MPT_HOME"
           mpt cli \
             --video-subject "كيف يعمل صمام المحرك وما دوره في دخول الهواء وخروج العادم" \
             --video-language "ar-SA" \
@@ -83,19 +131,24 @@ jobs:
 
       - name: Locate and validate generated video
         run: |
-          set -e
-          VIDEO="$(find "$HOME/.local/share/MoneyPrinterTurbo/storage/tasks" -type f -iname '*.mp4' -printf '%T@ %p\n' 2>/dev/null | sort -nr | head -n1 | cut -d' ' -f2-)"
+          set -euo pipefail
+
+          VIDEO="$(find "$MPT_HOME/storage/tasks" -type f -iname '*.mp4' -printf '%T@ %p\n' 2>/dev/null | sort -nr | head -n1 | cut -d' ' -f2-)"
+
           if [ -z "$VIDEO" ] || [ ! -s "$VIDEO" ]; then
             echo "::error::MoneyPrinterTurbo did not produce an MP4 file"
-            find "$HOME/.local/share/MoneyPrinterTurbo" -maxdepth 5 -type f | head -200
+            find "$MPT_HOME" -maxdepth 6 -type f | head -200
             exit 1
           fi
+
           DURATION="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$VIDEO")"
           WIDTH="$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=s=x:p=0 "$VIDEO")"
           HEIGHT="$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=s=x:p=0 "$VIDEO")"
+
           echo "VIDEO=$VIDEO" >> "$GITHUB_ENV"
           echo "Duration: $DURATION seconds"
           echo "Resolution: ${WIDTH}x${HEIGHT}"
+
           python - "$DURATION" "$WIDTH" "$HEIGHT" <<'PY'
           import sys
           duration, width, height = float(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3])
@@ -109,8 +162,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: mpt-isolated-test-${{ github.run_number }}
-          path: |
-            ${{ env.VIDEO }}
+          path: ${{ env.VIDEO }}
           if-no-files-found: error
           retention-days: 1
 
@@ -122,6 +174,6 @@ jobs:
           path: |
             ${{ runner.temp }}/ollama.log
             ${{ runner.temp }}/mpt-cli-help.txt
-            $HOME/.local/share/MoneyPrinterTurbo
+            ~/.local/share/MoneyPrinterTurbo
           if-no-files-found: ignore
           retention-days: 1
