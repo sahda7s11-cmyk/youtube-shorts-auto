@@ -16,10 +16,16 @@ jobs:
     timeout-minutes: 360
 
     steps:
-      - name: Checkout this repository
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v7
 
-      - name: Check required secret
+      - name: Set up supported Python version
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Check required Pexels secret
         env:
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
         run: |
@@ -31,29 +37,36 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg git curl python3-venv
+          sudo apt-get install -y ffmpeg git curl
 
       - name: Install Ollama and start local service
         run: |
+          set -euo pipefail
           curl -fsSL https://ollama.com/install.sh | sh
-          ollama serve > "$RUNNER_TEMP/ollama.log" 2>&1 &
+
+          if ! curl -fsS http://127.0.0.1:11434/api/tags >/dev/null; then
+            ollama serve > "$RUNNER_TEMP/ollama.log" 2>&1 &
+          fi
+
           for i in $(seq 1 60); do
             if curl -fsS http://127.0.0.1:11434/api/tags >/dev/null; then
               break
             fi
             sleep 2
           done
+
           curl -fsS http://127.0.0.1:11434/api/tags >/dev/null
           ollama pull qwen3:4b-instruct
           ollama list
 
-      - name: Install MoneyPrinterTurbo
+      - name: Install official MoneyPrinterTurbo package
         run: |
+          set -euo pipefail
           python -m pip install --upgrade pip
-          python -m pip install mpt
+          python -m pip install "mpt==1.3.9"
           mpt cli --help | tee "$RUNNER_TEMP/mpt-cli-help.txt"
 
-      - name: Configure MoneyPrinterTurbo for free test
+      - name: Configure MoneyPrinterTurbo for the isolated test
         env:
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
         run: |
@@ -61,6 +74,7 @@ jobs:
 
           MPT_HOME="$HOME/.local/share/MoneyPrinterTurbo"
           mkdir -p "$MPT_HOME"
+          echo "MPT_HOME=$MPT_HOME" >> "$GITHUB_ENV"
 
           cat > "$MPT_HOME/config.toml" <<EOF
           log_level = "INFO"
@@ -76,42 +90,37 @@ jobs:
           subtitle_provider = "edge"
           EOF
 
-          echo "MPT_HOME=$MPT_HOME" >> "$GITHUB_ENV"
-
           python - "$MPT_HOME/config.toml" <<'PY'
           import sys
           import tomllib
           from pathlib import Path
 
-          path = Path(sys.argv[1])
-          data = tomllib.loads(path.read_text(encoding="utf-8"))
-          app = data.get("app", {})
+          config_path = Path(sys.argv[1])
+          config = tomllib.loads(config_path.read_text(encoding="utf-8"))
+          app = config.get("app", {})
 
-          provider = app.get("llm_provider")
-          model = app.get("ollama_model_name")
-          source = app.get("video_source")
-          subtitle = app.get("subtitle_provider")
+          checks = {
+              "LLM provider": (app.get("llm_provider"), "ollama"),
+              "Ollama model": (app.get("ollama_model_name"), "qwen3:4b-instruct"),
+              "video source": (app.get("video_source"), "pexels"),
+              "subtitle provider": (app.get("subtitle_provider"), "edge"),
+          }
 
-          print(f"Config file: {path}")
-          print(f"LLM provider: {provider}")
-          print(f"Ollama model: {model}")
-          print(f"Video source: {source}")
-          print(f"Subtitle provider: {subtitle}")
+          print(f"Configuration file found: {config_path}")
+          for label, (actual, expected) in checks.items():
+              print(f"{label}: {actual}")
+              if actual != expected:
+                  raise SystemExit(f"Configuration check failed for {label}")
 
-          if provider != "ollama":
-              raise SystemExit("Configuration check failed: llm_provider is not ollama")
-          if model != "qwen3:4b-instruct":
-              raise SystemExit("Configuration check failed: Ollama model is incorrect")
-          if source != "pexels":
-              raise SystemExit("Configuration check failed: video source is not Pexels")
-          if subtitle != "edge":
-              raise SystemExit("Configuration check failed: subtitle provider is not Edge")
+          if not app.get("pexels_api_keys"):
+              raise SystemExit("Configuration check failed: no Pexels key was loaded")
+          print("Pexels API key: present (value hidden)")
           PY
 
-      - name: Confirm Ollama responds before generation
+      - name: Verify Ollama model responds
         run: |
           set -euo pipefail
-          curl -fsS http://127.0.0.1:11434/api/tags
+          curl -fsS http://127.0.0.1:11434/api/tags >/dev/null
           ollama run qwen3:4b-instruct "اكتب جملة عربية قصيرة عن صمام المحرك."
 
       - name: Generate one Arabic automotive-mechanics test video
@@ -127,9 +136,16 @@ jobs:
             --voice-name "ar-SA-HamedNeural" \
             --bgm-type none \
             --video-script-prompt "اكتب نصًا عربيًا فصيحًا أصليًا ودقيقًا عن ميكانيكا السيارات فقط. اشرح آلية عمل صمام المحرك. لا تستخدم مقدمة هل تعلم أو تدري. لا تذكر كلمات إنجليزية أو رموزًا في النص المنطوق. اجعل النص مناسبًا لفيديو قصير تعليمي. لا تذكر أشخاصًا أو قيادة أو طرقًا أو موضوعات خارج ميكانيكا السيارات." \
-            --n-threads 2
+            --n-threads 2 \
+            2>&1 | tee "$RUNNER_TEMP/mpt-generation.log"
+
+          if ! grep -Eiq 'llm provider: *ollama' "$RUNNER_TEMP/mpt-generation.log"; then
+            echo "::error::MoneyPrinterTurbo logs did not confirm that Ollama was selected"
+            exit 1
+          fi
 
       - name: Locate and validate generated video
+        id: validate_video
         run: |
           set -euo pipefail
 
@@ -137,43 +153,50 @@ jobs:
 
           if [ -z "$VIDEO" ] || [ ! -s "$VIDEO" ]; then
             echo "::error::MoneyPrinterTurbo did not produce an MP4 file"
-            find "$MPT_HOME" -maxdepth 6 -type f | head -200
+            find "$MPT_HOME/storage/tasks" -maxdepth 5 -type f 2>/dev/null | head -100 || true
             exit 1
           fi
 
           DURATION="$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$VIDEO")"
-          WIDTH="$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of csv=s=x:p=0 "$VIDEO")"
-          HEIGHT="$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=s=x:p=0 "$VIDEO")"
+          DIMENSIONS="$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 "$VIDEO")"
+          AUDIO_STREAMS="$(ffprobe -v error -select_streams a -show_entries stream=index -of csv=p=0 "$VIDEO")"
 
-          echo "VIDEO=$VIDEO" >> "$GITHUB_ENV"
-          echo "Duration: $DURATION seconds"
-          echo "Resolution: ${WIDTH}x${HEIGHT}"
+          echo "Video duration: ${DURATION}s"
+          echo "Video dimensions: ${DIMENSIONS}"
+          if [ -z "$AUDIO_STREAMS" ]; then
+            echo "::error::Generated video has no audio stream"
+            exit 1
+          fi
+          echo "Audio stream: present"
 
-          python - "$DURATION" "$WIDTH" "$HEIGHT" <<'PY'
+          python - "$DURATION" "$DIMENSIONS" <<'PY'
           import sys
-          duration, width, height = float(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3])
+          duration = float(sys.argv[1])
+          width, height = (int(value) for value in sys.argv[2].split("x", 1))
           if duration < 5:
               raise SystemExit("Video is too short")
           if height <= width:
               raise SystemExit("Video is not portrait")
           PY
 
-      - name: Upload test output for manual review (no YouTube upload)
-        uses: actions/upload-artifact@v4
+          echo "video_path=$VIDEO" >> "$GITHUB_OUTPUT"
+
+      - name: Upload test video for manual review (no YouTube upload)
+        uses: actions/upload-artifact@v7
         with:
           name: mpt-isolated-test-${{ github.run_number }}
-          path: ${{ env.VIDEO }}
+          path: ${{ steps.validate_video.outputs.video_path }}
           if-no-files-found: error
           retention-days: 1
 
-      - name: Upload logs if the test fails
+      - name: Upload safe diagnostics if the test fails
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mpt-test-diagnostics-${{ github.run_number }}
           path: |
             ${{ runner.temp }}/ollama.log
             ${{ runner.temp }}/mpt-cli-help.txt
-            ~/.local/share/MoneyPrinterTurbo
+            ${{ runner.temp }}/mpt-generation.log
           if-no-files-found: ignore
           retention-days: 1
