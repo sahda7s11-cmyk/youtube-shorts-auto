@@ -96,6 +96,25 @@ jobs:
           echo "OLLAMA_MODEL=$MODEL" >> "$GITHUB_ENV"
           ollama list
 
+          # تحقق من واجهة OpenAI المتوافقة التي يستخدمها MoneyPrinterTurbo.
+          # Ollama API الأصلية على /api لا تكفي لهذا الاتصال؛ المطلوب /v1.
+          echo "Testing Ollama OpenAI-compatible endpoint..."
+          curl --fail --silent --show-error \
+            http://127.0.0.1:11434/v1/chat/completions \
+            -H "Content-Type: application/json" \
+            -d "{\"model\":\"$MODEL\",\"messages\":[{\"role\":\"user\",\"content\":\"اكتب جملة عربية قصيرة عن صمام المحرك.\"}],\"stream\":false}" \
+            -o "$RUNNER_TEMP/ollama-openai-test.json"
+          python - <<'PYJSON'
+          import json, os
+          from pathlib import Path
+          data = json.loads((Path(os.environ["RUNNER_TEMP"]) / "ollama-openai-test.json").read_text(encoding="utf-8"))
+          content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+          if not content.strip():
+              raise SystemExit("Ollama OpenAI-compatible test returned no message content")
+          print("Ollama OpenAI-compatible endpoint: OK")
+          print("Arabic response: " + content[:300])
+          PYJSON
+
       - name: Quick Arabic check of the local model
         run: |
           set -euo pipefail
@@ -120,7 +139,7 @@ jobs:
               "video_source": '"pexels"',
               "pexels_api_keys": '["' + os.environ["PEXELS_API_KEY"] + '"]',
               "llm_provider": '"ollama"',
-              "ollama_base_url": '"http://127.0.0.1:11434"',
+              "ollama_base_url": '"http://127.0.0.1:11434/v1"',
               "ollama_model_name": '"' + os.environ["OLLAMA_MODEL"] + '"',
               "subtitle_provider": '"edge"',
           }
@@ -226,6 +245,7 @@ jobs:
           name: mpt-test-diagnostics-${{ github.run_number }}
           path: |
             ${{ runner.temp }}/ollama.log
+            ${{ runner.temp }}/ollama-openai-test.json
             ${{ runner.temp }}/mpt-cli-help.txt
             ${{ runner.temp }}/mpt-generation.log
           if-no-files-found: ignore
