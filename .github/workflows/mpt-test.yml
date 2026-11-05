@@ -1,6 +1,6 @@
-name: MoneyPrinterTurbo Isolated Test
+name: MoneyPrinterTurbo Isolated Test - No Music + Arabic Subtitles
 
-# تجربة منفصلة: لا ترفع شيئًا إلى YouTube ولا تلمس main.py أو ملفات الذاكرة.
+# تجربة منفصلة بلا موسيقى: لا ترفع شيئًا إلى YouTube ولا تلمس main.py أو ملفات الذاكرة.
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: mpt-isolated-test
+  group: mpt-isolated-test-arabic
   cancel-in-progress: false
 
 jobs:
@@ -36,7 +36,8 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg git curl imagemagick
+          sudo apt-get install -y ffmpeg git curl imagemagick fonts-noto-core fonts-noto-extra fontconfig
+          fc-cache -f
 
       - name: Clone official MoneyPrinterTurbo (no unofficial PyPI package)
         run: |
@@ -63,6 +64,128 @@ jobs:
             .venv/bin/pip install -r requirements.txt
             echo "RUN_PY=$MPT_DIR/.venv/bin/python" >> "$GITHUB_ENV"
           fi
+
+      - name: Install Arabic shaping support and prepare Arabic font
+        run: |
+          set -euo pipefail
+          cd "$MPT_DIR"
+
+          mkdir -p resource/fonts
+          FONT_SOURCE="$(find /usr/share/fonts -type f -iname 'NotoSansArabic-Regular.ttf' | head -n1)"
+          if [ -z "$FONT_SOURCE" ]; then
+            FONT_SOURCE="$(fc-match -f '%{file}' 'Noto Sans Arabic:style=Regular' | head -n1)"
+          fi
+          if [ -z "$FONT_SOURCE" ] || [ ! -f "$FONT_SOURCE" ]; then
+            echo "::error::Noto Sans Arabic font was not found"
+            exit 1
+          fi
+          cp "$FONT_SOURCE" resource/fonts/NotoSansArabic-Regular.ttf
+          echo "Arabic subtitle font: $FONT_SOURCE"
+
+          if [ -x .venv/bin/python ]; then
+            .venv/bin/python -m pip install arabic-reshaper python-bidi
+          else
+            uv pip install arabic-reshaper python-bidi
+          fi
+
+          python - <<'PY_PATCH'
+          from pathlib import Path
+
+          path = Path("app/services/video.py")
+          source = path.read_text(encoding="utf-8")
+
+          import_line = "from PIL import Image, ImageColor, ImageDraw, ImageFont, ImageOps\n"
+          import_patch = import_line + "import arabic_reshaper\nfrom bidi.algorithm import get_display\n"
+          if "import arabic_reshaper" not in source:
+              if source.count(import_line) != 1:
+                  raise SystemExit("Could not safely locate Pillow imports in video.py")
+              source = source.replace(import_line, import_patch, 1)
+
+          helper_anchor = "from app.utils import file_security, logging_utils, utils\n"
+          helper_lines = [
+              "",
+              "",
+              "def _shape_arabic_subtitle_text(text: str) -> str:",
+              "    # Shape Arabic glyphs and apply bidi ordering for subtitle rendering.",
+              '    output_lines = []',
+              '    for line in str(text or "").split("\\n"): ',
+              '        if any("\\u0600" <= char <= "\\u06ff" or "\\ufb50" <= char <= "\\ufdff" or "\\ufe70" <= char <= "\\ufeff" for char in line):',
+              '            line = get_display(arabic_reshaper.reshape(line))',
+              '        output_lines.append(line)',
+              '    return "\\n".join(output_lines)',
+              "",
+          ]
+          helper = helper_anchor + "\n".join(helper_lines) + "\n"
+          if "def _shape_arabic_subtitle_text" not in source:
+              if source.count(helper_anchor) != 1:
+                  raise SystemExit("Could not safely locate helper insertion point")
+              source = source.replace(helper_anchor, helper, 1)
+
+          old_wrap = '''        wrapped_txt, txt_height = wrap_text(
+                      phrase,
+                      max_width=text_max_width,
+                      font=font_path,
+                      fontsize=params.font_size,
+                  )
+                  interline = int(params.font_size * 0.25)
+          '''
+          new_wrap = '''        wrapped_txt, txt_height = wrap_text(
+                      phrase,
+                      max_width=text_max_width,
+                      font=font_path,
+                      fontsize=params.font_size,
+                  )
+                  # Wrap in logical Arabic order first, then shape each rendered line.
+                  wrapped_txt = _shape_arabic_subtitle_text(wrapped_txt)
+                  interline = int(params.font_size * 0.25)
+          '''
+          if "wrapped_txt = _shape_arabic_subtitle_text(wrapped_txt)" not in source:
+              if source.count(old_wrap) != 1:
+                  raise SystemExit("Could not safely patch subtitle rendering block")
+              source = source.replace(old_wrap, new_wrap, 1)
+
+          old_factory = '''        def make_textclip(text):
+                      return TextClip(
+                          text=text,
+          '''
+          new_factory = '''        def make_textclip(text):
+                      return TextClip(
+                          text=_shape_arabic_subtitle_text(text),
+          '''
+          if "text=_shape_arabic_subtitle_text(text)" not in source:
+              if source.count(old_factory) != 1:
+                  raise SystemExit("Could not safely patch subtitle clip factory")
+              source = source.replace(old_factory, new_factory, 1)
+
+          path.write_text(source, encoding="utf-8")
+          print("Arabic subtitle shaping patch applied")
+          PY_PATCH
+
+          "$RUN_PY" - <<'PY_CHECK'
+          from pathlib import Path
+          import unicodedata
+          import arabic_reshaper
+          from bidi.algorithm import get_display
+          from PIL import ImageFont
+
+          font_path = Path("resource/fonts/NotoSansArabic-Regular.ttf")
+          if not font_path.is_file():
+              raise SystemExit("Arabic font file is missing")
+          sample = "كيف يعمل صمام المحرك وما دوره في دخول الهواء وخروج العادم؟"
+          rendered = get_display(arabic_reshaper.reshape(sample))
+          font = ImageFont.truetype(str(font_path), 64)
+          missing = font.getmask("\U0010ffff")
+          missing_signature = (missing.size, missing.getbbox(), bytes(missing))
+          for char in rendered:
+              if unicodedata.category(char)[0] not in {"L", "N"}:
+                  continue
+              mask = font.getmask(char)
+              signature = (mask.size, mask.getbbox(), bytes(mask))
+              if mask.getbbox() is None or signature == missing_signature:
+                  raise SystemExit(f"Arabic font is missing glyph: U+{ord(char):04X}")
+          print("Arabic font and shaping preflight: PASS")
+          print("Rendered sample (visual order):", rendered)
+          PY_CHECK
 
       - name: Show real CLI options (diagnostic)
         run: |
@@ -95,25 +218,6 @@ jobs:
           fi
           echo "OLLAMA_MODEL=$MODEL" >> "$GITHUB_ENV"
           ollama list
-
-          # تحقق من واجهة OpenAI المتوافقة التي يستخدمها MoneyPrinterTurbo.
-          # Ollama API الأصلية على /api لا تكفي لهذا الاتصال؛ المطلوب /v1.
-          echo "Testing Ollama OpenAI-compatible endpoint..."
-          curl --fail --silent --show-error \
-            http://127.0.0.1:11434/v1/chat/completions \
-            -H "Content-Type: application/json" \
-            -d "{\"model\":\"$MODEL\",\"messages\":[{\"role\":\"user\",\"content\":\"اكتب جملة عربية قصيرة عن صمام المحرك.\"}],\"stream\":false}" \
-            -o "$RUNNER_TEMP/ollama-openai-test.json"
-          python - <<'PYJSON'
-          import json, os
-          from pathlib import Path
-          data = json.loads((Path(os.environ["RUNNER_TEMP"]) / "ollama-openai-test.json").read_text(encoding="utf-8"))
-          content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
-          if not content.strip():
-              raise SystemExit("Ollama OpenAI-compatible test returned no message content")
-          print("Ollama OpenAI-compatible endpoint: OK")
-          print("Arabic response: " + content[:300])
-          PYJSON
 
       - name: Quick Arabic check of the local model
         run: |
@@ -175,10 +279,20 @@ jobs:
           HELP="$RUNNER_TEMP/mpt-cli-help.txt"
           if grep -q -- "--video-language" "$HELP"; then ARGS+=( --video-language "ar-SA" ); else echo "::warning::--video-language not available"; fi
           if grep -q -- "--voice-name" "$HELP"; then ARGS+=( --voice-name "ar-SA-HamedNeural" ); else echo "::warning::--voice-name not available"; fi
+          if grep -q -- "--font-name" "$HELP"; then ARGS+=( --font-name "NotoSansArabic-Regular.ttf" ); else echo "::error::--font-name is unavailable"; exit 1; fi
           if grep -q -- "--video-aspect" "$HELP"; then ARGS+=( --video-aspect "9:16" ); fi
           if grep -q -- "--video-count" "$HELP"; then ARGS+=( --video-count 1 ); fi
 
+          # إيقاف الموسيقى الخلفية صراحةً؛ الوضع الافتراضي في MoneyPrinterTurbo هو random.
+          if ! grep -q -- "--bgm-type" "$HELP"; then
+            echo "::error::This MoneyPrinterTurbo build does not expose --bgm-type; refusing to generate a video that may contain music."
+            exit 1
+          fi
+          ARGS+=( --bgm-type none )
+          if grep -q -- "--bgm-volume" "$HELP"; then ARGS+=( --bgm-volume 0 ); fi
+
           echo "Arguments used: ${ARGS[*]}"
+          echo "Background music policy: DISABLED (bgm-type=none, bgm-volume=0)"
           $RUN_PY cli.py "${ARGS[@]}" 2>&1 | tee "$RUNNER_TEMP/mpt-generation.log"
           STATUS=${PIPESTATUS[0]}
           if [ "$STATUS" -ne 0 ]; then
@@ -245,7 +359,6 @@ jobs:
           name: mpt-test-diagnostics-${{ github.run_number }}
           path: |
             ${{ runner.temp }}/ollama.log
-            ${{ runner.temp }}/ollama-openai-test.json
             ${{ runner.temp }}/mpt-cli-help.txt
             ${{ runner.temp }}/mpt-generation.log
           if-no-files-found: ignore
