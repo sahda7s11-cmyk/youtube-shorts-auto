@@ -57,7 +57,12 @@ jobs:
           cd "$MPT_DIR"
           python -m pip install --upgrade pip uv
           if uv sync --frozen; then
-            echo "RUN_PY=uv run python" >> "$GITHUB_ENV"
+            # Store the interpreter path, not the multi-word command "uv run python".
+            if [ ! -x .venv/bin/python ]; then
+              echo "::error::uv sync completed but .venv/bin/python was not created"
+              exit 1
+            fi
+            echo "RUN_PY=$MPT_DIR/.venv/bin/python" >> "$GITHUB_ENV"
           else
             echo "uv sync failed; falling back to venv + requirements.txt"
             python -m venv .venv
