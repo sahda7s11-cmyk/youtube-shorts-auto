@@ -82,11 +82,14 @@ jobs:
           cp "$FONT_SOURCE" resource/fonts/NotoSansArabic-Regular.ttf
           echo "Arabic subtitle font: $FONT_SOURCE"
 
-          if [ -x .venv/bin/python ]; then
-            .venv/bin/python -m pip install arabic-reshaper python-bidi
-          else
-            uv pip install arabic-reshaper python-bidi
+          # uv-created virtual environments do not necessarily contain pip.
+          # Install into the project's interpreter through uv, without relying on python -m pip.
+          if [ ! -x .venv/bin/python ]; then
+            echo "::error::MoneyPrinterTurbo virtual-environment Python was not found"
+            exit 1
           fi
+          uv pip install --python .venv/bin/python arabic-reshaper python-bidi
+          .venv/bin/python -c "import arabic_reshaper; from bidi.algorithm import get_display; print('Arabic shaping packages: installed')"
 
           python - <<'PY_PATCH'
           from pathlib import Path
