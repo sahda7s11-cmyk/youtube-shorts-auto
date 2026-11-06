@@ -129,29 +129,9 @@ jobs:
                   raise SystemExit("Could not safely locate helper insertion point")
               source = source.replace(helper_anchor, helper, 1)
 
-          old_wrap = '''        wrapped_txt, txt_height = wrap_text(
-                      phrase,
-                      max_width=text_max_width,
-                      font=font_path,
-                      fontsize=params.font_size,
-                  )
-                  interline = int(params.font_size * 0.25)
-          '''
-          new_wrap = '''        wrapped_txt, txt_height = wrap_text(
-                      phrase,
-                      max_width=text_max_width,
-                      font=font_path,
-                      fontsize=params.font_size,
-                  )
-                  # Wrap in logical Arabic order first, then shape each rendered line.
-                  wrapped_txt = _shape_arabic_subtitle_text(wrapped_txt)
-                  interline = int(params.font_size * 0.25)
-          '''
-          if "wrapped_txt = _shape_arabic_subtitle_text(wrapped_txt)" not in source:
-              if source.count(old_wrap) != 1:
-                  raise SystemExit("Could not safely patch subtitle rendering block")
-              source = source.replace(old_wrap, new_wrap, 1)
-
+          # Shape Arabic exactly once, at the final TextClip rendering boundary.
+          # Do not reshape wrapped_txt: the previous workflow shaped twice and
+          # produced reversed/disconnected glyphs.
           old_factory = '''        def make_textclip(text):
                       return TextClip(
                           text=text,
@@ -164,6 +144,11 @@ jobs:
               if source.count(old_factory) != 1:
                   raise SystemExit("Could not safely patch subtitle clip factory")
               source = source.replace(old_factory, new_factory, 1)
+
+          if source.count("text=_shape_arabic_subtitle_text(text)") != 1:
+              raise SystemExit("Expected exactly one Arabic shaping call at final rendering")
+          if "wrapped_txt = _shape_arabic_subtitle_text(wrapped_txt)" in source:
+              raise SystemExit("Unexpected early Arabic shaping call detected")
 
           path.write_text(source, encoding="utf-8")
           print("Arabic subtitle shaping patch applied")
@@ -281,13 +266,18 @@ jobs:
           set -uo pipefail
           cd "$MPT_DIR"
 
-          ARGS=( --video-subject "كيف يعمل صمام المحرك وما دوره في دخول الهواء وخروج العادم" )
+          # Use a reviewed Arabic script instead of asking the small local model
+          # to write Arabic. This isolates subtitle rendering from script quality.
+          ARABIC_SCRIPT="تعمل صمامات المحرك على تنظيم دخول الهواء وخروج غازات العادم من الأسطوانات. في شوط السحب، يفتح صمام السحب ويدخل الهواء إلى الأسطوانة. ثم يُغلق الصمام أثناء شوطَي الضغط والقدرة. وبعد انتهاء الاحتراق، يفتح صمام العادم خلال شوط العادم، فيدفع المكبس الغازات المحترقة إلى خارج الأسطوانة. ويتحكم عمود الكامات في توقيت فتح الصمامات وإغلاقها، لضمان عمل المحرك بكفاءة."
+          ARGS=( --video-script "$ARABIC_SCRIPT" )
 
           # نضيف الخيارات فقط إذا كانت موجودة فعلًا في --help، حتى لا نفشل بسبب خيار غير موجود.
           HELP="$RUNNER_TEMP/mpt-cli-help.txt"
           if grep -q -- "--video-language" "$HELP"; then ARGS+=( --video-language "ar-SA" ); else echo "::warning::--video-language not available"; fi
           if grep -q -- "--voice-name" "$HELP"; then ARGS+=( --voice-name "ar-SA-HamedNeural" ); else echo "::warning::--voice-name not available"; fi
           if grep -q -- "--font-name" "$HELP"; then ARGS+=( --font-name "NotoSansArabic-Regular.ttf" ); else echo "::error::--font-name is unavailable"; exit 1; fi
+          if grep -q -- "--subtitle-display-mode" "$HELP"; then ARGS+=( --subtitle-display-mode sentence ); else echo "::error::--subtitle-display-mode is unavailable"; exit 1; fi
+          if ! grep -q -- "--video-script" "$HELP"; then echo "::error::--video-script is unavailable"; exit 1; fi
           if grep -q -- "--video-aspect" "$HELP"; then ARGS+=( --video-aspect "9:16" ); fi
           if grep -q -- "--video-count" "$HELP"; then ARGS+=( --video-count 1 ); fi
 
