@@ -1,0 +1,313 @@
+name: Daily MPT Short
+
+# النظام الجديد: MoneyPrinterTurbo + فحص جودة + رفع YouTube.
+# عطّل workflow القديم (Daily YouTube Short) من تبويب Actions حتى لا ينشر الاثنان معًا.
+
+on:
+  schedule:
+    - cron: "0 14 * * *"
+  workflow_dispatch:
+    inputs:
+      privacy:
+        description: "none = تجربة بدون رفع | private | unlisted | public"
+        type: choice
+        default: none
+        options:
+          - none
+          - private
+          - unlisted
+          - public
+      topic_id:
+        description: "اختياري: رقم موضوع محدد من topics.json (مثل valve-001)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: youtube-shorts-automation
+  cancel-in-progress: false
+
+env:
+  # التشغيل المجدول يستخدم المتغير YT_PRIVACY إن وُجد (Settings > Variables)، وإلا private.
+  PRIVACY: ${{ github.event.inputs.privacy || vars.YT_PRIVACY || 'private' }}
+
+jobs:
+  generate-and-upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Check required secrets
+        env:
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+        run: |
+          echo "Privacy mode: $PRIVACY"
+          [ -n "$PEXELS_API_KEY" ] || { echo "::error::Missing secret PEXELS_API_KEY"; exit 1; }
+          echo "PEXELS_API_KEY: present"
+          if [ "$PRIVACY" != "none" ]; then
+            for name in YOUTUBE_CLIENT_ID YOUTUBE_CLIENT_SECRET YOUTUBE_REFRESH_TOKEN; do
+              if [ -z "${!name}" ]; then echo "::error::Missing secret $name"; exit 1; fi
+              echo "$name: present"
+            done
+          fi
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg git curl imagemagick fonts-noto-core fonts-noto-extra fontconfig
+          fc-cache -f
+
+      - name: Clone official MoneyPrinterTurbo
+        run: |
+          set -euo pipefail
+          # نحاول النسخة v1.3.9، وإن لم توجد نستخدم الفرع الرئيسي.
+          if ! git clone --depth 1 --branch v1.3.9 https://github.com/harry0703/MoneyPrinterTurbo.git "$RUNNER_TEMP/mpt"; then
+            echo "Tag v1.3.9 not found; using default branch."
+            rm -rf "$RUNNER_TEMP/mpt"
+            git clone --depth 1 https://github.com/harry0703/MoneyPrinterTurbo.git "$RUNNER_TEMP/mpt"
+          fi
+          echo "MPT_DIR=$RUNNER_TEMP/mpt" >> "$GITHUB_ENV"
+          ls "$RUNNER_TEMP/mpt"
+
+      - name: Install MoneyPrinterTurbo dependencies
+        run: |
+          set -euo pipefail
+          cd "$MPT_DIR"
+          python -m pip install --upgrade pip uv
+          if uv sync --frozen; then
+            # Store the interpreter path, not the multi-word command "uv run python".
+            if [ ! -x .venv/bin/python ]; then
+              echo "::error::uv sync completed but .venv/bin/python was not created"
+              exit 1
+            fi
+            echo "RUN_PY=$MPT_DIR/.venv/bin/python" >> "$GITHUB_ENV"
+          else
+            echo "uv sync failed; falling back to venv + requirements.txt"
+            python -m venv .venv
+            .venv/bin/pip install -r requirements.txt
+            echo "RUN_PY=$MPT_DIR/.venv/bin/python" >> "$GITHUB_ENV"
+          fi
+
+      - name: Install Arabic shaping support and prepare Arabic font
+        run: |
+          set -euo pipefail
+          cd "$MPT_DIR"
+
+          mkdir -p resource/fonts
+          FONT_SOURCE="$(find /usr/share/fonts -type f -iname 'NotoSansArabic-Regular.ttf' | head -n1)"
+          if [ -z "$FONT_SOURCE" ]; then
+            FONT_SOURCE="$(fc-match -f '%{file}' 'Noto Sans Arabic:style=Regular' | head -n1)"
+          fi
+          if [ -z "$FONT_SOURCE" ] || [ ! -f "$FONT_SOURCE" ]; then
+            echo "::error::Noto Sans Arabic font was not found"
+            exit 1
+          fi
+          cp "$FONT_SOURCE" resource/fonts/NotoSansArabic-Regular.ttf
+          echo "Arabic subtitle font: $FONT_SOURCE"
+
+          # uv-created virtual environments do not necessarily contain pip.
+          # Install into the project's interpreter through uv, without relying on python -m pip.
+          if [ ! -x .venv/bin/python ]; then
+            echo "::error::MoneyPrinterTurbo virtual-environment Python was not found"
+            exit 1
+          fi
+          uv pip install --python .venv/bin/python arabic-reshaper python-bidi
+          .venv/bin/python -c "import arabic_reshaper; from bidi.algorithm import get_display; print('Arabic shaping packages: installed')"
+
+          python - <<'PY_PATCH'
+          from pathlib import Path
+
+          path = Path("app/services/video.py")
+          source = path.read_text(encoding="utf-8")
+
+          import_line = "from PIL import Image, ImageColor, ImageDraw, ImageFont, ImageOps\n"
+          import_patch = import_line + "import arabic_reshaper\nfrom bidi.algorithm import get_display\n"
+          if "import arabic_reshaper" not in source:
+              if source.count(import_line) != 1:
+                  raise SystemExit("Could not safely locate Pillow imports in video.py")
+              source = source.replace(import_line, import_patch, 1)
+
+          helper_anchor = "from app.utils import file_security, logging_utils, utils\n"
+          helper_lines = [
+              "",
+              "",
+              "def _shape_arabic_subtitle_text(text: str) -> str:",
+              "    # Shape Arabic glyphs and apply bidi ordering for subtitle rendering.",
+              '    output_lines = []',
+              '    for line in str(text or "").split("\\n"): ',
+              '        if any("\\u0600" <= char <= "\\u06ff" or "\\ufb50" <= char <= "\\ufdff" or "\\ufe70" <= char <= "\\ufeff" for char in line):',
+              '            line = get_display(arabic_reshaper.reshape(line))',
+              '        output_lines.append(line)',
+              '    return "\\n".join(output_lines)',
+              "",
+          ]
+          helper = helper_anchor + "\n".join(helper_lines) + "\n"
+          if "def _shape_arabic_subtitle_text" not in source:
+              if source.count(helper_anchor) != 1:
+                  raise SystemExit("Could not safely locate helper insertion point")
+              source = source.replace(helper_anchor, helper, 1)
+
+          # Shape Arabic exactly once, at the final TextClip rendering boundary.
+          # Do not reshape wrapped_txt: the previous workflow shaped twice and
+          # produced reversed/disconnected glyphs.
+          old_factory = '''        def make_textclip(text):
+                      return TextClip(
+                          text=text,
+          '''
+          new_factory = '''        def make_textclip(text):
+                      return TextClip(
+                          text=_shape_arabic_subtitle_text(text),
+          '''
+          if "text=_shape_arabic_subtitle_text(text)" not in source:
+              if source.count(old_factory) != 1:
+                  raise SystemExit("Could not safely patch subtitle clip factory")
+              source = source.replace(old_factory, new_factory, 1)
+
+          if source.count("text=_shape_arabic_subtitle_text(text)") != 1:
+              raise SystemExit("Expected exactly one Arabic shaping call at final rendering")
+          if "wrapped_txt = _shape_arabic_subtitle_text(wrapped_txt)" in source:
+              raise SystemExit("Unexpected early Arabic shaping call detected")
+
+          path.write_text(source, encoding="utf-8")
+          print("Arabic subtitle shaping patch applied")
+          PY_PATCH
+
+          "$RUN_PY" - <<'PY_CHECK'
+          from pathlib import Path
+          import unicodedata
+          import arabic_reshaper
+          from bidi.algorithm import get_display
+          from PIL import ImageFont
+
+          font_path = Path("resource/fonts/NotoSansArabic-Regular.ttf")
+          if not font_path.is_file():
+              raise SystemExit("Arabic font file is missing")
+          sample = "كيف يعمل صمام المحرك وما دوره في دخول الهواء وخروج العادم؟"
+          rendered = get_display(arabic_reshaper.reshape(sample))
+          font = ImageFont.truetype(str(font_path), 64)
+          missing = font.getmask("\U0010ffff")
+          missing_signature = (missing.size, missing.getbbox(), bytes(missing))
+          for char in rendered:
+              if unicodedata.category(char)[0] not in {"L", "N"}:
+                  continue
+              mask = font.getmask(char)
+              signature = (mask.size, mask.getbbox(), bytes(mask))
+              if mask.getbbox() is None or signature == missing_signature:
+                  raise SystemExit(f"Arabic font is missing glyph: U+{ord(char):04X}")
+          print("Arabic font and shaping preflight: PASS")
+          print("Rendered sample (visual order):", rendered)
+          PY_CHECK
+
+      - name: Configure MoneyPrinterTurbo
+        env:
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+        run: |
+          set -euo pipefail
+          cd "$MPT_DIR"
+          cp config.example.toml config.toml
+
+          python - <<'PY'
+          import os, re, tomllib
+          from pathlib import Path
+
+          path = Path("config.toml")
+          text = path.read_text(encoding="utf-8")
+
+          settings = {
+              "video_source": '"pexels"',
+              "pexels_api_keys": '["' + os.environ["PEXELS_API_KEY"] + '"]',
+              "subtitle_provider": '"edge"',
+          }
+
+          for key, value in settings.items():
+              pattern = re.compile(r"^[ \t]*#?[ \t]*" + re.escape(key) + r"[ \t]*=.*$", re.M)
+              line = f"{key} = {value}"
+              if pattern.search(text):
+                  text = pattern.sub(lambda m: line, text, count=1)
+              elif re.search(r"^\[app\][ \t]*$", text, re.M):
+                  text = re.sub(r"^\[app\][ \t]*$", lambda m: "[app]\n" + line, text, count=1, flags=re.M)
+              else:
+                  text += "\n[app]\n" + line + "\n"
+
+          path.write_text(text, encoding="utf-8")
+
+          app = tomllib.loads(text).get("app", {})
+          print("video_source:", app.get("video_source"))
+          print("subtitle_provider:", app.get("subtitle_provider"))
+          if not app.get("pexels_api_keys"):
+              raise SystemExit("Configuration check failed: no Pexels key loaded")
+          print("pexels_api_keys: present (value hidden)")
+          PY
+
+      - name: Install daily-pipeline requirements
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r mpt_daily/requirements.txt
+
+      - name: Produce, check and upload the Short
+        env:
+          FORCE_TOPIC_ID: ${{ github.event.inputs.topic_id }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+        run: |
+          python mpt_daily/run_daily.py
+
+      - name: Save memory safely
+        if: ${{ success() && env.PRIVACY != 'none' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/generated-memory"
+          cp used_content.json used_pexels.json "$RUNNER_TEMP/generated-memory/"
+          cp mpt_daily/merge_memory.py "$RUNNER_TEMP/merge_memory.py"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          for attempt in 1 2 3 4 5; do
+            echo "Memory sync attempt $attempt / 5"
+            git fetch origin main
+            git reset --hard origin/main
+            python "$RUNNER_TEMP/merge_memory.py" "$RUNNER_TEMP/generated-memory"
+            git add used_content.json used_pexels.json
+            if git diff --cached --quiet; then
+              echo "No memory changes."
+              exit 0
+            fi
+            git commit -m "Update Shorts content memory (MPT)"
+            if git push origin HEAD:main; then
+              echo "Memory pushed."
+              exit 0
+            fi
+            echo "Push rejected; retrying with the newest remote state."
+            sleep 3
+          done
+          echo "::error::Could not push memory after 5 attempts. The video WAS uploaded; add its topic to used_content.json manually to avoid a duplicate."
+          exit 1
+
+      - name: Upload review files (video + contact sheet)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mpt-daily-review-${{ github.run_number }}
+          path: |
+            output/short.mp4
+            review/**
+          if-no-files-found: ignore
+          retention-days: 3
