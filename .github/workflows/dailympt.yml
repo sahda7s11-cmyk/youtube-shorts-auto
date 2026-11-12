@@ -1,0 +1,1154 @@
+name: Daily MPT Short
+
+# ملف واحد يحتوي كل شيء (السكربتات والمواضيع مدمجة). لا تحتاج مجلد mpt_daily.
+# النظام الجديد: MoneyPrinterTurbo + فحص جودة + رفع YouTube.
+# عطّل workflow القديم (Daily YouTube Short) من تبويب Actions حتى لا ينشر الاثنان معًا.
+
+on:
+  schedule:
+    - cron: "0 14 * * *"
+  workflow_dispatch:
+    inputs:
+      privacy:
+        description: "none = تجربة بدون رفع | private | unlisted | public"
+        type: choice
+        default: none
+        options:
+          - none
+          - private
+          - unlisted
+          - public
+      topic_id:
+        description: "اختياري: رقم موضوع محدد من topics.json (مثل valve-001)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: youtube-shorts-automation
+  cancel-in-progress: false
+
+env:
+  # التشغيل المجدول يستخدم المتغير YT_PRIVACY إن وُجد (Settings > Variables)، وإلا private.
+  PRIVACY: ${{ github.event.inputs.privacy || vars.YT_PRIVACY || 'private' }}
+
+jobs:
+  generate-and-upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install pipeline files (embedded)
+        run: |
+          set -euo pipefail
+          mkdir -p mpt_daily
+          cat > mpt_daily/run_daily.py <<'PYEOF_RUN_DAILY'
+          #!/usr/bin/env python3
+          """المنسّق اليومي للنظام الجديد.
+
+          الترتيب:
+            1. اختيار موضوع لم يُنتج من قبل (من topics.json مقابل used_content.json)
+            2. إنتاج الفيديو بواسطة MoneyPrinterTurbo (حتى 3 محاولات)
+            3. فحص الجودة (check_video.py) - إذا فشل لا يُنشر شيء
+            4. الرفع إلى YouTube حسب PRIVACY: private | unlisted | public | none
+               (none = تجربة بدون رفع ولا حفظ ذاكرة)
+            5. حفظ الموضوع ومعرّف الفيديو في used_content.json
+               وحفظ معرّفات مقاطع Pexels في used_pexels.json
+
+          متغيرات البيئة المطلوبة:
+            MPT_DIR, RUN_PY            (يضبطها الـ workflow)
+            PRIVACY                    (الافتراضي private)
+            FORCE_TOPIC_ID             (اختياري: لتجربة موضوع محدد)
+            YOUTUBE_CLIENT_ID, YOUTUBE_CLIENT_SECRET, YOUTUBE_REFRESH_TOKEN
+                                       (مطلوبة فقط عند الرفع)
+          لا يطبع هذا السكربت أي قيمة سرية.
+          """
+          import json
+          import os
+          import re
+          import shutil
+          import subprocess
+          import sys
+          import time
+          from pathlib import Path
+
+          HERE = Path(__file__).resolve().parent
+          ROOT = HERE.parent
+          sys.path.insert(0, str(HERE))
+          import check_video  # noqa: E402
+
+          TOPICS_FILE = HERE / "topics.json"
+          USED_CONTENT = ROOT / "used_content.json"
+          USED_PEXELS = ROOT / "used_pexels.json"
+          REVIEW_DIR = ROOT / "review"
+          OUTPUT_DIR = ROOT / "output"
+          MAX_ATTEMPTS = 3
+          GENERATION_TIMEOUT = 40 * 60
+          VALID_PRIVACY = ("private", "unlisted", "public", "none")
+
+          REQUIRED_CLI_FLAGS = [
+              "--video-script", "--video-terms", "--video-language", "--voice-name",
+              "--font-name", "--subtitle-display-mode", "--video-aspect",
+              "--video-count", "--bgm-type", "--bgm-volume",
+          ]
+
+
+          # ----------------------------------------------------------------- helpers
+          def norm(text):
+              text = re.sub(r"[\u064B-\u065F\u0670\u0640]", "", str(text or ""))  # التشكيل والتطويل
+              text = re.sub(r"[^\w\s]", " ", text, flags=re.UNICODE)
+              return re.sub(r"\s+", " ", text).strip().lower()
+
+
+          def load_list(path):
+              if not path.exists():
+                  return []
+              try:
+                  data = json.loads(path.read_text(encoding="utf-8"))
+              except Exception:
+                  print(f"WARNING: could not read {path.name}; treating as empty")
+                  return []
+              return data if isinstance(data, list) else []
+
+
+          def write_json_atomic(path, data):
+              tmp = path.with_suffix(path.suffix + ".tmp")
+              tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+              tmp.replace(path)
+
+
+          # ------------------------------------------------------------------ topics
+          def pick_topic(topics, used_records, forced_id=None):
+              if forced_id:
+                  for t in topics:
+                      if t["id"] == forced_id:
+                          print(f"FORCE_TOPIC_ID={forced_id}: skipping the used-topic check")
+                          return t
+                  raise SystemExit(f"FORCE_TOPIC_ID '{forced_id}' not found in topics.json")
+
+              used_ids = {r.get("mpt_id") for r in used_records if isinstance(r, dict)}
+              used_titles = {norm(r.get("title")) for r in used_records if isinstance(r, dict)}
+              for t in topics:
+                  if t["id"] in used_ids or norm(t["title"]) in used_titles:
+                      continue
+                  return t
+              return None
+
+
+          def validate_topics(topics):
+              seen = set()
+              for i, t in enumerate(topics, 1):
+                  for key in ("id", "title", "script", "terms"):
+                      if not t.get(key):
+                          raise SystemExit(f"topics.json: topic #{i} has empty '{key}'")
+                  if t["id"] in seen:
+                      raise SystemExit(f"topics.json: duplicate id {t['id']}")
+                  seen.add(t["id"])
+                  if re.search(r"[A-Za-z]", t["script"]):
+                      raise SystemExit(f"topics.json: script of {t['id']} contains Latin letters")
+
+
+          # --------------------------------------------------------------- generation
+          def mpt_python():
+              return os.environ["RUN_PY"]
+
+
+          def mpt_dir():
+              return Path(os.environ["MPT_DIR"])
+
+
+          def check_cli_supports_flags():
+              p = subprocess.run([mpt_python(), "cli.py", "--help"], cwd=mpt_dir(),
+                                 capture_output=True, text=True, errors="replace")
+              help_text = p.stdout + p.stderr
+              missing = [f for f in REQUIRED_CLI_FLAGS if f not in help_text]
+              if missing:
+                  raise SystemExit("MoneyPrinterTurbo CLI is missing options: " + ", ".join(missing))
+
+
+          def build_cli_args(topic):
+              return [
+                  "cli.py",
+                  "--video-script", topic["script"],
+                  "--video-terms", ",".join(topic["terms"]),
+                  "--video-language", "ar-SA",
+                  "--voice-name", "ar-SA-HamedNeural",
+                  "--font-name", "NotoSansArabic-Regular.ttf",
+                  "--subtitle-display-mode", "sentence",
+                  "--video-aspect", "9:16",
+                  "--video-count", "1",
+                  "--bgm-type", "none",
+                  "--bgm-volume", "0",
+              ]
+
+
+          def generate_video(topic):
+              """يشغّل MoneyPrinterTurbo ويعيد (مسار الفيديو، نص السجل)."""
+              started = time.time()
+              proc = subprocess.Popen([mpt_python()] + build_cli_args(topic), cwd=mpt_dir(),
+                                      stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                      text=True, errors="replace")
+              lines = []
+              deadline = started + GENERATION_TIMEOUT
+              try:
+                  for line in proc.stdout:
+                      print(line, end="")
+                      lines.append(line)
+                      if time.time() > deadline:
+                          proc.kill()
+                          raise RuntimeError("generation timed out")
+              finally:
+                  proc.wait()
+              if proc.returncode != 0:
+                  raise RuntimeError(f"cli.py exited with code {proc.returncode}")
+
+              candidates = [p for p in (mpt_dir() / "storage" / "tasks").glob("*/final-*.mp4")
+                            if p.stat().st_mtime >= started - 2]
+              if not candidates:
+                  raise RuntimeError("no final-*.mp4 was produced")
+              return max(candidates, key=lambda p: p.stat().st_mtime), "".join(lines)
+
+
+          def parse_asset_ids(log_text):
+              return list(dict.fromkeys(re.findall(r"asset_id=(\d+)", log_text)))
+
+
+          # ------------------------------------------------------------------- upload
+          def upload_video(video_path, topic, privacy):
+              from google.auth.exceptions import RefreshError
+              from google.auth.transport.requests import Request
+              from google.oauth2.credentials import Credentials
+              from googleapiclient.discovery import build
+              from googleapiclient.errors import HttpError
+              from googleapiclient.http import MediaFileUpload
+
+              creds = Credentials(
+                  token=None,
+                  refresh_token=os.environ["YOUTUBE_REFRESH_TOKEN"],
+                  token_uri="https://oauth2.googleapis.com/token",
+                  client_id=os.environ["YOUTUBE_CLIENT_ID"],
+                  client_secret=os.environ["YOUTUBE_CLIENT_SECRET"],
+                  scopes=["https://www.googleapis.com/auth/youtube.upload"],
+              )
+              try:
+                  creds.refresh(Request())
+              except RefreshError as exc:
+                  raise RuntimeError("YouTube OAuth refresh failed: " + str(exc)[:200])
+              print("OAuth refresh: OK")
+
+              youtube = build("youtube", "v3", credentials=creds, cache_discovery=False)
+              title = (topic["title"] + " #shorts")[:100]
+              description = (topic["script"] + "\n\n#سيارات #ميكانيكا_السيارات #هندسة #shorts")[:4900]
+              body = {
+                  "snippet": {
+                      "title": title,
+                      "description": description,
+                      "tags": ["ميكانيكا السيارات", "محرك", "هندسة", "سيارات", "shorts"],
+                      "categoryId": "2",  # Autos & Vehicles
+                      "defaultLanguage": "ar",
+                      "defaultAudioLanguage": "ar",
+                  },
+                  "status": {"privacyStatus": privacy, "selfDeclaredMadeForKids": False},
+              }
+              media = MediaFileUpload(str(video_path), mimetype="video/mp4",
+                                      chunksize=8 * 1024 * 1024, resumable=True)
+              request = youtube.videos().insert(part="snippet,status", body=body, media_body=media)
+
+              response, failures = None, 0
+              while response is None:
+                  try:
+                      status, response = request.next_chunk()
+                      if status:
+                          print(f"Upload progress: {int(status.progress() * 100)}%")
+                  except HttpError as exc:
+                      if exc.resp.status in (500, 502, 503, 504) and failures < 5:
+                          failures += 1
+                          time.sleep(2 ** failures)
+                          continue
+                      raise RuntimeError(f"YouTube upload failed: HTTP {exc.resp.status}: {str(exc)[:200]}")
+
+              video_id = response.get("id")
+              returned = (response.get("status") or {}).get("privacyStatus")
+              if not video_id:
+                  raise RuntimeError("upload finished but no video id was returned")
+              print(f"UPLOAD OK: https://youtu.be/{video_id}  privacy={returned}")
+              if returned != privacy:
+                  print(f"WARNING: requested privacy '{privacy}' but YouTube reports '{returned}'")
+              return video_id
+
+
+          # ------------------------------------------------------------------- memory
+          def remember(topic, video_id, asset_ids):
+              used = load_list(USED_CONTENT)
+              used.append({
+                  "title": topic["title"],
+                  "text": topic["script"],
+                  "search": ", ".join(topic["terms"]),
+                  "fingerprint": [norm(topic["title"]), norm(topic["script"]), norm(" ".join(topic["terms"]))],
+                  "video_id": video_id,
+                  "saved_at": int(time.time()),
+                  "mpt_id": topic["id"],
+                  "source": "mpt",
+              })
+              write_json_atomic(USED_CONTENT, used)
+
+              pexels = load_list(USED_PEXELS)
+              known = {str(x) for x in pexels}
+              fresh = [a for a in asset_ids if a not in known]
+              overlap = len(asset_ids) - len(fresh)
+              pexels.extend(fresh)
+              write_json_atomic(USED_PEXELS, pexels)
+              print(f"Memory saved: {len(used)} content records; "
+                    f"{len(fresh)} new Pexels ids ({overlap} had been used before)")
+
+
+          # --------------------------------------------------------------------- main
+          def main():
+              privacy = os.environ.get("PRIVACY", "private").strip().lower()
+              if privacy not in VALID_PRIVACY:
+                  print(f"ERROR: PRIVACY must be one of {VALID_PRIVACY}, got '{privacy}'")
+                  return 2
+
+              topics = json.loads(TOPICS_FILE.read_text(encoding="utf-8"))
+              validate_topics(topics)
+              used = load_list(USED_CONTENT)
+              topic = pick_topic(topics, used, os.environ.get("FORCE_TOPIC_ID", "").strip() or None)
+              if topic is None:
+                  print("ERROR: every topic in topics.json has been used. Add new topics.")
+                  return 3
+              print(f"Topic: {topic['id']} - {topic['title']}")
+              print(f"Privacy mode: {privacy}")
+
+              check_cli_supports_flags()
+
+              video, asset_ids, passed = None, [], False
+              for attempt in range(1, MAX_ATTEMPTS + 1):
+                  print(f"\n===== Attempt {attempt}/{MAX_ATTEMPTS} =====")
+                  try:
+                      video, log_text = generate_video(topic)
+                  except Exception as exc:
+                      print(f"Generation failed: {exc}")
+                      continue
+                  asset_ids = parse_asset_ids(log_text)
+                  passed, report = check_video.check(video, REVIEW_DIR / f"attempt{attempt}")
+                  print("\n".join(report))
+                  print("QUALITY CHECK:", "PASS" if passed else "FAIL")
+                  if passed:
+                      break
+
+              if not passed:
+                  print("\nERROR: no attempt passed the quality check. Nothing was uploaded "
+                        "and no memory was written.")
+                  return 1
+
+              OUTPUT_DIR.mkdir(exist_ok=True)
+              final_copy = OUTPUT_DIR / "short.mp4"
+              shutil.copy2(video, final_copy)
+
+              if privacy == "none":
+                  print("\nDry run (PRIVACY=none): skipping upload and memory.")
+                  return 0
+
+              for name in ("YOUTUBE_CLIENT_ID", "YOUTUBE_CLIENT_SECRET", "YOUTUBE_REFRESH_TOKEN"):
+                  if not os.environ.get(name):
+                      print(f"ERROR: secret {name} is missing")
+                      return 4
+
+              video_id = upload_video(final_copy, topic, privacy)
+              remember(topic, video_id, asset_ids)
+              return 0
+
+
+          if __name__ == "__main__":
+              try:
+                  sys.exit(main())
+              except SystemExit:
+                  raise
+              except Exception as exc:  # noqa: BLE001
+                  print(f"ERROR: {type(exc).__name__}: {exc}")
+                  sys.exit(1)
+          PYEOF_RUN_DAILY
+          cat > mpt_daily/check_video.py <<'PYEOF_CHECK_VIDEO'
+          #!/usr/bin/env python3
+          """فحص جودة الفيديو قبل النشر.
+
+          الاستعمال:  python check_video.py VIDEO.mp4 [REVIEW_DIR]
+
+          يطبع تقريرًا، ويخرج برمز 0 عند النجاح و1 عند فشل أي فحص أساسي.
+          يحفظ في REVIEW_DIR صورة مجمّعة (contact_sheet.jpg) لمراجعتك بالعين.
+
+          ما يفحصه آليًا:
+            - الملف قابل للقراءة ومكتمل
+            - المدة (15 إلى 59 ثانية)
+            - الدقة 1080x1920 ومعدل الإطارات
+            - وجود مسار صوت، وعدم كونه صامتًا
+            - عدم وجود صمت طويل، وعدم وجود شاشة سوداء طويلة
+            - توافق مدة الصوت مع مدة الفيديو
+            - ظهور وجوه بشرية (كشف تقريبي، يحجب النشر إذا تكرر)
+
+          ما لا يفحصه آليًا (راجعه بالعين من الصورة المجمّعة):
+            - صحة الترجمة العربية وترتيبها
+            - صلة اللقطات بالموضوع
+          """
+          import json
+          import re
+          import subprocess
+          import sys
+          from pathlib import Path
+
+          MIN_DURATION = 15.0
+          MAX_DURATION = 59.5
+          EXPECTED_SIZE = (1080, 1920)
+          MIN_MEAN_VOLUME_DB = -35.0
+          MAX_SILENCE_SECONDS = 2.5
+          MAX_BLACK_SECONDS = 1.0
+          MAX_AV_DIFF_SECONDS = 1.5
+          FACE_FRAMES_TO_BLOCK = 2
+
+
+          def run(cmd):
+              return subprocess.run(cmd, capture_output=True, text=True, errors="replace")
+
+
+          def probe(path):
+              p = run(["ffprobe", "-v", "error", "-print_format", "json",
+                       "-show_format", "-show_streams", str(path)])
+              if p.returncode != 0:
+                  raise RuntimeError("ffprobe failed: " + p.stderr.strip()[:300])
+              return json.loads(p.stdout)
+
+
+          def decode_whole_file(path):
+              """يقرأ الملف كاملًا للتأكد أنه غير تالف."""
+              p = run(["ffmpeg", "-v", "error", "-i", str(path), "-f", "null", "-"])
+              return p.returncode == 0 and not p.stderr.strip(), p.stderr.strip()[:300]
+
+
+          def volume_stats(path):
+              p = run(["ffmpeg", "-hide_banner", "-i", str(path), "-vn",
+                       "-af", "volumedetect", "-f", "null", "-"])
+              m = re.search(r"mean_volume:\s*(-?[\d.]+|-inf) dB", p.stderr)
+              if not m:
+                  return None
+              return float("-inf") if m.group(1) == "-inf" else float(m.group(1))
+
+
+          def longest_silence(path):
+              p = run(["ffmpeg", "-hide_banner", "-i", str(path), "-vn",
+                       "-af", "silencedetect=noise=-40dB:d=0.8", "-f", "null", "-"])
+              durations = [float(x) for x in re.findall(r"silence_duration:\s*([\d.]+)", p.stderr)]
+              # صمت ينتهي مع نهاية الملف لا يظهر له silence_duration، فنفحصه أيضًا
+              starts = re.findall(r"silence_start:\s*([\d.]+)", p.stderr)
+              ends = re.findall(r"silence_end:", p.stderr)
+              open_start = float(starts[-1]) if len(starts) > len(ends) else None
+              return (max(durations) if durations else 0.0), open_start
+
+
+          def black_total(path):
+              p = run(["ffmpeg", "-hide_banner", "-i", str(path), "-an",
+                       "-vf", "blackdetect=d=0.4:pix_th=0.10", "-f", "null", "-"])
+              return sum(float(x) for x in re.findall(r"black_duration:([\d.]+)", p.stderr))
+
+
+          def count_face_frames(path, duration):
+              """يأخذ لقطة كل ثانيتين تقريبًا، ويعدّ اللقطات التي ظهر فيها وجه."""
+              try:
+                  import cv2
+              except Exception as exc:  # opencv غير مثبت
+                  return None, f"opencv not available ({exc})"
+
+              try:
+                  cascade = cv2.CascadeClassifier(
+                      cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+                  if cascade.empty():
+                      return None, "face cascade file could not be loaded"
+              except Exception as exc:
+                  return None, f"face detector unavailable ({exc})"
+              cap = cv2.VideoCapture(str(path))
+              if not cap.isOpened():
+                  return None, "cannot open video for sampling"
+
+              face_frames = 0
+              t = 1.0
+              while t < duration - 0.5:
+                  cap.set(cv2.CAP_PROP_POS_MSEC, t * 1000)
+                  ok, frame = cap.read()
+                  if not ok:
+                      break
+                  gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                  faces = cascade.detectMultiScale(
+                      gray, scaleFactor=1.1, minNeighbors=6, minSize=(90, 90))
+                  if len(faces) > 0:
+                      face_frames += 1
+                  t += 2.0
+              cap.release()
+
+              return face_frames, None
+
+
+          def make_contact_sheet(path, duration, review_dir):
+              """صورة مجمّعة من 8 لقطات لمراجعتك بالعين (عبر ffmpeg)."""
+              if not review_dir:
+                  return
+              try:
+                  out = Path(review_dir)
+                  out.mkdir(parents=True, exist_ok=True)
+                  interval = max(1.0, duration / 8.0)
+                  run(["ffmpeg", "-v", "error", "-y", "-i", str(path),
+                       "-vf", f"fps=1/{interval:.2f},scale=270:480,tile=4x2",
+                       "-frames:v", "1", "-q:v", "3", str(out / "contact_sheet.jpg")])
+              except Exception as exc:
+                  print(f"(could not write contact sheet: {exc})")
+
+
+          def check(path, review_dir=None):
+              """يعيد (نجح؟، قائمة أسطر التقرير)."""
+              report = []
+              failed = []
+
+              def ok(msg):
+                  report.append("PASS  " + msg)
+
+              def bad(msg):
+                  report.append("FAIL  " + msg)
+                  failed.append(msg)
+
+              def note(msg):
+                  report.append("NOTE  " + msg)
+
+              path = Path(path)
+              if not path.is_file() or path.stat().st_size == 0:
+                  return False, ["FAIL  file missing or empty"]
+
+              try:
+                  info = probe(path)
+              except Exception as exc:
+                  return False, [f"FAIL  unreadable video: {exc}"]
+
+              streams = info.get("streams", [])
+              video = next((s for s in streams if s.get("codec_type") == "video"), None)
+              audio = next((s for s in streams if s.get("codec_type") == "audio"), None)
+              duration = float(info.get("format", {}).get("duration", 0) or 0)
+              size_mb = path.stat().st_size / 1e6
+              note(f"size {size_mb:.1f} MB, duration {duration:.1f}s")
+
+              if not video:
+                  bad("no video stream")
+                  return False, report
+
+              width, height = int(video.get("width", 0)), int(video.get("height", 0))
+              if (width, height) == EXPECTED_SIZE:
+                  ok(f"resolution {width}x{height}")
+              else:
+                  bad(f"resolution {width}x{height}, expected {EXPECTED_SIZE[0]}x{EXPECTED_SIZE[1]}")
+
+              try:
+                  num, den = video.get("avg_frame_rate", "0/1").split("/")
+                  fps = float(num) / float(den) if float(den) else 0.0
+              except Exception:
+                  fps = 0.0
+              if 23.0 <= fps <= 61.0:
+                  ok(f"frame rate {fps:.1f} fps")
+              else:
+                  bad(f"frame rate {fps:.1f} fps is not valid")
+
+              if MIN_DURATION <= duration <= MAX_DURATION:
+                  ok(f"duration {duration:.1f}s within {MIN_DURATION:.0f}-{MAX_DURATION:.0f}s")
+              else:
+                  bad(f"duration {duration:.1f}s outside {MIN_DURATION:.0f}-{MAX_DURATION:.0f}s")
+
+              complete, err = decode_whole_file(path)
+              if complete:
+                  ok("file decodes completely without errors")
+              else:
+                  bad(f"decode errors: {err}")
+
+              if not audio:
+                  bad("no audio stream")
+              else:
+                  a_dur = float(audio.get("duration", 0) or 0) or duration
+                  if abs(a_dur - duration) <= MAX_AV_DIFF_SECONDS:
+                      ok(f"audio/video length match ({a_dur:.1f}s vs {duration:.1f}s)")
+                  else:
+                      bad(f"audio {a_dur:.1f}s vs video {duration:.1f}s differ too much")
+
+                  mean_db = volume_stats(path)
+                  if mean_db is None or mean_db < MIN_MEAN_VOLUME_DB:
+                      bad(f"audio too quiet or silent (mean volume {mean_db} dB)")
+                  else:
+                      ok(f"audio level fine (mean {mean_db:.1f} dB)")
+
+                  longest, open_start = longest_silence(path)
+                  if longest > MAX_SILENCE_SECONDS:
+                      bad(f"silence of {longest:.1f}s inside the video")
+                  elif open_start is not None and duration - open_start > MAX_SILENCE_SECONDS:
+                      bad(f"silent tail of {duration - open_start:.1f}s at the end")
+                  else:
+                      ok(f"no long silence (longest {longest:.1f}s)")
+
+              black = black_total(path)
+              if black > MAX_BLACK_SECONDS:
+                  bad(f"black screen totals {black:.1f}s")
+              else:
+                  ok(f"no long black screen ({black:.1f}s)")
+
+              make_contact_sheet(path, duration, review_dir)
+              face_frames, face_err = count_face_frames(path, duration)
+              if face_frames is None:
+                  note(f"face check skipped: {face_err}")
+              elif face_frames >= FACE_FRAMES_TO_BLOCK:
+                  bad(f"faces detected in {face_frames} sampled frames (people are not allowed)")
+              elif face_frames == 1:
+                  note("face detected in 1 sampled frame (below block threshold; check the contact sheet)")
+              else:
+                  ok("no faces detected in sampled frames")
+
+              note("subtitle correctness and clip relevance are NOT checked automatically; "
+                   "look at contact_sheet.jpg")
+              return (not failed), report
+
+
+          def main():
+              if len(sys.argv) < 2:
+                  print(__doc__)
+                  return 2
+              review_dir = sys.argv[2] if len(sys.argv) > 2 else None
+              passed, report = check(sys.argv[1], review_dir)
+              print("\n".join(report))
+              print("RESULT:", "PASS" if passed else "FAIL")
+              return 0 if passed else 1
+
+
+          if __name__ == "__main__":
+              sys.exit(main())
+          PYEOF_CHECK_VIDEO
+          cat > mpt_daily/merge_memory.py <<'PYEOF_MERGE_MEMORY'
+          #!/usr/bin/env python3
+          """يدمج ذاكرة هذا التشغيل مع أحدث نسخة من GitHub دون حذف أي سجل.
+
+          الاستعمال:  python mpt_daily/merge_memory.py GENERATED_DIR
+          (يُنفَّذ من جذر المستودع بعد git reset --hard origin/main)
+          """
+          import json
+          import sys
+          from pathlib import Path
+
+          FILES = ("used_content.json", "used_pexels.json")
+
+
+          def load_list(path):
+              if not path.exists():
+                  return []
+              try:
+                  data = json.loads(path.read_text(encoding="utf-8"))
+              except Exception:
+                  print(f"WARNING: could not read {path}; treating as empty")
+                  return []
+              return data if isinstance(data, list) else []
+
+
+          def key(item):
+              try:
+                  return json.dumps(item, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+              except Exception:
+                  return repr(item)
+
+
+          def main():
+              if len(sys.argv) != 2:
+                  print(__doc__)
+                  return 2
+              generated_dir = Path(sys.argv[1])
+              for name in FILES:
+                  generated = generated_dir / name
+                  if not generated.exists():
+                      print(f"{name}: nothing to merge")
+                      continue
+                  remote = load_list(Path(name))
+                  merged, seen = [], set()
+                  for item in remote + load_list(generated):
+                      k = key(item)
+                      if k not in seen:
+                          seen.add(k)
+                          merged.append(item)
+                  Path(name).write_text(json.dumps(merged, ensure_ascii=False, indent=2) + "\n",
+                                        encoding="utf-8")
+                  print(f"{name}: remote {len(remote)} + generated -> {len(merged)} records")
+              return 0
+
+
+          if __name__ == "__main__":
+              sys.exit(main())
+          PYEOF_MERGE_MEMORY
+          cat > mpt_daily/requirements.txt <<'EOF_REQUIREMENTS'
+          google-api-python-client
+          google-auth
+          google-auth-httplib2
+          opencv-python-headless
+          numpy
+          EOF_REQUIREMENTS
+          # قائمة المواضيع: تُنشأ فقط إذا لم يكن لديك ملف mpt_daily/topics.json في المستودع
+          if [ ! -f mpt_daily/topics.json ]; then
+          cat > mpt_daily/topics.json <<'EOF_TOPICS'
+          [
+            {
+              "id": "valve-001",
+              "title": "كيف يعمل صمام المحرك؟",
+              "script": "تعمل صمامات المحرك على تنظيم دخول الهواء وخروج غازات العادم من الأسطوانات. في شوط السحب، يفتح صمام السحب ويدخل الهواء إلى الأسطوانة. ثم يُغلق الصمام أثناء شوطَي الضغط والقدرة. وبعد انتهاء الاحتراق، يفتح صمام العادم خلال شوط العادم، فيدفع المكبس الغازات المحترقة إلى خارج الأسطوانة. ويتحكم عمود الكامات في توقيت فتح الصمامات وإغلاقها، لضمان عمل المحرك بكفاءة.",
+              "terms": ["engine valve", "car engine cylinder head", "engine camshaft", "engine piston"]
+            },
+            {
+              "id": "piston-rings-002",
+              "title": "لماذا يحيط بالمكبس حلقات معدنية؟",
+              "script": "يتحرك المكبس صعودًا وهبوطًا داخل الأسطوانة آلاف المرات في الدقيقة. وتحيط به عادة ثلاث حلقات، حلقتان للضغط وحلقة للزيت. حلقات الضغط تمنع تسرب الغازات أثناء الاحتراق، وحلقة الزيت تكشط الزيت الزائد عن جدار الأسطوانة. وعندما تبلى هذه الحلقات يزداد استهلاك الزيت، وقد يظهر دخان أزرق من العادم.",
+              "terms": ["engine piston rings", "car engine piston", "engine cylinder", "engine parts close up"]
+            },
+            {
+              "id": "four-stroke-003",
+              "title": "كيف يعمل المحرك رباعي الأشواط؟",
+              "script": "يعمل محرك البنزين المعتاد على أربعة أشواط. في شوط السحب يدخل خليط الهواء والوقود. في شوط الضغط يضغطه المكبس. في شوط القدرة تشعل الشمعة الخليط، فيدفع الاحتراق المكبس إلى الأسفل. وفي شوط العادم تخرج الغازات المحترقة. ولا تنتج الأسطوانة قدرة إلا في شوط واحد من كل أربعة، وتتولى الأسطوانات الأخرى والحدافة إكمال الحركة بسلاسة.",
+              "terms": ["car engine animation", "engine pistons moving", "engine cylinder", "engine crankshaft"]
+            },
+            {
+              "id": "spark-plug-004",
+              "title": "كيف تشعل شمعة الإشعال الوقود؟",
+              "script": "تنتج الشمعة شرارة كهربائية بين قطبين في اللحظة المناسبة، لإشعال خليط الهواء والوقود المضغوط. ويصل إليها من ملف الإشعال جهد عالٍ يبلغ عشرات الآلاف من الفولتات. والمسافة الصغيرة بين القطبين يجب أن تكون مضبوطة بدقة. وإذا تراكمت الرواسب على الشمعة أو بلي القطب ضعفت الشرارة، فيظهر اهتزاز في المحرك ويزداد استهلاك الوقود.",
+              "terms": ["spark plug", "car spark plugs engine", "engine ignition coil", "engine close up"]
+            },
+            {
+              "id": "turbo-005",
+              "title": "كيف يزيد الشاحن التوربيني قدرة المحرك؟",
+              "script": "يستفيد الشاحن التوربيني من غازات العادم التي كانت ستضيع. تدير هذه الغازات توربينًا يدور بسرعات هائلة، وهو متصل على المحور نفسه بضاغط يدفع هواءً أكثر إلى المحرك. وكلما دخل هواء أكثر أمكن حقن وقود أكثر، فتزداد القدرة دون زيادة حجم المحرك. ويعمل التوربين في حرارة عالية جدًا، ولذلك يحتاج إلى زيت نظيف للتزييت والتبريد.",
+              "terms": ["turbocharger", "car turbo engine", "turbine engine close up", "engine exhaust manifold"]
+            },
+            {
+              "id": "thermostat-006",
+              "title": "ما وظيفة منظم الحرارة في المحرك؟",
+              "script": "يعمل منظم الحرارة كصمام يفتح ويغلق بحسب حرارة سائل التبريد. عند بدء التشغيل يبقى مغلقًا ليسخن المحرك بسرعة. وحين تصل الحرارة إلى نحو تسعين درجة مئوية تقريبًا يبدأ بالفتح، فيمر السائل إلى المبرد. ولو علق مغلقًا ارتفعت الحرارة بسرعة وقد يتضرر المحرك، ولو علق مفتوحًا بقي المحرك باردًا وزاد استهلاك الوقود.",
+              "terms": ["car radiator", "engine cooling system", "car coolant", "engine thermostat"]
+            },
+            {
+              "id": "oil-pump-007",
+              "title": "لماذا يحتاج المحرك إلى ضغط الزيت؟",
+              "script": "تسحب مضخة الزيت الزيت من الحوض، وتدفعه عبر المرشح إلى مجارٍ صغيرة داخل المحرك. يشكل الزيت طبقة رقيقة بين الأجزاء المعدنية المتحركة، فيمنع احتكاكها المباشر. ولا تكفي كمية الزيت وحدها، بل يجب أن يكون ضغطه مناسبًا. ولهذا يضيء مصباح ضغط الزيت عندما ينخفض الضغط، وعندها يجب إيقاف المحرك فورًا لتجنب تلف المحامل.",
+              "terms": ["engine oil", "car engine oil change", "engine oil filter", "engine lubrication"]
+            },
+            {
+              "id": "timing-belt-008",
+              "title": "ماذا يحدث إذا انقطع سير التوقيت؟",
+              "script": "يربط سير التوقيت، أو سلسلته، بين عمود المرفق وعمود الكامات. وبذلك تفتح الصمامات وتغلق في اللحظة الصحيحة بالنسبة لحركة المكابس. وفي كثير من المحركات، إذا انقطع السير اصطدمت الصمامات بالمكابس وحدث ضرر جسيم. ولذلك تحدد الشركات المصنعة مسافة لاستبداله، ولا يُنصح بتأخيرها.",
+              "terms": ["timing belt", "engine timing chain", "engine camshaft", "car engine belt"]
+            },
+            {
+              "id": "disc-brake-009",
+              "title": "كيف تعمل الفرامل القرصية؟",
+              "script": "عند الضغط على دواسة الفرامل ينتقل ضغط السائل الهيدروليكي إلى الملقط، فيدفع قطع الاحتكاك لتضغط على قرص يدور مع العجلة. فيتحول جزء كبير من طاقة حركة السيارة إلى حرارة بسبب الاحتكاك، وتبطؤ السيارة. ولهذا تحتاج الفرامل إلى تبريد جيد. وقد يضعف مفعولها إذا سخنت أكثر من اللازم، أو إذا امتص سائل الفرامل رطوبة مع الزمن.",
+              "terms": ["brake disc", "car brake caliper", "brake pads", "wheel brake rotor"]
+            },
+            {
+              "id": "abs-010",
+              "title": "كيف يمنع نظام ABS انغلاق العجلات؟",
+              "script": "عند الفرملة القوية قد تتوقف العجلة عن الدوران وتنزلق، فتفقد السيارة القدرة على التوجيه. تقيس حساسات سرعة العجلات هذا الانزلاق، وتأمر وحدة التحكم بتخفيف ضغط الفرامل عن العجلة ثم إعادته عدة مرات في الثانية. ولذلك تشعر باهتزاز في الدواسة، وهذا طبيعي، ومعناه أن النظام يعمل.",
+              "terms": ["abs brake system", "brake caliper", "car wheel hub sensor", "brake disc"]
+            },
+            {
+              "id": "clutch-011",
+              "title": "كيف يعمل قابض السيارة؟",
+              "script": "يصل القابض بين المحرك وعلبة السرعات بواسطة قرص احتكاك. عندما ترفع قدمك عن الدواسة تضغط زنبركات قوية القرص على حدافة المحرك، فتنتقل الحركة إلى العلبة. وعندما تضغط الدواسة ينفصل القرص، فيمكن تغيير السرعة بسلاسة. ويبلى القرص مع الاستعمال، ومن أهم أسباب تلفه إبقاء القدم على الدواسة أو الانطلاق بعنف.",
+              "terms": ["car clutch", "clutch disc", "manual transmission", "flywheel engine"]
+            },
+            {
+              "id": "torque-converter-012",
+              "title": "ما هو محول العزم في الناقل الأوتوماتيكي؟",
+              "script": "في ناقل الحركة الأوتوماتيكي لا يوجد قابض احتكاك عادي بين المحرك والعلبة. بدلًا من ذلك يوجد محول عزم مملوء بسائل. تدفع مروحة يديرها المحرك السائل نحو مروحة أخرى متصلة بالعلبة، فتدور. وهذا يسمح للسيارة بالتوقف والمحرك يعمل، كما يضاعف العزم عند الانطلاق.",
+              "terms": ["automatic transmission", "torque converter", "car gearbox", "transmission gears"]
+            },
+            {
+              "id": "differential-013",
+              "title": "لماذا تحتاج السيارة إلى الترس التفاضلي؟",
+              "script": "عند الانعطاف تقطع العجلة الخارجية مسافة أطول من العجلة الداخلية، فتحتاج إلى أن تدور أسرع منها. يحل الترس التفاضلي هذه المشكلة بمجموعة تروس صغيرة، تسمح لكل عجلة بالدوران بسرعة مختلفة مع بقاء القدرة منقولة إليهما. ولولاه لانزلقت إحدى العجلتين، وتآكلت الإطارات بسرعة، وصعب توجيه السيارة.",
+              "terms": ["car differential", "differential gears", "car axle", "transmission gears"]
+            },
+            {
+              "id": "shock-absorber-014",
+              "title": "ما وظيفة ممتص الصدمات حقًا؟",
+              "script": "لا يحمل ممتص الصدمات وزن السيارة، فهذه مهمة الزنبرك. مهمته تخميد حركة الزنبرك، لأنه لو ترك وحده لاهتزت السيارة صعودًا وهبوطًا بعد كل مطب. وفي داخله مكبس يتحرك في زيت ويمر عبر فتحات ضيقة، فتتحول طاقة الحركة إلى حرارة. وعندما يضعف الممتص يطول مسافة التوقف، وتفقد العجلات تماسكها بالأرض.",
+              "terms": ["car shock absorber", "car suspension spring", "suspension system", "car coilover"]
+            },
+            {
+              "id": "electric-steering-015",
+              "title": "كيف يعمل التوجيه المساعد كهربائيًا؟",
+              "script": "في التوجيه المعزز كهربائيًا يقيس حساس في عمود المقود مقدار الجهد الذي تبذله في تدوير المقود. ثم تحسب وحدة التحكم المساعدة المطلوبة، وتشغل محركًا كهربائيًا يضيف قوة إلى جهاز التوجيه. وتقل المساعدة عند السرعات العالية ليبقى المقود أثقل قليلًا، فتزداد الثقة. وهو يوفر الوقود لأنه لا يعمل إلا عند الحاجة.",
+              "terms": ["steering rack", "car steering system", "steering column", "car electric motor"]
+            },
+            {
+              "id": "oxygen-sensor-016",
+              "title": "ماذا يقيس حساس الأكسجين في العادم؟",
+              "script": "يوضع حساس الأكسجين في مجرى العادم، ويقيس كمية الأكسجين غير المحترق في الغازات. تستخدم وحدة التحكم هذه القراءة لمعرفة هل الخليط غني بالوقود أم فقير، فتعدل كمية الوقود المحقون باستمرار. والهدف هو الإبقاء على النسبة المثالية للاحتراق. وإذا تلف الحساس زاد استهلاك الوقود وارتفع التلوث، وقد يضيء مصباح المحرك.",
+              "terms": ["oxygen sensor car", "car exhaust system", "car sensor engine", "exhaust pipe"]
+            },
+            {
+              "id": "catalytic-017",
+              "title": "كيف ينقّي المحول الحفاز غازات العادم؟",
+              "script": "يحتوي المحول الحفاز على قرص خزفي ذي خلايا صغيرة، مغطى بمعادن نفيسة مثل البلاتين والبلاديوم والروديوم. تساعد هذه المعادن على تفاعلات كيميائية تحول غازات ضارة، كأول أكسيد الكربون وأكاسيد النيتروجين والهيدروكربونات، إلى ثاني أكسيد الكربون وبخار الماء والنيتروجين. ولا يعمل جيدًا إلا إذا سخن، ويتلف إذا وصل إليه وقود غير محترق.",
+              "terms": ["catalytic converter", "car exhaust system", "exhaust pipe", "car muffler"]
+            },
+            {
+              "id": "injector-018",
+              "title": "كيف يرش حاقن الوقود البنزين؟",
+              "script": "الحاقن صمام كهرومغناطيسي يرش الوقود على شكل رذاذ دقيق. تتحكم وحدة التحكم في مدة فتحه بأجزاء من الثانية، وكلما طالت المدة زادت كمية الوقود. والرذاذ الناعم يختلط بالهواء بصورة أفضل، فيحترق احتراقًا أكمل. وإذا انسدت فتحات الحاقن بالرواسب تشوه الرش، فيظهر اهتزاز في المحرك وضعف في الأداء.",
+              "terms": ["fuel injector", "car fuel injection", "engine fuel rail", "engine intake manifold"]
+            },
+            {
+              "id": "alternator-019",
+              "title": "كيف يولد المولد الكهرباء في السيارة؟",
+              "script": "بعد تشغيل المحرك يتولى المولد تزويد السيارة بالكهرباء وشحن البطارية. يدور مغناطيس كهربائي داخل ملفات ثابتة، فيتولد تيار متناوب. ثم يحوله مقوّم إلى تيار مستمر مناسب للبطارية. وينظم منظم الجهد الناتج حول أربعة عشر فولتًا تقريبًا. وإذا ضعف المولد ضعفت الأضواء وفرغت البطارية رغم أن المحرك يعمل.",
+              "terms": ["car alternator", "alternator engine", "car battery", "engine belt pulley"]
+            },
+            {
+              "id": "starter-020",
+              "title": "كيف يدير محرك البدء المحرك؟",
+              "script": "محرك بدء التشغيل محرك كهربائي قوي يسحب تيارًا كبيرًا من البطارية. عند إدارة المفتاح يدفع مغناطيس كهربائي ترسًا صغيرًا ليتشابك مع أسنان الحدافة، ثم يدير المحرك الكهربائي المحرك حتى يبدأ بالاشتعال بنفسه. بعدها ينسحب الترس تلقائيًا. وإذا سمعت نقرة فقط دون دوران، فغالبًا البطارية ضعيفة أو التوصيلات مفكوكة.",
+              "terms": ["car starter motor", "starter motor engine", "car battery terminals", "engine flywheel"]
+            },
+            {
+              "id": "battery-021",
+              "title": "كيف تخزن بطارية السيارة الكهرباء؟",
+              "script": "بطارية السيارة التقليدية من نوع الرصاص الحمضي، وتتكون من صفائح رصاص مغمورة في محلول حمض الكبريتيك. عند التفريغ يحدث تفاعل كيميائي ينتج تيارًا كهربائيًا، وعند الشحن يعكس المولد هذا التفاعل. وتقصر عمرها الحرارة الشديدة والتفريغ العميق المتكرر، ولذلك لا يحسن ترك الأضواء مضاءة والمحرك متوقف.",
+              "terms": ["car battery", "car battery terminals", "battery engine bay", "car battery charger"]
+            },
+            {
+              "id": "egr-022",
+              "title": "ما فائدة صمام إعادة تدوير العادم؟",
+              "script": "يعيد هذا الصمام جزءًا قليلًا من غازات العادم إلى مجرى الهواء الداخل إلى المحرك. هذه الغازات لا تحترق مرة أخرى، لكنها تخفض حرارة الاحتراق. وارتفاع الحرارة هو السبب الرئيسي لتكوّن أكاسيد النيتروجين، لذلك يقلل الصمام هذه الانبعاثات. لكن الكربون قد يتراكم عليه ويسده، فيسبب اهتزازًا أو توقفًا للمحرك.",
+              "terms": ["engine intake manifold", "car engine exhaust", "engine parts", "car engine close up"]
+            },
+            {
+              "id": "intercooler-023",
+              "title": "لماذا نبرّد هواء الشاحن قبل دخوله المحرك؟",
+              "script": "عندما يضغط الشاحن الهواء ترتفع حرارته، والهواء الساخن أقل كثافة ويحتوي أكسجينًا أقل. لذلك يمر الهواء المضغوط عبر المبرد الوسيط، وهو يشبه مبردًا صغيرًا، فيبرد قبل دخوله المحرك. فيصبح أكثر كثافة، فتزداد القدرة وتقل احتمالات الفرقعة. وإذا تسرب الهواء من المبرد ضعف أداء السيارة، وقد تسمع صفيرًا.",
+              "terms": ["car intercooler", "turbo engine", "car radiator", "engine air intake"]
+            },
+            {
+              "id": "crankshaft-024",
+              "title": "كيف تتحول حركة المكبس إلى دوران؟",
+              "script": "يحول ذراع التوصيل الحركة الخطية للمكبس إلى حركة دائرية في عمود المرفق. يرتبط طرفه الأول بالمكبس، وطرفه الآخر بنتوء في العمود يسمى ذراع المرفق. وبين الذراع والعمود محامل رقيقة يغمرها الزيت. وهذه الأجزاء تتحمل أحمالًا هائلة مع كل شوط. لذلك يؤدي نقص الزيت إلى انصهار المحامل وصوت طرق عالٍ.",
+              "terms": ["engine crankshaft", "connecting rod piston", "engine pistons", "engine block"]
+            },
+            {
+              "id": "flywheel-025",
+              "title": "ما دور الحدافة في المحرك؟",
+              "script": "تثبت الحدافة في نهاية عمود المرفق، وهي قرص ثقيل يخزن طاقة الدوران. فالمحرك لا يعطي قدرة إلا في أشواط القدرة، وبين كل شوطين تنقطع القوة. فتتولى الحدافة، بقصورها الذاتي، تعويض هذا الانقطاع وتهدئة اهتزاز الدوران. كما تحمل أسنانًا يتصل بها محرك بدء التشغيل، ويتصل بها قرص القابض.",
+              "terms": ["engine flywheel", "clutch flywheel", "engine crankshaft", "car clutch"]
+            },
+            {
+              "id": "cv-joint-026",
+              "title": "كيف تنقل وصلة السرعة الثابتة الحركة للعجلة؟",
+              "script": "في السيارات ذات الدفع الأمامي يجب أن تصل الحركة إلى عجلات تتحرك لأعلى وأسفل وتنعطف في الوقت نفسه. تحل هذه المشكلة وصلة السرعة الثابتة، وهي تعمل كمفصل كروي بداخله كرات فولاذية. يغطيها غلاف مطاطي مملوء بالشحم. وإذا تمزق الغلاف تسرب الشحم ودخل الغبار، فتبلى الوصلة، وتسمع طقطقة عند الانعطاف.",
+              "terms": ["cv joint car", "car drive shaft", "car axle", "car wheel hub"]
+            },
+            {
+              "id": "knock-027",
+              "title": "ما هي فرقعة المحرك ولماذا تضره؟",
+              "script": "الفرقعة احتراق غير منضبط في الأسطوانة، إذ يشتعل جزء من الخليط من تلقاء نفسه قبل وصول جبهة اللهب. ينتج عن ذلك موجات ضغط تضرب جدران الأسطوانة وتسبب صوت طرق معدنيًا. وتستخدم المحركات حساس طرق يلتقط هذه الاهتزازات، فتؤخر وحدة التحكم توقيت الشرارة. ويساعد على تجنبها استخدام الوقود ذي الأوكتان المناسب.",
+              "terms": ["engine piston", "car engine cylinder", "engine block", "engine spark plug"]
+            },
+            {
+              "id": "air-filter-028",
+              "title": "لماذا يحتاج المحرك إلى مرشح هواء نظيف؟",
+              "script": "يحتاج المحرك إلى كمية هائلة من الهواء النظيف، ومرشح الهواء يحبس الغبار قبل دخوله. وبعده يقيس حساس تدفق الهواء كمية الهواء الداخلة، فتحسب وحدة التحكم كمية الوقود المناسبة. وإذا اتسخ المرشح اختنق المحرك قليلًا وزاد الاستهلاك. وإذا اتسخ الحساس أعطت وحدة التحكم قراءة خاطئة، فيضطرب الأداء.",
+              "terms": ["car air filter", "engine air intake", "air filter housing", "engine bay"]
+            },
+            {
+              "id": "water-pump-029",
+              "title": "كيف تدفع مضخة الماء سائل التبريد؟",
+              "script": "تدفع مضخة الماء سائل التبريد في مجاريه حول الأسطوانات، ثم إلى المبرد. وتدار عادة بالسير أو بالمحرك، وفيها مروحة ذات ريش. ويمنع ختم صغير تسرب السائل. وإذا تلف هذا الختم ظهرت قطرات من السائل، وقد يسخن المحرك. ولهذا تُستبدل المضخة غالبًا مع سير التوقيت.",
+              "terms": ["car water pump", "engine cooling system", "car radiator", "engine coolant"]
+            },
+            {
+              "id": "diesel-030",
+              "title": "كيف يشتعل الديزل بدون شمعة إشعال؟",
+              "script": "في محرك الديزل لا توجد شمعة إشعال. يضغط المكبس الهواء وحده ضغطًا كبيرًا جدًا، فترتفع حرارته إلى مستوى كافٍ لإشعال الوقود. وعندها يُحقن الديزل في الأسطوانة فيشتعل ذاتيًا. ولهذا يحتاج المحرك إلى هيكل أقوى وأثقل، لكنه يعطي عزمًا كبيرًا وكفاءة أعلى في استهلاك الوقود.",
+              "terms": ["diesel engine", "engine piston", "diesel injector", "engine cylinder head"]
+            }
+          ]
+          EOF_TOPICS
+          else
+            echo "Using mpt_daily/topics.json from the repository"
+          fi
+          ls -l mpt_daily
+
+      - name: Check required secrets
+        env:
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+        run: |
+          echo "Privacy mode: $PRIVACY"
+          [ -n "$PEXELS_API_KEY" ] || { echo "::error::Missing secret PEXELS_API_KEY"; exit 1; }
+          echo "PEXELS_API_KEY: present"
+          if [ "$PRIVACY" != "none" ]; then
+            for name in YOUTUBE_CLIENT_ID YOUTUBE_CLIENT_SECRET YOUTUBE_REFRESH_TOKEN; do
+              if [ -z "${!name}" ]; then echo "::error::Missing secret $name"; exit 1; fi
+              echo "$name: present"
+            done
+          fi
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg git curl imagemagick fonts-noto-core fonts-noto-extra fontconfig
+          fc-cache -f
+
+      - name: Clone official MoneyPrinterTurbo
+        run: |
+          set -euo pipefail
+          # نحاول النسخة v1.3.9، وإن لم توجد نستخدم الفرع الرئيسي.
+          if ! git clone --depth 1 --branch v1.3.9 https://github.com/harry0703/MoneyPrinterTurbo.git "$RUNNER_TEMP/mpt"; then
+            echo "Tag v1.3.9 not found; using default branch."
+            rm -rf "$RUNNER_TEMP/mpt"
+            git clone --depth 1 https://github.com/harry0703/MoneyPrinterTurbo.git "$RUNNER_TEMP/mpt"
+          fi
+          echo "MPT_DIR=$RUNNER_TEMP/mpt" >> "$GITHUB_ENV"
+          ls "$RUNNER_TEMP/mpt"
+
+      - name: Install MoneyPrinterTurbo dependencies
+        run: |
+          set -euo pipefail
+          cd "$MPT_DIR"
+          python -m pip install --upgrade pip uv
+          if uv sync --frozen; then
+            # Store the interpreter path, not the multi-word command "uv run python".
+            if [ ! -x .venv/bin/python ]; then
+              echo "::error::uv sync completed but .venv/bin/python was not created"
+              exit 1
+            fi
+            echo "RUN_PY=$MPT_DIR/.venv/bin/python" >> "$GITHUB_ENV"
+          else
+            echo "uv sync failed; falling back to venv + requirements.txt"
+            python -m venv .venv
+            .venv/bin/pip install -r requirements.txt
+            echo "RUN_PY=$MPT_DIR/.venv/bin/python" >> "$GITHUB_ENV"
+          fi
+
+      - name: Install Arabic shaping support and prepare Arabic font
+        run: |
+          set -euo pipefail
+          cd "$MPT_DIR"
+
+          mkdir -p resource/fonts
+          FONT_SOURCE="$(find /usr/share/fonts -type f -iname 'NotoSansArabic-Regular.ttf' | head -n1)"
+          if [ -z "$FONT_SOURCE" ]; then
+            FONT_SOURCE="$(fc-match -f '%{file}' 'Noto Sans Arabic:style=Regular' | head -n1)"
+          fi
+          if [ -z "$FONT_SOURCE" ] || [ ! -f "$FONT_SOURCE" ]; then
+            echo "::error::Noto Sans Arabic font was not found"
+            exit 1
+          fi
+          cp "$FONT_SOURCE" resource/fonts/NotoSansArabic-Regular.ttf
+          echo "Arabic subtitle font: $FONT_SOURCE"
+
+          # uv-created virtual environments do not necessarily contain pip.
+          # Install into the project's interpreter through uv, without relying on python -m pip.
+          if [ ! -x .venv/bin/python ]; then
+            echo "::error::MoneyPrinterTurbo virtual-environment Python was not found"
+            exit 1
+          fi
+          uv pip install --python .venv/bin/python arabic-reshaper python-bidi
+          .venv/bin/python -c "import arabic_reshaper; from bidi.algorithm import get_display; print('Arabic shaping packages: installed')"
+
+          python - <<'PY_PATCH'
+          from pathlib import Path
+
+          path = Path("app/services/video.py")
+          source = path.read_text(encoding="utf-8")
+
+          import_line = "from PIL import Image, ImageColor, ImageDraw, ImageFont, ImageOps\n"
+          import_patch = import_line + "import arabic_reshaper\nfrom bidi.algorithm import get_display\n"
+          if "import arabic_reshaper" not in source:
+              if source.count(import_line) != 1:
+                  raise SystemExit("Could not safely locate Pillow imports in video.py")
+              source = source.replace(import_line, import_patch, 1)
+
+          helper_anchor = "from app.utils import file_security, logging_utils, utils\n"
+          helper_lines = [
+              "",
+              "",
+              "def _shape_arabic_subtitle_text(text: str) -> str:",
+              "    # Shape Arabic glyphs and apply bidi ordering for subtitle rendering.",
+              '    output_lines = []',
+              '    for line in str(text or "").split("\\n"): ',
+              '        if any("\\u0600" <= char <= "\\u06ff" or "\\ufb50" <= char <= "\\ufdff" or "\\ufe70" <= char <= "\\ufeff" for char in line):',
+              '            line = get_display(arabic_reshaper.reshape(line))',
+              '        output_lines.append(line)',
+              '    return "\\n".join(output_lines)',
+              "",
+          ]
+          helper = helper_anchor + "\n".join(helper_lines) + "\n"
+          if "def _shape_arabic_subtitle_text" not in source:
+              if source.count(helper_anchor) != 1:
+                  raise SystemExit("Could not safely locate helper insertion point")
+              source = source.replace(helper_anchor, helper, 1)
+
+          # Shape Arabic exactly once, at the final TextClip rendering boundary.
+          # Do not reshape wrapped_txt: the previous workflow shaped twice and
+          # produced reversed/disconnected glyphs.
+          old_factory = '''        def make_textclip(text):
+                      return TextClip(
+                          text=text,
+          '''
+          new_factory = '''        def make_textclip(text):
+                      return TextClip(
+                          text=_shape_arabic_subtitle_text(text),
+          '''
+          if "text=_shape_arabic_subtitle_text(text)" not in source:
+              if source.count(old_factory) != 1:
+                  raise SystemExit("Could not safely patch subtitle clip factory")
+              source = source.replace(old_factory, new_factory, 1)
+
+          if source.count("text=_shape_arabic_subtitle_text(text)") != 1:
+              raise SystemExit("Expected exactly one Arabic shaping call at final rendering")
+          if "wrapped_txt = _shape_arabic_subtitle_text(wrapped_txt)" in source:
+              raise SystemExit("Unexpected early Arabic shaping call detected")
+
+          path.write_text(source, encoding="utf-8")
+          print("Arabic subtitle shaping patch applied")
+          PY_PATCH
+
+          "$RUN_PY" - <<'PY_CHECK'
+          from pathlib import Path
+          import unicodedata
+          import arabic_reshaper
+          from bidi.algorithm import get_display
+          from PIL import ImageFont
+
+          font_path = Path("resource/fonts/NotoSansArabic-Regular.ttf")
+          if not font_path.is_file():
+              raise SystemExit("Arabic font file is missing")
+          sample = "كيف يعمل صمام المحرك وما دوره في دخول الهواء وخروج العادم؟"
+          rendered = get_display(arabic_reshaper.reshape(sample))
+          font = ImageFont.truetype(str(font_path), 64)
+          missing = font.getmask("\U0010ffff")
+          missing_signature = (missing.size, missing.getbbox(), bytes(missing))
+          for char in rendered:
+              if unicodedata.category(char)[0] not in {"L", "N"}:
+                  continue
+              mask = font.getmask(char)
+              signature = (mask.size, mask.getbbox(), bytes(mask))
+              if mask.getbbox() is None or signature == missing_signature:
+                  raise SystemExit(f"Arabic font is missing glyph: U+{ord(char):04X}")
+          print("Arabic font and shaping preflight: PASS")
+          print("Rendered sample (visual order):", rendered)
+          PY_CHECK
+
+      - name: Configure MoneyPrinterTurbo
+        env:
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+        run: |
+          set -euo pipefail
+          cd "$MPT_DIR"
+          cp config.example.toml config.toml
+
+          python - <<'PY'
+          import os, re, tomllib
+          from pathlib import Path
+
+          path = Path("config.toml")
+          text = path.read_text(encoding="utf-8")
+
+          settings = {
+              "video_source": '"pexels"',
+              "pexels_api_keys": '["' + os.environ["PEXELS_API_KEY"] + '"]',
+              "subtitle_provider": '"edge"',
+          }
+
+          for key, value in settings.items():
+              pattern = re.compile(r"^[ \t]*#?[ \t]*" + re.escape(key) + r"[ \t]*=.*$", re.M)
+              line = f"{key} = {value}"
+              if pattern.search(text):
+                  text = pattern.sub(lambda m: line, text, count=1)
+              elif re.search(r"^\[app\][ \t]*$", text, re.M):
+                  text = re.sub(r"^\[app\][ \t]*$", lambda m: "[app]\n" + line, text, count=1, flags=re.M)
+              else:
+                  text += "\n[app]\n" + line + "\n"
+
+          path.write_text(text, encoding="utf-8")
+
+          app = tomllib.loads(text).get("app", {})
+          print("video_source:", app.get("video_source"))
+          print("subtitle_provider:", app.get("subtitle_provider"))
+          if not app.get("pexels_api_keys"):
+              raise SystemExit("Configuration check failed: no Pexels key loaded")
+          print("pexels_api_keys: present (value hidden)")
+          PY
+
+      - name: Install daily-pipeline requirements
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r mpt_daily/requirements.txt
+
+      - name: Produce, check and upload the Short
+        env:
+          FORCE_TOPIC_ID: ${{ github.event.inputs.topic_id }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+        run: |
+          python mpt_daily/run_daily.py
+
+      - name: Save memory safely
+        if: ${{ success() && env.PRIVACY != 'none' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/generated-memory"
+          cp used_content.json used_pexels.json "$RUNNER_TEMP/generated-memory/"
+          cp mpt_daily/merge_memory.py "$RUNNER_TEMP/merge_memory.py"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          for attempt in 1 2 3 4 5; do
+            echo "Memory sync attempt $attempt / 5"
+            git fetch origin main
+            git reset --hard origin/main
+            python "$RUNNER_TEMP/merge_memory.py" "$RUNNER_TEMP/generated-memory"
+            git add used_content.json used_pexels.json
+            if git diff --cached --quiet; then
+              echo "No memory changes."
+              exit 0
+            fi
+            git commit -m "Update Shorts content memory (MPT)"
+            if git push origin HEAD:main; then
+              echo "Memory pushed."
+              exit 0
+            fi
+            echo "Push rejected; retrying with the newest remote state."
+            sleep 3
+          done
+          echo "::error::Could not push memory after 5 attempts. The video WAS uploaded; add its topic to used_content.json manually to avoid a duplicate."
+          exit 1
+
+      - name: Upload review files (video + contact sheet)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mpt-daily-review-${{ github.run_number }}
+          path: |
+            output/short.mp4
+            review/**
+          if-no-files-found: ignore
+          retention-days: 3
