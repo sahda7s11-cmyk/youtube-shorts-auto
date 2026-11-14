@@ -1,8 +1,8 @@
 name: Daily MPT Short
 
-# ملف واحد يحتوي كل شيء (السكربتات والمواضيع مدمجة). لا تحتاج مجلد mpt_daily.
-# النظام الجديد: MoneyPrinterTurbo + فحص جودة + رفع YouTube.
-# عطّل workflow القديم (Daily YouTube Short) من تبويب Actions حتى لا ينشر الاثنان معًا.
+# One file contains everything (scripts and topics are embedded as base64). No mpt_daily folder needed.
+# New system: MoneyPrinterTurbo + quality check + YouTube upload.
+# Disable the old workflow (Daily YouTube Short) in the Actions tab so both do not publish.
 
 on:
   schedule:
@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       privacy:
-        description: "none = تجربة بدون رفع | private | unlisted | public"
+        description: "none = test without upload | private | unlisted | public"
         type: choice
         default: none
         options:
@@ -19,7 +19,7 @@ on:
           - unlisted
           - public
       topic_id:
-        description: "اختياري: رقم موضوع محدد من topics.json (مثل valve-001)"
+        description: "Optional: a specific topic id from topics.json (for example valve-001)"
         required: false
         default: ""
 
@@ -31,7 +31,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  # التشغيل المجدول يستخدم المتغير YT_PRIVACY إن وُجد (Settings > Variables)، وإلا private.
+  # Scheduled runs use the repository variable YT_PRIVACY if set (Settings > Variables), else private.
   PRIVACY: ${{ github.event.inputs.privacy || vars.YT_PRIVACY || 'private' }}
 
 jobs:
@@ -54,840 +54,841 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p mpt_daily
-          cat > mpt_daily/run_daily.py <<'PYEOF_RUN_DAILY'
-          #!/usr/bin/env python3
-          """المنسّق اليومي للنظام الجديد.
-
-          الترتيب:
-            1. اختيار موضوع لم يُنتج من قبل (من topics.json مقابل used_content.json)
-            2. إنتاج الفيديو بواسطة MoneyPrinterTurbo (حتى 3 محاولات)
-            3. فحص الجودة (check_video.py) - إذا فشل لا يُنشر شيء
-            4. الرفع إلى YouTube حسب PRIVACY: private | unlisted | public | none
-               (none = تجربة بدون رفع ولا حفظ ذاكرة)
-            5. حفظ الموضوع ومعرّف الفيديو في used_content.json
-               وحفظ معرّفات مقاطع Pexels في used_pexels.json
-
-          متغيرات البيئة المطلوبة:
-            MPT_DIR, RUN_PY            (يضبطها الـ workflow)
-            PRIVACY                    (الافتراضي private)
-            FORCE_TOPIC_ID             (اختياري: لتجربة موضوع محدد)
-            YOUTUBE_CLIENT_ID, YOUTUBE_CLIENT_SECRET, YOUTUBE_REFRESH_TOKEN
-                                       (مطلوبة فقط عند الرفع)
-          لا يطبع هذا السكربت أي قيمة سرية.
-          """
-          import json
-          import os
-          import re
-          import shutil
-          import subprocess
-          import sys
-          import time
-          from pathlib import Path
-
-          HERE = Path(__file__).resolve().parent
-          ROOT = HERE.parent
-          sys.path.insert(0, str(HERE))
-          import check_video  # noqa: E402
-
-          TOPICS_FILE = HERE / "topics.json"
-          USED_CONTENT = ROOT / "used_content.json"
-          USED_PEXELS = ROOT / "used_pexels.json"
-          REVIEW_DIR = ROOT / "review"
-          OUTPUT_DIR = ROOT / "output"
-          MAX_ATTEMPTS = 3
-          GENERATION_TIMEOUT = 40 * 60
-          VALID_PRIVACY = ("private", "unlisted", "public", "none")
-
-          REQUIRED_CLI_FLAGS = [
-              "--video-script", "--video-terms", "--video-language", "--voice-name",
-              "--font-name", "--subtitle-display-mode", "--video-aspect",
-              "--video-count", "--bgm-type", "--bgm-volume",
-          ]
-
-
-          # ----------------------------------------------------------------- helpers
-          def norm(text):
-              text = re.sub(r"[\u064B-\u065F\u0670\u0640]", "", str(text or ""))  # التشكيل والتطويل
-              text = re.sub(r"[^\w\s]", " ", text, flags=re.UNICODE)
-              return re.sub(r"\s+", " ", text).strip().lower()
-
-
-          def load_list(path):
-              if not path.exists():
-                  return []
-              try:
-                  data = json.loads(path.read_text(encoding="utf-8"))
-              except Exception:
-                  print(f"WARNING: could not read {path.name}; treating as empty")
-                  return []
-              return data if isinstance(data, list) else []
-
-
-          def write_json_atomic(path, data):
-              tmp = path.with_suffix(path.suffix + ".tmp")
-              tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-              tmp.replace(path)
-
-
-          # ------------------------------------------------------------------ topics
-          def pick_topic(topics, used_records, forced_id=None):
-              if forced_id:
-                  for t in topics:
-                      if t["id"] == forced_id:
-                          print(f"FORCE_TOPIC_ID={forced_id}: skipping the used-topic check")
-                          return t
-                  raise SystemExit(f"FORCE_TOPIC_ID '{forced_id}' not found in topics.json")
-
-              used_ids = {r.get("mpt_id") for r in used_records if isinstance(r, dict)}
-              used_titles = {norm(r.get("title")) for r in used_records if isinstance(r, dict)}
-              for t in topics:
-                  if t["id"] in used_ids or norm(t["title"]) in used_titles:
-                      continue
-                  return t
-              return None
-
-
-          def validate_topics(topics):
-              seen = set()
-              for i, t in enumerate(topics, 1):
-                  for key in ("id", "title", "script", "terms"):
-                      if not t.get(key):
-                          raise SystemExit(f"topics.json: topic #{i} has empty '{key}'")
-                  if t["id"] in seen:
-                      raise SystemExit(f"topics.json: duplicate id {t['id']}")
-                  seen.add(t["id"])
-                  if re.search(r"[A-Za-z]", t["script"]):
-                      raise SystemExit(f"topics.json: script of {t['id']} contains Latin letters")
-
-
-          # --------------------------------------------------------------- generation
-          def mpt_python():
-              return os.environ["RUN_PY"]
-
-
-          def mpt_dir():
-              return Path(os.environ["MPT_DIR"])
-
-
-          def check_cli_supports_flags():
-              p = subprocess.run([mpt_python(), "cli.py", "--help"], cwd=mpt_dir(),
-                                 capture_output=True, text=True, errors="replace")
-              help_text = p.stdout + p.stderr
-              missing = [f for f in REQUIRED_CLI_FLAGS if f not in help_text]
-              if missing:
-                  raise SystemExit("MoneyPrinterTurbo CLI is missing options: " + ", ".join(missing))
-
-
-          def build_cli_args(topic):
-              return [
-                  "cli.py",
-                  "--video-script", topic["script"],
-                  "--video-terms", ",".join(topic["terms"]),
-                  "--video-language", "ar-SA",
-                  "--voice-name", "ar-SA-HamedNeural",
-                  "--font-name", "NotoSansArabic-Regular.ttf",
-                  "--subtitle-display-mode", "sentence",
-                  "--video-aspect", "9:16",
-                  "--video-count", "1",
-                  "--bgm-type", "none",
-                  "--bgm-volume", "0",
-              ]
-
-
-          def generate_video(topic):
-              """يشغّل MoneyPrinterTurbo ويعيد (مسار الفيديو، نص السجل)."""
-              started = time.time()
-              proc = subprocess.Popen([mpt_python()] + build_cli_args(topic), cwd=mpt_dir(),
-                                      stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                      text=True, errors="replace")
-              lines = []
-              deadline = started + GENERATION_TIMEOUT
-              try:
-                  for line in proc.stdout:
-                      print(line, end="")
-                      lines.append(line)
-                      if time.time() > deadline:
-                          proc.kill()
-                          raise RuntimeError("generation timed out")
-              finally:
-                  proc.wait()
-              if proc.returncode != 0:
-                  raise RuntimeError(f"cli.py exited with code {proc.returncode}")
-
-              candidates = [p for p in (mpt_dir() / "storage" / "tasks").glob("*/final-*.mp4")
-                            if p.stat().st_mtime >= started - 2]
-              if not candidates:
-                  raise RuntimeError("no final-*.mp4 was produced")
-              return max(candidates, key=lambda p: p.stat().st_mtime), "".join(lines)
-
-
-          def parse_asset_ids(log_text):
-              return list(dict.fromkeys(re.findall(r"asset_id=(\d+)", log_text)))
-
-
-          # ------------------------------------------------------------------- upload
-          def upload_video(video_path, topic, privacy):
-              from google.auth.exceptions import RefreshError
-              from google.auth.transport.requests import Request
-              from google.oauth2.credentials import Credentials
-              from googleapiclient.discovery import build
-              from googleapiclient.errors import HttpError
-              from googleapiclient.http import MediaFileUpload
-
-              creds = Credentials(
-                  token=None,
-                  refresh_token=os.environ["YOUTUBE_REFRESH_TOKEN"],
-                  token_uri="https://oauth2.googleapis.com/token",
-                  client_id=os.environ["YOUTUBE_CLIENT_ID"],
-                  client_secret=os.environ["YOUTUBE_CLIENT_SECRET"],
-                  scopes=["https://www.googleapis.com/auth/youtube.upload"],
-              )
-              try:
-                  creds.refresh(Request())
-              except RefreshError as exc:
-                  raise RuntimeError("YouTube OAuth refresh failed: " + str(exc)[:200])
-              print("OAuth refresh: OK")
-
-              youtube = build("youtube", "v3", credentials=creds, cache_discovery=False)
-              title = (topic["title"] + " #shorts")[:100]
-              description = (topic["script"] + "\n\n#سيارات #ميكانيكا_السيارات #هندسة #shorts")[:4900]
-              body = {
-                  "snippet": {
-                      "title": title,
-                      "description": description,
-                      "tags": ["ميكانيكا السيارات", "محرك", "هندسة", "سيارات", "shorts"],
-                      "categoryId": "2",  # Autos & Vehicles
-                      "defaultLanguage": "ar",
-                      "defaultAudioLanguage": "ar",
-                  },
-                  "status": {"privacyStatus": privacy, "selfDeclaredMadeForKids": False},
-              }
-              media = MediaFileUpload(str(video_path), mimetype="video/mp4",
-                                      chunksize=8 * 1024 * 1024, resumable=True)
-              request = youtube.videos().insert(part="snippet,status", body=body, media_body=media)
-
-              response, failures = None, 0
-              while response is None:
-                  try:
-                      status, response = request.next_chunk()
-                      if status:
-                          print(f"Upload progress: {int(status.progress() * 100)}%")
-                  except HttpError as exc:
-                      if exc.resp.status in (500, 502, 503, 504) and failures < 5:
-                          failures += 1
-                          time.sleep(2 ** failures)
-                          continue
-                      raise RuntimeError(f"YouTube upload failed: HTTP {exc.resp.status}: {str(exc)[:200]}")
-
-              video_id = response.get("id")
-              returned = (response.get("status") or {}).get("privacyStatus")
-              if not video_id:
-                  raise RuntimeError("upload finished but no video id was returned")
-              print(f"UPLOAD OK: https://youtu.be/{video_id}  privacy={returned}")
-              if returned != privacy:
-                  print(f"WARNING: requested privacy '{privacy}' but YouTube reports '{returned}'")
-              return video_id
-
-
-          # ------------------------------------------------------------------- memory
-          def remember(topic, video_id, asset_ids):
-              used = load_list(USED_CONTENT)
-              used.append({
-                  "title": topic["title"],
-                  "text": topic["script"],
-                  "search": ", ".join(topic["terms"]),
-                  "fingerprint": [norm(topic["title"]), norm(topic["script"]), norm(" ".join(topic["terms"]))],
-                  "video_id": video_id,
-                  "saved_at": int(time.time()),
-                  "mpt_id": topic["id"],
-                  "source": "mpt",
-              })
-              write_json_atomic(USED_CONTENT, used)
-
-              pexels = load_list(USED_PEXELS)
-              known = {str(x) for x in pexels}
-              fresh = [a for a in asset_ids if a not in known]
-              overlap = len(asset_ids) - len(fresh)
-              pexels.extend(fresh)
-              write_json_atomic(USED_PEXELS, pexels)
-              print(f"Memory saved: {len(used)} content records; "
-                    f"{len(fresh)} new Pexels ids ({overlap} had been used before)")
-
-
-          # --------------------------------------------------------------------- main
-          def main():
-              privacy = os.environ.get("PRIVACY", "private").strip().lower()
-              if privacy not in VALID_PRIVACY:
-                  print(f"ERROR: PRIVACY must be one of {VALID_PRIVACY}, got '{privacy}'")
-                  return 2
-
-              topics = json.loads(TOPICS_FILE.read_text(encoding="utf-8"))
-              validate_topics(topics)
-              used = load_list(USED_CONTENT)
-              topic = pick_topic(topics, used, os.environ.get("FORCE_TOPIC_ID", "").strip() or None)
-              if topic is None:
-                  print("ERROR: every topic in topics.json has been used. Add new topics.")
-                  return 3
-              print(f"Topic: {topic['id']} - {topic['title']}")
-              print(f"Privacy mode: {privacy}")
-
-              check_cli_supports_flags()
-
-              video, asset_ids, passed = None, [], False
-              for attempt in range(1, MAX_ATTEMPTS + 1):
-                  print(f"\n===== Attempt {attempt}/{MAX_ATTEMPTS} =====")
-                  try:
-                      video, log_text = generate_video(topic)
-                  except Exception as exc:
-                      print(f"Generation failed: {exc}")
-                      continue
-                  asset_ids = parse_asset_ids(log_text)
-                  passed, report = check_video.check(video, REVIEW_DIR / f"attempt{attempt}")
-                  print("\n".join(report))
-                  print("QUALITY CHECK:", "PASS" if passed else "FAIL")
-                  if passed:
-                      break
-
-              if not passed:
-                  print("\nERROR: no attempt passed the quality check. Nothing was uploaded "
-                        "and no memory was written.")
-                  return 1
-
-              OUTPUT_DIR.mkdir(exist_ok=True)
-              final_copy = OUTPUT_DIR / "short.mp4"
-              shutil.copy2(video, final_copy)
-
-              if privacy == "none":
-                  print("\nDry run (PRIVACY=none): skipping upload and memory.")
-                  return 0
-
-              for name in ("YOUTUBE_CLIENT_ID", "YOUTUBE_CLIENT_SECRET", "YOUTUBE_REFRESH_TOKEN"):
-                  if not os.environ.get(name):
-                      print(f"ERROR: secret {name} is missing")
-                      return 4
-
-              video_id = upload_video(final_copy, topic, privacy)
-              remember(topic, video_id, asset_ids)
-              return 0
-
-
-          if __name__ == "__main__":
-              try:
-                  sys.exit(main())
-              except SystemExit:
-                  raise
-              except Exception as exc:  # noqa: BLE001
-                  print(f"ERROR: {type(exc).__name__}: {exc}")
-                  sys.exit(1)
-          PYEOF_RUN_DAILY
-          cat > mpt_daily/check_video.py <<'PYEOF_CHECK_VIDEO'
-          #!/usr/bin/env python3
-          """فحص جودة الفيديو قبل النشر.
-
-          الاستعمال:  python check_video.py VIDEO.mp4 [REVIEW_DIR]
-
-          يطبع تقريرًا، ويخرج برمز 0 عند النجاح و1 عند فشل أي فحص أساسي.
-          يحفظ في REVIEW_DIR صورة مجمّعة (contact_sheet.jpg) لمراجعتك بالعين.
-
-          ما يفحصه آليًا:
-            - الملف قابل للقراءة ومكتمل
-            - المدة (15 إلى 59 ثانية)
-            - الدقة 1080x1920 ومعدل الإطارات
-            - وجود مسار صوت، وعدم كونه صامتًا
-            - عدم وجود صمت طويل، وعدم وجود شاشة سوداء طويلة
-            - توافق مدة الصوت مع مدة الفيديو
-            - ظهور وجوه بشرية (كشف تقريبي، يحجب النشر إذا تكرر)
-
-          ما لا يفحصه آليًا (راجعه بالعين من الصورة المجمّعة):
-            - صحة الترجمة العربية وترتيبها
-            - صلة اللقطات بالموضوع
-          """
-          import json
-          import re
-          import subprocess
-          import sys
-          from pathlib import Path
-
-          MIN_DURATION = 15.0
-          MAX_DURATION = 59.5
-          EXPECTED_SIZE = (1080, 1920)
-          MIN_MEAN_VOLUME_DB = -35.0
-          MAX_SILENCE_SECONDS = 2.5
-          MAX_BLACK_SECONDS = 1.0
-          MAX_AV_DIFF_SECONDS = 1.5
-          FACE_FRAMES_TO_BLOCK = 2
-
-
-          def run(cmd):
-              return subprocess.run(cmd, capture_output=True, text=True, errors="replace")
-
-
-          def probe(path):
-              p = run(["ffprobe", "-v", "error", "-print_format", "json",
-                       "-show_format", "-show_streams", str(path)])
-              if p.returncode != 0:
-                  raise RuntimeError("ffprobe failed: " + p.stderr.strip()[:300])
-              return json.loads(p.stdout)
-
-
-          def decode_whole_file(path):
-              """يقرأ الملف كاملًا للتأكد أنه غير تالف."""
-              p = run(["ffmpeg", "-v", "error", "-i", str(path), "-f", "null", "-"])
-              return p.returncode == 0 and not p.stderr.strip(), p.stderr.strip()[:300]
-
-
-          def volume_stats(path):
-              p = run(["ffmpeg", "-hide_banner", "-i", str(path), "-vn",
-                       "-af", "volumedetect", "-f", "null", "-"])
-              m = re.search(r"mean_volume:\s*(-?[\d.]+|-inf) dB", p.stderr)
-              if not m:
-                  return None
-              return float("-inf") if m.group(1) == "-inf" else float(m.group(1))
-
-
-          def longest_silence(path):
-              p = run(["ffmpeg", "-hide_banner", "-i", str(path), "-vn",
-                       "-af", "silencedetect=noise=-40dB:d=0.8", "-f", "null", "-"])
-              durations = [float(x) for x in re.findall(r"silence_duration:\s*([\d.]+)", p.stderr)]
-              # صمت ينتهي مع نهاية الملف لا يظهر له silence_duration، فنفحصه أيضًا
-              starts = re.findall(r"silence_start:\s*([\d.]+)", p.stderr)
-              ends = re.findall(r"silence_end:", p.stderr)
-              open_start = float(starts[-1]) if len(starts) > len(ends) else None
-              return (max(durations) if durations else 0.0), open_start
-
-
-          def black_total(path):
-              p = run(["ffmpeg", "-hide_banner", "-i", str(path), "-an",
-                       "-vf", "blackdetect=d=0.4:pix_th=0.10", "-f", "null", "-"])
-              return sum(float(x) for x in re.findall(r"black_duration:([\d.]+)", p.stderr))
-
-
-          def count_face_frames(path, duration):
-              """يأخذ لقطة كل ثانيتين تقريبًا، ويعدّ اللقطات التي ظهر فيها وجه."""
-              try:
-                  import cv2
-              except Exception as exc:  # opencv غير مثبت
-                  return None, f"opencv not available ({exc})"
-
-              try:
-                  cascade = cv2.CascadeClassifier(
-                      cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
-                  if cascade.empty():
-                      return None, "face cascade file could not be loaded"
-              except Exception as exc:
-                  return None, f"face detector unavailable ({exc})"
-              cap = cv2.VideoCapture(str(path))
-              if not cap.isOpened():
-                  return None, "cannot open video for sampling"
-
-              face_frames = 0
-              t = 1.0
-              while t < duration - 0.5:
-                  cap.set(cv2.CAP_PROP_POS_MSEC, t * 1000)
-                  ok, frame = cap.read()
-                  if not ok:
-                      break
-                  gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                  faces = cascade.detectMultiScale(
-                      gray, scaleFactor=1.1, minNeighbors=6, minSize=(90, 90))
-                  if len(faces) > 0:
-                      face_frames += 1
-                  t += 2.0
-              cap.release()
-
-              return face_frames, None
-
-
-          def make_contact_sheet(path, duration, review_dir):
-              """صورة مجمّعة من 8 لقطات لمراجعتك بالعين (عبر ffmpeg)."""
-              if not review_dir:
-                  return
-              try:
-                  out = Path(review_dir)
-                  out.mkdir(parents=True, exist_ok=True)
-                  interval = max(1.0, duration / 8.0)
-                  run(["ffmpeg", "-v", "error", "-y", "-i", str(path),
-                       "-vf", f"fps=1/{interval:.2f},scale=270:480,tile=4x2",
-                       "-frames:v", "1", "-q:v", "3", str(out / "contact_sheet.jpg")])
-              except Exception as exc:
-                  print(f"(could not write contact sheet: {exc})")
-
-
-          def check(path, review_dir=None):
-              """يعيد (نجح؟، قائمة أسطر التقرير)."""
-              report = []
-              failed = []
-
-              def ok(msg):
-                  report.append("PASS  " + msg)
-
-              def bad(msg):
-                  report.append("FAIL  " + msg)
-                  failed.append(msg)
-
-              def note(msg):
-                  report.append("NOTE  " + msg)
-
-              path = Path(path)
-              if not path.is_file() or path.stat().st_size == 0:
-                  return False, ["FAIL  file missing or empty"]
-
-              try:
-                  info = probe(path)
-              except Exception as exc:
-                  return False, [f"FAIL  unreadable video: {exc}"]
-
-              streams = info.get("streams", [])
-              video = next((s for s in streams if s.get("codec_type") == "video"), None)
-              audio = next((s for s in streams if s.get("codec_type") == "audio"), None)
-              duration = float(info.get("format", {}).get("duration", 0) or 0)
-              size_mb = path.stat().st_size / 1e6
-              note(f"size {size_mb:.1f} MB, duration {duration:.1f}s")
-
-              if not video:
-                  bad("no video stream")
-                  return False, report
-
-              width, height = int(video.get("width", 0)), int(video.get("height", 0))
-              if (width, height) == EXPECTED_SIZE:
-                  ok(f"resolution {width}x{height}")
-              else:
-                  bad(f"resolution {width}x{height}, expected {EXPECTED_SIZE[0]}x{EXPECTED_SIZE[1]}")
-
-              try:
-                  num, den = video.get("avg_frame_rate", "0/1").split("/")
-                  fps = float(num) / float(den) if float(den) else 0.0
-              except Exception:
-                  fps = 0.0
-              if 23.0 <= fps <= 61.0:
-                  ok(f"frame rate {fps:.1f} fps")
-              else:
-                  bad(f"frame rate {fps:.1f} fps is not valid")
-
-              if MIN_DURATION <= duration <= MAX_DURATION:
-                  ok(f"duration {duration:.1f}s within {MIN_DURATION:.0f}-{MAX_DURATION:.0f}s")
-              else:
-                  bad(f"duration {duration:.1f}s outside {MIN_DURATION:.0f}-{MAX_DURATION:.0f}s")
-
-              complete, err = decode_whole_file(path)
-              if complete:
-                  ok("file decodes completely without errors")
-              else:
-                  bad(f"decode errors: {err}")
-
-              if not audio:
-                  bad("no audio stream")
-              else:
-                  a_dur = float(audio.get("duration", 0) or 0) or duration
-                  if abs(a_dur - duration) <= MAX_AV_DIFF_SECONDS:
-                      ok(f"audio/video length match ({a_dur:.1f}s vs {duration:.1f}s)")
-                  else:
-                      bad(f"audio {a_dur:.1f}s vs video {duration:.1f}s differ too much")
-
-                  mean_db = volume_stats(path)
-                  if mean_db is None or mean_db < MIN_MEAN_VOLUME_DB:
-                      bad(f"audio too quiet or silent (mean volume {mean_db} dB)")
-                  else:
-                      ok(f"audio level fine (mean {mean_db:.1f} dB)")
-
-                  longest, open_start = longest_silence(path)
-                  if longest > MAX_SILENCE_SECONDS:
-                      bad(f"silence of {longest:.1f}s inside the video")
-                  elif open_start is not None and duration - open_start > MAX_SILENCE_SECONDS:
-                      bad(f"silent tail of {duration - open_start:.1f}s at the end")
-                  else:
-                      ok(f"no long silence (longest {longest:.1f}s)")
-
-              black = black_total(path)
-              if black > MAX_BLACK_SECONDS:
-                  bad(f"black screen totals {black:.1f}s")
-              else:
-                  ok(f"no long black screen ({black:.1f}s)")
-
-              make_contact_sheet(path, duration, review_dir)
-              face_frames, face_err = count_face_frames(path, duration)
-              if face_frames is None:
-                  note(f"face check skipped: {face_err}")
-              elif face_frames >= FACE_FRAMES_TO_BLOCK:
-                  bad(f"faces detected in {face_frames} sampled frames (people are not allowed)")
-              elif face_frames == 1:
-                  note("face detected in 1 sampled frame (below block threshold; check the contact sheet)")
-              else:
-                  ok("no faces detected in sampled frames")
-
-              note("subtitle correctness and clip relevance are NOT checked automatically; "
-                   "look at contact_sheet.jpg")
-              return (not failed), report
-
-
-          def main():
-              if len(sys.argv) < 2:
-                  print(__doc__)
-                  return 2
-              review_dir = sys.argv[2] if len(sys.argv) > 2 else None
-              passed, report = check(sys.argv[1], review_dir)
-              print("\n".join(report))
-              print("RESULT:", "PASS" if passed else "FAIL")
-              return 0 if passed else 1
-
-
-          if __name__ == "__main__":
-              sys.exit(main())
-          PYEOF_CHECK_VIDEO
-          cat > mpt_daily/merge_memory.py <<'PYEOF_MERGE_MEMORY'
-          #!/usr/bin/env python3
-          """يدمج ذاكرة هذا التشغيل مع أحدث نسخة من GitHub دون حذف أي سجل.
-
-          الاستعمال:  python mpt_daily/merge_memory.py GENERATED_DIR
-          (يُنفَّذ من جذر المستودع بعد git reset --hard origin/main)
-          """
-          import json
-          import sys
-          from pathlib import Path
-
-          FILES = ("used_content.json", "used_pexels.json")
-
-
-          def load_list(path):
-              if not path.exists():
-                  return []
-              try:
-                  data = json.loads(path.read_text(encoding="utf-8"))
-              except Exception:
-                  print(f"WARNING: could not read {path}; treating as empty")
-                  return []
-              return data if isinstance(data, list) else []
-
-
-          def key(item):
-              try:
-                  return json.dumps(item, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
-              except Exception:
-                  return repr(item)
-
-
-          def main():
-              if len(sys.argv) != 2:
-                  print(__doc__)
-                  return 2
-              generated_dir = Path(sys.argv[1])
-              for name in FILES:
-                  generated = generated_dir / name
-                  if not generated.exists():
-                      print(f"{name}: nothing to merge")
-                      continue
-                  remote = load_list(Path(name))
-                  merged, seen = [], set()
-                  for item in remote + load_list(generated):
-                      k = key(item)
-                      if k not in seen:
-                          seen.add(k)
-                          merged.append(item)
-                  Path(name).write_text(json.dumps(merged, ensure_ascii=False, indent=2) + "\n",
-                                        encoding="utf-8")
-                  print(f"{name}: remote {len(remote)} + generated -> {len(merged)} records")
-              return 0
-
-
-          if __name__ == "__main__":
-              sys.exit(main())
-          PYEOF_MERGE_MEMORY
-          cat > mpt_daily/requirements.txt <<'EOF_REQUIREMENTS'
-          google-api-python-client
-          google-auth
-          google-auth-httplib2
-          opencv-python-headless
-          numpy
-          EOF_REQUIREMENTS
-          # قائمة المواضيع: تُنشأ فقط إذا لم يكن لديك ملف mpt_daily/topics.json في المستودع
-          if [ ! -f mpt_daily/topics.json ]; then
-          cat > mpt_daily/topics.json <<'EOF_TOPICS'
-          [
-            {
-              "id": "valve-001",
-              "title": "كيف يعمل صمام المحرك؟",
-              "script": "تعمل صمامات المحرك على تنظيم دخول الهواء وخروج غازات العادم من الأسطوانات. في شوط السحب، يفتح صمام السحب ويدخل الهواء إلى الأسطوانة. ثم يُغلق الصمام أثناء شوطَي الضغط والقدرة. وبعد انتهاء الاحتراق، يفتح صمام العادم خلال شوط العادم، فيدفع المكبس الغازات المحترقة إلى خارج الأسطوانة. ويتحكم عمود الكامات في توقيت فتح الصمامات وإغلاقها، لضمان عمل المحرك بكفاءة.",
-              "terms": ["engine valve", "car engine cylinder head", "engine camshaft", "engine piston"]
-            },
-            {
-              "id": "piston-rings-002",
-              "title": "لماذا يحيط بالمكبس حلقات معدنية؟",
-              "script": "يتحرك المكبس صعودًا وهبوطًا داخل الأسطوانة آلاف المرات في الدقيقة. وتحيط به عادة ثلاث حلقات، حلقتان للضغط وحلقة للزيت. حلقات الضغط تمنع تسرب الغازات أثناء الاحتراق، وحلقة الزيت تكشط الزيت الزائد عن جدار الأسطوانة. وعندما تبلى هذه الحلقات يزداد استهلاك الزيت، وقد يظهر دخان أزرق من العادم.",
-              "terms": ["engine piston rings", "car engine piston", "engine cylinder", "engine parts close up"]
-            },
-            {
-              "id": "four-stroke-003",
-              "title": "كيف يعمل المحرك رباعي الأشواط؟",
-              "script": "يعمل محرك البنزين المعتاد على أربعة أشواط. في شوط السحب يدخل خليط الهواء والوقود. في شوط الضغط يضغطه المكبس. في شوط القدرة تشعل الشمعة الخليط، فيدفع الاحتراق المكبس إلى الأسفل. وفي شوط العادم تخرج الغازات المحترقة. ولا تنتج الأسطوانة قدرة إلا في شوط واحد من كل أربعة، وتتولى الأسطوانات الأخرى والحدافة إكمال الحركة بسلاسة.",
-              "terms": ["car engine animation", "engine pistons moving", "engine cylinder", "engine crankshaft"]
-            },
-            {
-              "id": "spark-plug-004",
-              "title": "كيف تشعل شمعة الإشعال الوقود؟",
-              "script": "تنتج الشمعة شرارة كهربائية بين قطبين في اللحظة المناسبة، لإشعال خليط الهواء والوقود المضغوط. ويصل إليها من ملف الإشعال جهد عالٍ يبلغ عشرات الآلاف من الفولتات. والمسافة الصغيرة بين القطبين يجب أن تكون مضبوطة بدقة. وإذا تراكمت الرواسب على الشمعة أو بلي القطب ضعفت الشرارة، فيظهر اهتزاز في المحرك ويزداد استهلاك الوقود.",
-              "terms": ["spark plug", "car spark plugs engine", "engine ignition coil", "engine close up"]
-            },
-            {
-              "id": "turbo-005",
-              "title": "كيف يزيد الشاحن التوربيني قدرة المحرك؟",
-              "script": "يستفيد الشاحن التوربيني من غازات العادم التي كانت ستضيع. تدير هذه الغازات توربينًا يدور بسرعات هائلة، وهو متصل على المحور نفسه بضاغط يدفع هواءً أكثر إلى المحرك. وكلما دخل هواء أكثر أمكن حقن وقود أكثر، فتزداد القدرة دون زيادة حجم المحرك. ويعمل التوربين في حرارة عالية جدًا، ولذلك يحتاج إلى زيت نظيف للتزييت والتبريد.",
-              "terms": ["turbocharger", "car turbo engine", "turbine engine close up", "engine exhaust manifold"]
-            },
-            {
-              "id": "thermostat-006",
-              "title": "ما وظيفة منظم الحرارة في المحرك؟",
-              "script": "يعمل منظم الحرارة كصمام يفتح ويغلق بحسب حرارة سائل التبريد. عند بدء التشغيل يبقى مغلقًا ليسخن المحرك بسرعة. وحين تصل الحرارة إلى نحو تسعين درجة مئوية تقريبًا يبدأ بالفتح، فيمر السائل إلى المبرد. ولو علق مغلقًا ارتفعت الحرارة بسرعة وقد يتضرر المحرك، ولو علق مفتوحًا بقي المحرك باردًا وزاد استهلاك الوقود.",
-              "terms": ["car radiator", "engine cooling system", "car coolant", "engine thermostat"]
-            },
-            {
-              "id": "oil-pump-007",
-              "title": "لماذا يحتاج المحرك إلى ضغط الزيت؟",
-              "script": "تسحب مضخة الزيت الزيت من الحوض، وتدفعه عبر المرشح إلى مجارٍ صغيرة داخل المحرك. يشكل الزيت طبقة رقيقة بين الأجزاء المعدنية المتحركة، فيمنع احتكاكها المباشر. ولا تكفي كمية الزيت وحدها، بل يجب أن يكون ضغطه مناسبًا. ولهذا يضيء مصباح ضغط الزيت عندما ينخفض الضغط، وعندها يجب إيقاف المحرك فورًا لتجنب تلف المحامل.",
-              "terms": ["engine oil", "car engine oil change", "engine oil filter", "engine lubrication"]
-            },
-            {
-              "id": "timing-belt-008",
-              "title": "ماذا يحدث إذا انقطع سير التوقيت؟",
-              "script": "يربط سير التوقيت، أو سلسلته، بين عمود المرفق وعمود الكامات. وبذلك تفتح الصمامات وتغلق في اللحظة الصحيحة بالنسبة لحركة المكابس. وفي كثير من المحركات، إذا انقطع السير اصطدمت الصمامات بالمكابس وحدث ضرر جسيم. ولذلك تحدد الشركات المصنعة مسافة لاستبداله، ولا يُنصح بتأخيرها.",
-              "terms": ["timing belt", "engine timing chain", "engine camshaft", "car engine belt"]
-            },
-            {
-              "id": "disc-brake-009",
-              "title": "كيف تعمل الفرامل القرصية؟",
-              "script": "عند الضغط على دواسة الفرامل ينتقل ضغط السائل الهيدروليكي إلى الملقط، فيدفع قطع الاحتكاك لتضغط على قرص يدور مع العجلة. فيتحول جزء كبير من طاقة حركة السيارة إلى حرارة بسبب الاحتكاك، وتبطؤ السيارة. ولهذا تحتاج الفرامل إلى تبريد جيد. وقد يضعف مفعولها إذا سخنت أكثر من اللازم، أو إذا امتص سائل الفرامل رطوبة مع الزمن.",
-              "terms": ["brake disc", "car brake caliper", "brake pads", "wheel brake rotor"]
-            },
-            {
-              "id": "abs-010",
-              "title": "كيف يمنع نظام ABS انغلاق العجلات؟",
-              "script": "عند الفرملة القوية قد تتوقف العجلة عن الدوران وتنزلق، فتفقد السيارة القدرة على التوجيه. تقيس حساسات سرعة العجلات هذا الانزلاق، وتأمر وحدة التحكم بتخفيف ضغط الفرامل عن العجلة ثم إعادته عدة مرات في الثانية. ولذلك تشعر باهتزاز في الدواسة، وهذا طبيعي، ومعناه أن النظام يعمل.",
-              "terms": ["abs brake system", "brake caliper", "car wheel hub sensor", "brake disc"]
-            },
-            {
-              "id": "clutch-011",
-              "title": "كيف يعمل قابض السيارة؟",
-              "script": "يصل القابض بين المحرك وعلبة السرعات بواسطة قرص احتكاك. عندما ترفع قدمك عن الدواسة تضغط زنبركات قوية القرص على حدافة المحرك، فتنتقل الحركة إلى العلبة. وعندما تضغط الدواسة ينفصل القرص، فيمكن تغيير السرعة بسلاسة. ويبلى القرص مع الاستعمال، ومن أهم أسباب تلفه إبقاء القدم على الدواسة أو الانطلاق بعنف.",
-              "terms": ["car clutch", "clutch disc", "manual transmission", "flywheel engine"]
-            },
-            {
-              "id": "torque-converter-012",
-              "title": "ما هو محول العزم في الناقل الأوتوماتيكي؟",
-              "script": "في ناقل الحركة الأوتوماتيكي لا يوجد قابض احتكاك عادي بين المحرك والعلبة. بدلًا من ذلك يوجد محول عزم مملوء بسائل. تدفع مروحة يديرها المحرك السائل نحو مروحة أخرى متصلة بالعلبة، فتدور. وهذا يسمح للسيارة بالتوقف والمحرك يعمل، كما يضاعف العزم عند الانطلاق.",
-              "terms": ["automatic transmission", "torque converter", "car gearbox", "transmission gears"]
-            },
-            {
-              "id": "differential-013",
-              "title": "لماذا تحتاج السيارة إلى الترس التفاضلي؟",
-              "script": "عند الانعطاف تقطع العجلة الخارجية مسافة أطول من العجلة الداخلية، فتحتاج إلى أن تدور أسرع منها. يحل الترس التفاضلي هذه المشكلة بمجموعة تروس صغيرة، تسمح لكل عجلة بالدوران بسرعة مختلفة مع بقاء القدرة منقولة إليهما. ولولاه لانزلقت إحدى العجلتين، وتآكلت الإطارات بسرعة، وصعب توجيه السيارة.",
-              "terms": ["car differential", "differential gears", "car axle", "transmission gears"]
-            },
-            {
-              "id": "shock-absorber-014",
-              "title": "ما وظيفة ممتص الصدمات حقًا؟",
-              "script": "لا يحمل ممتص الصدمات وزن السيارة، فهذه مهمة الزنبرك. مهمته تخميد حركة الزنبرك، لأنه لو ترك وحده لاهتزت السيارة صعودًا وهبوطًا بعد كل مطب. وفي داخله مكبس يتحرك في زيت ويمر عبر فتحات ضيقة، فتتحول طاقة الحركة إلى حرارة. وعندما يضعف الممتص يطول مسافة التوقف، وتفقد العجلات تماسكها بالأرض.",
-              "terms": ["car shock absorber", "car suspension spring", "suspension system", "car coilover"]
-            },
-            {
-              "id": "electric-steering-015",
-              "title": "كيف يعمل التوجيه المساعد كهربائيًا؟",
-              "script": "في التوجيه المعزز كهربائيًا يقيس حساس في عمود المقود مقدار الجهد الذي تبذله في تدوير المقود. ثم تحسب وحدة التحكم المساعدة المطلوبة، وتشغل محركًا كهربائيًا يضيف قوة إلى جهاز التوجيه. وتقل المساعدة عند السرعات العالية ليبقى المقود أثقل قليلًا، فتزداد الثقة. وهو يوفر الوقود لأنه لا يعمل إلا عند الحاجة.",
-              "terms": ["steering rack", "car steering system", "steering column", "car electric motor"]
-            },
-            {
-              "id": "oxygen-sensor-016",
-              "title": "ماذا يقيس حساس الأكسجين في العادم؟",
-              "script": "يوضع حساس الأكسجين في مجرى العادم، ويقيس كمية الأكسجين غير المحترق في الغازات. تستخدم وحدة التحكم هذه القراءة لمعرفة هل الخليط غني بالوقود أم فقير، فتعدل كمية الوقود المحقون باستمرار. والهدف هو الإبقاء على النسبة المثالية للاحتراق. وإذا تلف الحساس زاد استهلاك الوقود وارتفع التلوث، وقد يضيء مصباح المحرك.",
-              "terms": ["oxygen sensor car", "car exhaust system", "car sensor engine", "exhaust pipe"]
-            },
-            {
-              "id": "catalytic-017",
-              "title": "كيف ينقّي المحول الحفاز غازات العادم؟",
-              "script": "يحتوي المحول الحفاز على قرص خزفي ذي خلايا صغيرة، مغطى بمعادن نفيسة مثل البلاتين والبلاديوم والروديوم. تساعد هذه المعادن على تفاعلات كيميائية تحول غازات ضارة، كأول أكسيد الكربون وأكاسيد النيتروجين والهيدروكربونات، إلى ثاني أكسيد الكربون وبخار الماء والنيتروجين. ولا يعمل جيدًا إلا إذا سخن، ويتلف إذا وصل إليه وقود غير محترق.",
-              "terms": ["catalytic converter", "car exhaust system", "exhaust pipe", "car muffler"]
-            },
-            {
-              "id": "injector-018",
-              "title": "كيف يرش حاقن الوقود البنزين؟",
-              "script": "الحاقن صمام كهرومغناطيسي يرش الوقود على شكل رذاذ دقيق. تتحكم وحدة التحكم في مدة فتحه بأجزاء من الثانية، وكلما طالت المدة زادت كمية الوقود. والرذاذ الناعم يختلط بالهواء بصورة أفضل، فيحترق احتراقًا أكمل. وإذا انسدت فتحات الحاقن بالرواسب تشوه الرش، فيظهر اهتزاز في المحرك وضعف في الأداء.",
-              "terms": ["fuel injector", "car fuel injection", "engine fuel rail", "engine intake manifold"]
-            },
-            {
-              "id": "alternator-019",
-              "title": "كيف يولد المولد الكهرباء في السيارة؟",
-              "script": "بعد تشغيل المحرك يتولى المولد تزويد السيارة بالكهرباء وشحن البطارية. يدور مغناطيس كهربائي داخل ملفات ثابتة، فيتولد تيار متناوب. ثم يحوله مقوّم إلى تيار مستمر مناسب للبطارية. وينظم منظم الجهد الناتج حول أربعة عشر فولتًا تقريبًا. وإذا ضعف المولد ضعفت الأضواء وفرغت البطارية رغم أن المحرك يعمل.",
-              "terms": ["car alternator", "alternator engine", "car battery", "engine belt pulley"]
-            },
-            {
-              "id": "starter-020",
-              "title": "كيف يدير محرك البدء المحرك؟",
-              "script": "محرك بدء التشغيل محرك كهربائي قوي يسحب تيارًا كبيرًا من البطارية. عند إدارة المفتاح يدفع مغناطيس كهربائي ترسًا صغيرًا ليتشابك مع أسنان الحدافة، ثم يدير المحرك الكهربائي المحرك حتى يبدأ بالاشتعال بنفسه. بعدها ينسحب الترس تلقائيًا. وإذا سمعت نقرة فقط دون دوران، فغالبًا البطارية ضعيفة أو التوصيلات مفكوكة.",
-              "terms": ["car starter motor", "starter motor engine", "car battery terminals", "engine flywheel"]
-            },
-            {
-              "id": "battery-021",
-              "title": "كيف تخزن بطارية السيارة الكهرباء؟",
-              "script": "بطارية السيارة التقليدية من نوع الرصاص الحمضي، وتتكون من صفائح رصاص مغمورة في محلول حمض الكبريتيك. عند التفريغ يحدث تفاعل كيميائي ينتج تيارًا كهربائيًا، وعند الشحن يعكس المولد هذا التفاعل. وتقصر عمرها الحرارة الشديدة والتفريغ العميق المتكرر، ولذلك لا يحسن ترك الأضواء مضاءة والمحرك متوقف.",
-              "terms": ["car battery", "car battery terminals", "battery engine bay", "car battery charger"]
-            },
-            {
-              "id": "egr-022",
-              "title": "ما فائدة صمام إعادة تدوير العادم؟",
-              "script": "يعيد هذا الصمام جزءًا قليلًا من غازات العادم إلى مجرى الهواء الداخل إلى المحرك. هذه الغازات لا تحترق مرة أخرى، لكنها تخفض حرارة الاحتراق. وارتفاع الحرارة هو السبب الرئيسي لتكوّن أكاسيد النيتروجين، لذلك يقلل الصمام هذه الانبعاثات. لكن الكربون قد يتراكم عليه ويسده، فيسبب اهتزازًا أو توقفًا للمحرك.",
-              "terms": ["engine intake manifold", "car engine exhaust", "engine parts", "car engine close up"]
-            },
-            {
-              "id": "intercooler-023",
-              "title": "لماذا نبرّد هواء الشاحن قبل دخوله المحرك؟",
-              "script": "عندما يضغط الشاحن الهواء ترتفع حرارته، والهواء الساخن أقل كثافة ويحتوي أكسجينًا أقل. لذلك يمر الهواء المضغوط عبر المبرد الوسيط، وهو يشبه مبردًا صغيرًا، فيبرد قبل دخوله المحرك. فيصبح أكثر كثافة، فتزداد القدرة وتقل احتمالات الفرقعة. وإذا تسرب الهواء من المبرد ضعف أداء السيارة، وقد تسمع صفيرًا.",
-              "terms": ["car intercooler", "turbo engine", "car radiator", "engine air intake"]
-            },
-            {
-              "id": "crankshaft-024",
-              "title": "كيف تتحول حركة المكبس إلى دوران؟",
-              "script": "يحول ذراع التوصيل الحركة الخطية للمكبس إلى حركة دائرية في عمود المرفق. يرتبط طرفه الأول بالمكبس، وطرفه الآخر بنتوء في العمود يسمى ذراع المرفق. وبين الذراع والعمود محامل رقيقة يغمرها الزيت. وهذه الأجزاء تتحمل أحمالًا هائلة مع كل شوط. لذلك يؤدي نقص الزيت إلى انصهار المحامل وصوت طرق عالٍ.",
-              "terms": ["engine crankshaft", "connecting rod piston", "engine pistons", "engine block"]
-            },
-            {
-              "id": "flywheel-025",
-              "title": "ما دور الحدافة في المحرك؟",
-              "script": "تثبت الحدافة في نهاية عمود المرفق، وهي قرص ثقيل يخزن طاقة الدوران. فالمحرك لا يعطي قدرة إلا في أشواط القدرة، وبين كل شوطين تنقطع القوة. فتتولى الحدافة، بقصورها الذاتي، تعويض هذا الانقطاع وتهدئة اهتزاز الدوران. كما تحمل أسنانًا يتصل بها محرك بدء التشغيل، ويتصل بها قرص القابض.",
-              "terms": ["engine flywheel", "clutch flywheel", "engine crankshaft", "car clutch"]
-            },
-            {
-              "id": "cv-joint-026",
-              "title": "كيف تنقل وصلة السرعة الثابتة الحركة للعجلة؟",
-              "script": "في السيارات ذات الدفع الأمامي يجب أن تصل الحركة إلى عجلات تتحرك لأعلى وأسفل وتنعطف في الوقت نفسه. تحل هذه المشكلة وصلة السرعة الثابتة، وهي تعمل كمفصل كروي بداخله كرات فولاذية. يغطيها غلاف مطاطي مملوء بالشحم. وإذا تمزق الغلاف تسرب الشحم ودخل الغبار، فتبلى الوصلة، وتسمع طقطقة عند الانعطاف.",
-              "terms": ["cv joint car", "car drive shaft", "car axle", "car wheel hub"]
-            },
-            {
-              "id": "knock-027",
-              "title": "ما هي فرقعة المحرك ولماذا تضره؟",
-              "script": "الفرقعة احتراق غير منضبط في الأسطوانة، إذ يشتعل جزء من الخليط من تلقاء نفسه قبل وصول جبهة اللهب. ينتج عن ذلك موجات ضغط تضرب جدران الأسطوانة وتسبب صوت طرق معدنيًا. وتستخدم المحركات حساس طرق يلتقط هذه الاهتزازات، فتؤخر وحدة التحكم توقيت الشرارة. ويساعد على تجنبها استخدام الوقود ذي الأوكتان المناسب.",
-              "terms": ["engine piston", "car engine cylinder", "engine block", "engine spark plug"]
-            },
-            {
-              "id": "air-filter-028",
-              "title": "لماذا يحتاج المحرك إلى مرشح هواء نظيف؟",
-              "script": "يحتاج المحرك إلى كمية هائلة من الهواء النظيف، ومرشح الهواء يحبس الغبار قبل دخوله. وبعده يقيس حساس تدفق الهواء كمية الهواء الداخلة، فتحسب وحدة التحكم كمية الوقود المناسبة. وإذا اتسخ المرشح اختنق المحرك قليلًا وزاد الاستهلاك. وإذا اتسخ الحساس أعطت وحدة التحكم قراءة خاطئة، فيضطرب الأداء.",
-              "terms": ["car air filter", "engine air intake", "air filter housing", "engine bay"]
-            },
-            {
-              "id": "water-pump-029",
-              "title": "كيف تدفع مضخة الماء سائل التبريد؟",
-              "script": "تدفع مضخة الماء سائل التبريد في مجاريه حول الأسطوانات، ثم إلى المبرد. وتدار عادة بالسير أو بالمحرك، وفيها مروحة ذات ريش. ويمنع ختم صغير تسرب السائل. وإذا تلف هذا الختم ظهرت قطرات من السائل، وقد يسخن المحرك. ولهذا تُستبدل المضخة غالبًا مع سير التوقيت.",
-              "terms": ["car water pump", "engine cooling system", "car radiator", "engine coolant"]
-            },
-            {
-              "id": "diesel-030",
-              "title": "كيف يشتعل الديزل بدون شمعة إشعال؟",
-              "script": "في محرك الديزل لا توجد شمعة إشعال. يضغط المكبس الهواء وحده ضغطًا كبيرًا جدًا، فترتفع حرارته إلى مستوى كافٍ لإشعال الوقود. وعندها يُحقن الديزل في الأسطوانة فيشتعل ذاتيًا. ولهذا يحتاج المحرك إلى هيكل أقوى وأثقل، لكنه يعطي عزمًا كبيرًا وكفاءة أعلى في استهلاك الوقود.",
-              "terms": ["diesel engine", "engine piston", "diesel injector", "engine cylinder head"]
-            }
-          ]
-          EOF_TOPICS
+          decode() {
+            # $1 = target file, $2 = expected sha256, base64 data arrives on stdin
+            if ! base64 -d > "$1.tmp"; then
+              echo "::error::Invalid base64 while writing $1. The workflow text was damaged while pasting it."
+              exit 1
+            fi
+            actual="$(sha256sum "$1.tmp" | cut -d' ' -f1)"
+            if [ "$actual" != "$2" ]; then
+              echo "::error::$1 was corrupted while pasting the workflow (sha256 mismatch)."
+              exit 1
+            fi
+            mv "$1.tmp" "$1"
+            echo "Wrote $1 (sha256 OK)"
+          }
+          decode mpt_daily/run_daily.py 45b8aabc576ae9085d3a55aa2d3e78e5ad154086b4a5bbffc172c9d01ae33c26 <<'B64_RUN_DAILY'
+          IyEvdXNyL2Jpbi9lbnYgcHl0aG9uMwoiIiLYp9mE2YXZhtiz2ZHZgiDYp9mE2YrZiNmF2Yog2YTZ
+          hNmG2LjYp9mFINin2YTYrNiv2YrYry4KCtin2YTYqtix2KrZitioOgogIDEuINin2K7YqtmK2KfY
+          sSDZhdmI2LbZiNi5INmE2YUg2YrZj9mG2KrYrCDZhdmGINmC2KjZhCAo2YXZhiB0b3BpY3MuanNv
+          biDZhdmC2KfYqNmEIHVzZWRfY29udGVudC5qc29uKQogIDIuINil2YbYqtin2Kwg2KfZhNmB2YrY
+          r9mK2Ygg2KjZiNin2LPYt9ipIE1vbmV5UHJpbnRlclR1cmJvICjYrdiq2YkgMyDZhdit2KfZiNmE
+          2KfYqikKICAzLiDZgdit2LUg2KfZhNis2YjYr9ipIChjaGVja192aWRlby5weSkgLSDYpdiw2Kcg
+          2YHYtNmEINmE2Kcg2YrZj9mG2LTYsSDYtNmK2KEKICA0LiDYp9mE2LHZgdi5INil2YTZiSBZb3VU
+          dWJlINit2LPYqCBQUklWQUNZOiBwcml2YXRlIHwgdW5saXN0ZWQgfCBwdWJsaWMgfCBub25lCiAg
+          ICAgKG5vbmUgPSDYqtis2LHYqNipINio2K/ZiNmGINix2YHYuSDZiNmE2Kcg2K3Zgdi4INiw2KfZ
+          g9ix2KkpCiAgNS4g2K3Zgdi4INin2YTZhdmI2LbZiNi5INmI2YXYudix2ZHZgSDYp9mE2YHZitiv
+          2YrZiCDZgdmKIHVzZWRfY29udGVudC5qc29uCiAgICAg2YjYrdmB2Lgg2YXYudix2ZHZgdin2Kog
+          2YXZgtin2LfYuSBQZXhlbHMg2YHZiiB1c2VkX3BleGVscy5qc29uCgrZhdiq2LrZitix2KfYqiDY
+          p9mE2KjZitim2Kkg2KfZhNmF2LfZhNmI2KjYqToKICBNUFRfRElSLCBSVU5fUFkgICAgICAgICAg
+          ICAo2YrYttio2LfZh9inINin2YTZgCB3b3JrZmxvdykKICBQUklWQUNZICAgICAgICAgICAgICAg
+          ICAgICAo2KfZhNin2YHYqtix2KfYttmKIHByaXZhdGUpCiAgRk9SQ0VfVE9QSUNfSUQgICAgICAg
+          ICAgICAgKNin2K7YqtmK2KfYsdmKOiDZhNiq2KzYsdio2Kkg2YXZiNi22YjYuSDZhdit2K/YrykK
+          ICBZT1VUVUJFX0NMSUVOVF9JRCwgWU9VVFVCRV9DTElFTlRfU0VDUkVULCBZT1VUVUJFX1JFRlJF
+          U0hfVE9LRU4KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAo2YXYt9mE2YjYqNipINmB2YLY
+          tyDYudmG2K8g2KfZhNix2YHYuSkK2YTYpyDZiti32KjYuSDZh9iw2Kcg2KfZhNiz2YPYsdio2Kog
+          2KPZiiDZgtmK2YXYqSDYs9ix2YrYqS4KIiIiCmltcG9ydCBqc29uCmltcG9ydCBvcwppbXBvcnQg
+          cmUKaW1wb3J0IHNodXRpbAppbXBvcnQgc3VicHJvY2VzcwppbXBvcnQgc3lzCmltcG9ydCB0aW1l
+          CmZyb20gcGF0aGxpYiBpbXBvcnQgUGF0aAoKSEVSRSA9IFBhdGgoX19maWxlX18pLnJlc29sdmUo
+          KS5wYXJlbnQKUk9PVCA9IEhFUkUucGFyZW50CnN5cy5wYXRoLmluc2VydCgwLCBzdHIoSEVSRSkp
+          CmltcG9ydCBjaGVja192aWRlbyAgIyBub3FhOiBFNDAyCgpUT1BJQ1NfRklMRSA9IEhFUkUgLyAi
+          dG9waWNzLmpzb24iClVTRURfQ09OVEVOVCA9IFJPT1QgLyAidXNlZF9jb250ZW50Lmpzb24iClVT
+          RURfUEVYRUxTID0gUk9PVCAvICJ1c2VkX3BleGVscy5qc29uIgpSRVZJRVdfRElSID0gUk9PVCAv
+          ICJyZXZpZXciCk9VVFBVVF9ESVIgPSBST09UIC8gIm91dHB1dCIKTUFYX0FUVEVNUFRTID0gMwpH
+          RU5FUkFUSU9OX1RJTUVPVVQgPSA0MCAqIDYwClZBTElEX1BSSVZBQ1kgPSAoInByaXZhdGUiLCAi
+          dW5saXN0ZWQiLCAicHVibGljIiwgIm5vbmUiKQoKUkVRVUlSRURfQ0xJX0ZMQUdTID0gWwogICAg
+          Ii0tdmlkZW8tc2NyaXB0IiwgIi0tdmlkZW8tdGVybXMiLCAiLS12aWRlby1sYW5ndWFnZSIsICIt
+          LXZvaWNlLW5hbWUiLAogICAgIi0tZm9udC1uYW1lIiwgIi0tc3VidGl0bGUtZGlzcGxheS1tb2Rl
+          IiwgIi0tdmlkZW8tYXNwZWN0IiwKICAgICItLXZpZGVvLWNvdW50IiwgIi0tYmdtLXR5cGUiLCAi
+          LS1iZ20tdm9sdW1lIiwKXQoKCiMgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+          LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0gaGVscGVycwpkZWYgbm9ybSh0ZXh0KToKICAg
+          IHRleHQgPSByZS5zdWIociJbXHUwNjRCLVx1MDY1Rlx1MDY3MFx1MDY0MF0iLCAiIiwgc3RyKHRl
+          eHQgb3IgIiIpKSAgIyDYp9mE2KrYtNmD2YrZhCDZiNin2YTYqti32YjZitmECiAgICB0ZXh0ID0g
+          cmUuc3ViKHIiW15cd1xzXSIsICIgIiwgdGV4dCwgZmxhZ3M9cmUuVU5JQ09ERSkKICAgIHJldHVy
+          biByZS5zdWIociJccysiLCAiICIsIHRleHQpLnN0cmlwKCkubG93ZXIoKQoKCmRlZiBsb2FkX2xp
+          c3QocGF0aCk6CiAgICBpZiBub3QgcGF0aC5leGlzdHMoKToKICAgICAgICByZXR1cm4gW10KICAg
+          IHRyeToKICAgICAgICBkYXRhID0ganNvbi5sb2FkcyhwYXRoLnJlYWRfdGV4dChlbmNvZGluZz0i
+          dXRmLTgiKSkKICAgIGV4Y2VwdCBFeGNlcHRpb246CiAgICAgICAgcHJpbnQoZiJXQVJOSU5HOiBj
+          b3VsZCBub3QgcmVhZCB7cGF0aC5uYW1lfTsgdHJlYXRpbmcgYXMgZW1wdHkiKQogICAgICAgIHJl
+          dHVybiBbXQogICAgcmV0dXJuIGRhdGEgaWYgaXNpbnN0YW5jZShkYXRhLCBsaXN0KSBlbHNlIFtd
+          CgoKZGVmIHdyaXRlX2pzb25fYXRvbWljKHBhdGgsIGRhdGEpOgogICAgdG1wID0gcGF0aC53aXRo
+          X3N1ZmZpeChwYXRoLnN1ZmZpeCArICIudG1wIikKICAgIHRtcC53cml0ZV90ZXh0KGpzb24uZHVt
+          cHMoZGF0YSwgZW5zdXJlX2FzY2lpPUZhbHNlLCBpbmRlbnQ9MikgKyAiXG4iLCBlbmNvZGluZz0i
+          dXRmLTgiKQogICAgdG1wLnJlcGxhY2UocGF0aCkKCgojIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+          LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSB0b3BpY3MKZGVmIHBp
+          Y2tfdG9waWModG9waWNzLCB1c2VkX3JlY29yZHMsIGZvcmNlZF9pZD1Ob25lKToKICAgIGlmIGZv
+          cmNlZF9pZDoKICAgICAgICBmb3IgdCBpbiB0b3BpY3M6CiAgICAgICAgICAgIGlmIHRbImlkIl0g
+          PT0gZm9yY2VkX2lkOgogICAgICAgICAgICAgICAgcHJpbnQoZiJGT1JDRV9UT1BJQ19JRD17Zm9y
+          Y2VkX2lkfTogc2tpcHBpbmcgdGhlIHVzZWQtdG9waWMgY2hlY2siKQogICAgICAgICAgICAgICAg
+          cmV0dXJuIHQKICAgICAgICByYWlzZSBTeXN0ZW1FeGl0KGYiRk9SQ0VfVE9QSUNfSUQgJ3tmb3Jj
+          ZWRfaWR9JyBub3QgZm91bmQgaW4gdG9waWNzLmpzb24iKQoKICAgIHVzZWRfaWRzID0ge3IuZ2V0
+          KCJtcHRfaWQiKSBmb3IgciBpbiB1c2VkX3JlY29yZHMgaWYgaXNpbnN0YW5jZShyLCBkaWN0KX0K
+          ICAgIHVzZWRfdGl0bGVzID0ge25vcm0oci5nZXQoInRpdGxlIikpIGZvciByIGluIHVzZWRfcmVj
+          b3JkcyBpZiBpc2luc3RhbmNlKHIsIGRpY3QpfQogICAgZm9yIHQgaW4gdG9waWNzOgogICAgICAg
+          IGlmIHRbImlkIl0gaW4gdXNlZF9pZHMgb3Igbm9ybSh0WyJ0aXRsZSJdKSBpbiB1c2VkX3RpdGxl
+          czoKICAgICAgICAgICAgY29udGludWUKICAgICAgICByZXR1cm4gdAogICAgcmV0dXJuIE5vbmUK
+          CgpkZWYgdmFsaWRhdGVfdG9waWNzKHRvcGljcyk6CiAgICBzZWVuID0gc2V0KCkKICAgIGZvciBp
+          LCB0IGluIGVudW1lcmF0ZSh0b3BpY3MsIDEpOgogICAgICAgIGZvciBrZXkgaW4gKCJpZCIsICJ0
+          aXRsZSIsICJzY3JpcHQiLCAidGVybXMiKToKICAgICAgICAgICAgaWYgbm90IHQuZ2V0KGtleSk6
+          CiAgICAgICAgICAgICAgICByYWlzZSBTeXN0ZW1FeGl0KGYidG9waWNzLmpzb246IHRvcGljICN7
+          aX0gaGFzIGVtcHR5ICd7a2V5fSciKQogICAgICAgIGlmIHRbImlkIl0gaW4gc2VlbjoKICAgICAg
+          ICAgICAgcmFpc2UgU3lzdGVtRXhpdChmInRvcGljcy5qc29uOiBkdXBsaWNhdGUgaWQge3RbJ2lk
+          J119IikKICAgICAgICBzZWVuLmFkZCh0WyJpZCJdKQogICAgICAgIGlmIHJlLnNlYXJjaChyIltB
+          LVphLXpdIiwgdFsic2NyaXB0Il0pOgogICAgICAgICAgICByYWlzZSBTeXN0ZW1FeGl0KGYidG9w
+          aWNzLmpzb246IHNjcmlwdCBvZiB7dFsnaWQnXX0gY29udGFpbnMgTGF0aW4gbGV0dGVycyIpCgoK
+          IyAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+          LS0tLS0tLS0gZ2VuZXJhdGlvbgpkZWYgbXB0X3B5dGhvbigpOgogICAgcmV0dXJuIG9zLmVudmly
+          b25bIlJVTl9QWSJdCgoKZGVmIG1wdF9kaXIoKToKICAgIHJldHVybiBQYXRoKG9zLmVudmlyb25b
+          Ik1QVF9ESVIiXSkKCgpkZWYgY2hlY2tfY2xpX3N1cHBvcnRzX2ZsYWdzKCk6CiAgICBwID0gc3Vi
+          cHJvY2Vzcy5ydW4oW21wdF9weXRob24oKSwgImNsaS5weSIsICItLWhlbHAiXSwgY3dkPW1wdF9k
+          aXIoKSwKICAgICAgICAgICAgICAgICAgICAgICBjYXB0dXJlX291dHB1dD1UcnVlLCB0ZXh0PVRy
+          dWUsIGVycm9ycz0icmVwbGFjZSIpCiAgICBoZWxwX3RleHQgPSBwLnN0ZG91dCArIHAuc3RkZXJy
+          CiAgICBtaXNzaW5nID0gW2YgZm9yIGYgaW4gUkVRVUlSRURfQ0xJX0ZMQUdTIGlmIGYgbm90IGlu
+          IGhlbHBfdGV4dF0KICAgIGlmIG1pc3Npbmc6CiAgICAgICAgcmFpc2UgU3lzdGVtRXhpdCgiTW9u
+          ZXlQcmludGVyVHVyYm8gQ0xJIGlzIG1pc3Npbmcgb3B0aW9uczogIiArICIsICIuam9pbihtaXNz
+          aW5nKSkKCgpERUZBVUxUX0NUQSA9ICLZiNil2YYg2KPYudis2KjZgyDZh9iw2Kcg2KfZhNmF2YLY
+          t9i52Iwg2YHYp9i02KrYsdmDINmB2Yog2KfZhNmC2YbYp9ipINmE2YrYtdmE2YMg2YPZhCDYrNiv
+          2YrYry4iCgoKZGVmIGdldF9jdGEoKToKICAgICIiItis2YXZhNipINin2YTYp9i02KrYsdin2YMg
+          2KfZhNiq2Yog2KrZj9i22KfZgSDYpdmE2Ykg2YbZh9in2YrYqSDYp9mE2YbYtSAo2YHYqtmP2YbY
+          t9mCINmI2KrYuNmH2LEg2YHZiiDYp9mE2KrYsdis2YXYqSkuCgogICAgLSDYp9mE2YXYqti62YrY
+          sSBDVEFfVEVYVCAo2YrZj9i22KjYtyDZhdmGIFNldHRpbmdzID4gVmFyaWFibGVzKSDZiti62YrZ
+          kdixINin2YTYrNmF2YTYqSDYqNiv2YjZhiDYqti52K/ZitmEINin2YTZg9mI2K8uCiAgICAtINin
+          2YTZgtmK2YXYqSBub25lINij2Yggb2ZmINij2YggLSDYqtmE2LrZiiDYp9mE2KzZhdmE2KkuCiAg
+          ICAtINmK2KzYqCDYo9mGINiq2YPZiNmGINi52LHYqNmK2Kkg2YHZgti3ICjYqNiv2YjZhiDYrdix
+          2YjZgSDZhNin2KrZitmG2YrYqSkg2YjYpdmE2Kcg2KrZj9iz2KrYrtiv2YUg2KfZhNis2YXZhNip
+          INin2YTYp9mB2KrYsdin2LbZitipLgogICAgIiIiCiAgICByYXcgPSBvcy5lbnZpcm9uLmdldCgi
+          Q1RBX1RFWFQiLCAiIikuc3RyaXAoKQogICAgaWYgbm90IHJhdzoKICAgICAgICByZXR1cm4gREVG
+          QVVMVF9DVEEKICAgIGlmIHJhdy5sb3dlcigpIGluICgibm9uZSIsICJvZmYiLCAiLSIpOgogICAg
+          ICAgIHJldHVybiAiIgogICAgaWYgcmUuc2VhcmNoKHIiW0EtWmEtel0iLCByYXcpOgogICAgICAg
+          IHByaW50KCJXQVJOSU5HOiBDVEFfVEVYVCBjb250YWlucyBMYXRpbiBsZXR0ZXJzOyB1c2luZyB0
+          aGUgZGVmYXVsdCBzZW50ZW5jZSIpCiAgICAgICAgcmV0dXJuIERFRkFVTFRfQ1RBCiAgICByZXR1
+          cm4gcmF3WzoyMDBdCgoKZGVmIG5hcnJhdGlvbl9mb3IodG9waWMpOgogICAgY3RhID0gZ2V0X2N0
+          YSgpCiAgICByZXR1cm4gKHRvcGljWyJzY3JpcHQiXS5yc3RyaXAoKSArICIgIiArIGN0YSkgaWYg
+          Y3RhIGVsc2UgdG9waWNbInNjcmlwdCJdCgoKZGVmIGJ1aWxkX2NsaV9hcmdzKHRvcGljKToKICAg
+          IHJldHVybiBbCiAgICAgICAgImNsaS5weSIsCiAgICAgICAgIi0tdmlkZW8tc2NyaXB0IiwgbmFy
+          cmF0aW9uX2Zvcih0b3BpYyksCiAgICAgICAgIi0tdmlkZW8tdGVybXMiLCAiLCIuam9pbih0b3Bp
+          Y1sidGVybXMiXSksCiAgICAgICAgIi0tdmlkZW8tbGFuZ3VhZ2UiLCAiYXItU0EiLAogICAgICAg
+          ICItLXZvaWNlLW5hbWUiLCAiYXItU0EtSGFtZWROZXVyYWwiLAogICAgICAgICItLWZvbnQtbmFt
+          ZSIsICJOb3RvU2Fuc0FyYWJpYy1SZWd1bGFyLnR0ZiIsCiAgICAgICAgIi0tc3VidGl0bGUtZGlz
+          cGxheS1tb2RlIiwgInNlbnRlbmNlIiwKICAgICAgICAiLS12aWRlby1hc3BlY3QiLCAiOToxNiIs
+          CiAgICAgICAgIi0tdmlkZW8tY291bnQiLCAiMSIsCiAgICAgICAgIi0tYmdtLXR5cGUiLCAibm9u
+          ZSIsCiAgICAgICAgIi0tYmdtLXZvbHVtZSIsICIwIiwKICAgIF0KCgpkZWYgZ2VuZXJhdGVfdmlk
+          ZW8odG9waWMpOgogICAgIiIi2YrYtNi62ZHZhCBNb25leVByaW50ZXJUdXJibyDZiNmK2LnZitiv
+          ICjZhdiz2KfYsSDYp9mE2YHZitiv2YrZiNiMINmG2LUg2KfZhNiz2KzZhCkuIiIiCiAgICBzdGFy
+          dGVkID0gdGltZS50aW1lKCkKICAgIHByb2MgPSBzdWJwcm9jZXNzLlBvcGVuKFttcHRfcHl0aG9u
+          KCldICsgYnVpbGRfY2xpX2FyZ3ModG9waWMpLCBjd2Q9bXB0X2RpcigpLAogICAgICAgICAgICAg
+          ICAgICAgICAgICAgICAgc3Rkb3V0PXN1YnByb2Nlc3MuUElQRSwgc3RkZXJyPXN1YnByb2Nlc3Mu
+          U1RET1VULAogICAgICAgICAgICAgICAgICAgICAgICAgICAgdGV4dD1UcnVlLCBlcnJvcnM9InJl
+          cGxhY2UiKQogICAgbGluZXMgPSBbXQogICAgZGVhZGxpbmUgPSBzdGFydGVkICsgR0VORVJBVElP
+          Tl9USU1FT1VUCiAgICB0cnk6CiAgICAgICAgZm9yIGxpbmUgaW4gcHJvYy5zdGRvdXQ6CiAgICAg
+          ICAgICAgIHByaW50KGxpbmUsIGVuZD0iIikKICAgICAgICAgICAgbGluZXMuYXBwZW5kKGxpbmUp
+          CiAgICAgICAgICAgIGlmIHRpbWUudGltZSgpID4gZGVhZGxpbmU6CiAgICAgICAgICAgICAgICBw
+          cm9jLmtpbGwoKQogICAgICAgICAgICAgICAgcmFpc2UgUnVudGltZUVycm9yKCJnZW5lcmF0aW9u
+          IHRpbWVkIG91dCIpCiAgICBmaW5hbGx5OgogICAgICAgIHByb2Mud2FpdCgpCiAgICBpZiBwcm9j
+          LnJldHVybmNvZGUgIT0gMDoKICAgICAgICByYWlzZSBSdW50aW1lRXJyb3IoZiJjbGkucHkgZXhp
+          dGVkIHdpdGggY29kZSB7cHJvYy5yZXR1cm5jb2RlfSIpCgogICAgY2FuZGlkYXRlcyA9IFtwIGZv
+          ciBwIGluIChtcHRfZGlyKCkgLyAic3RvcmFnZSIgLyAidGFza3MiKS5nbG9iKCIqL2ZpbmFsLSou
+          bXA0IikKICAgICAgICAgICAgICAgICAgaWYgcC5zdGF0KCkuc3RfbXRpbWUgPj0gc3RhcnRlZCAt
+          IDJdCiAgICBpZiBub3QgY2FuZGlkYXRlczoKICAgICAgICByYWlzZSBSdW50aW1lRXJyb3IoIm5v
+          IGZpbmFsLSoubXA0IHdhcyBwcm9kdWNlZCIpCiAgICByZXR1cm4gbWF4KGNhbmRpZGF0ZXMsIGtl
+          eT1sYW1iZGEgcDogcC5zdGF0KCkuc3RfbXRpbWUpLCAiIi5qb2luKGxpbmVzKQoKCmRlZiBwYXJz
+          ZV9hc3NldF9pZHMobG9nX3RleHQpOgogICAgcmV0dXJuIGxpc3QoZGljdC5mcm9ta2V5cyhyZS5m
+          aW5kYWxsKHIiYXNzZXRfaWQ9KFxkKykiLCBsb2dfdGV4dCkpKQoKCiMgLS0tLS0tLS0tLS0tLS0t
+          LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSB1cGxv
+          YWQKZGVmIHVwbG9hZF92aWRlbyh2aWRlb19wYXRoLCB0b3BpYywgcHJpdmFjeSk6CiAgICBmcm9t
+          IGdvb2dsZS5hdXRoLmV4Y2VwdGlvbnMgaW1wb3J0IFJlZnJlc2hFcnJvcgogICAgZnJvbSBnb29n
+          bGUuYXV0aC50cmFuc3BvcnQucmVxdWVzdHMgaW1wb3J0IFJlcXVlc3QKICAgIGZyb20gZ29vZ2xl
+          Lm9hdXRoMi5jcmVkZW50aWFscyBpbXBvcnQgQ3JlZGVudGlhbHMKICAgIGZyb20gZ29vZ2xlYXBp
+          Y2xpZW50LmRpc2NvdmVyeSBpbXBvcnQgYnVpbGQKICAgIGZyb20gZ29vZ2xlYXBpY2xpZW50LmVy
+          cm9ycyBpbXBvcnQgSHR0cEVycm9yCiAgICBmcm9tIGdvb2dsZWFwaWNsaWVudC5odHRwIGltcG9y
+          dCBNZWRpYUZpbGVVcGxvYWQKCiAgICBjcmVkcyA9IENyZWRlbnRpYWxzKAogICAgICAgIHRva2Vu
+          PU5vbmUsCiAgICAgICAgcmVmcmVzaF90b2tlbj1vcy5lbnZpcm9uWyJZT1VUVUJFX1JFRlJFU0hf
+          VE9LRU4iXSwKICAgICAgICB0b2tlbl91cmk9Imh0dHBzOi8vb2F1dGgyLmdvb2dsZWFwaXMuY29t
+          L3Rva2VuIiwKICAgICAgICBjbGllbnRfaWQ9b3MuZW52aXJvblsiWU9VVFVCRV9DTElFTlRfSUQi
+          XSwKICAgICAgICBjbGllbnRfc2VjcmV0PW9zLmVudmlyb25bIllPVVRVQkVfQ0xJRU5UX1NFQ1JF
+          VCJdLAogICAgICAgIHNjb3Blcz1bImh0dHBzOi8vd3d3Lmdvb2dsZWFwaXMuY29tL2F1dGgveW91
+          dHViZS51cGxvYWQiXSwKICAgICkKICAgIHRyeToKICAgICAgICBjcmVkcy5yZWZyZXNoKFJlcXVl
+          c3QoKSkKICAgIGV4Y2VwdCBSZWZyZXNoRXJyb3IgYXMgZXhjOgogICAgICAgIHJhaXNlIFJ1bnRp
+          bWVFcnJvcigiWW91VHViZSBPQXV0aCByZWZyZXNoIGZhaWxlZDogIiArIHN0cihleGMpWzoyMDBd
+          KQogICAgcHJpbnQoIk9BdXRoIHJlZnJlc2g6IE9LIikKCiAgICB5b3V0dWJlID0gYnVpbGQoInlv
+          dXR1YmUiLCAidjMiLCBjcmVkZW50aWFscz1jcmVkcywgY2FjaGVfZGlzY292ZXJ5PUZhbHNlKQog
+          ICAgdGl0bGUgPSAodG9waWNbInRpdGxlIl0gKyAiICNzaG9ydHMiKVs6MTAwXQogICAgZGVzY3Jp
+          cHRpb24gPSAodG9waWNbInNjcmlwdCJdICsgIlxuXG4j2LPZitin2LHYp9iqICPZhdmK2YPYp9mG
+          2YrZg9inX9in2YTYs9mK2KfYsdin2KogI9mH2YbYr9iz2KkgI3Nob3J0cyIpWzo0OTAwXQogICAg
+          Ym9keSA9IHsKICAgICAgICAic25pcHBldCI6IHsKICAgICAgICAgICAgInRpdGxlIjogdGl0bGUs
+          CiAgICAgICAgICAgICJkZXNjcmlwdGlvbiI6IGRlc2NyaXB0aW9uLAogICAgICAgICAgICAidGFn
+          cyI6IFsi2YXZitmD2KfZhtmK2YPYpyDYp9mE2LPZitin2LHYp9iqIiwgItmF2K3YsdmDIiwgItmH
+          2YbYr9iz2KkiLCAi2LPZitin2LHYp9iqIiwgInNob3J0cyJdLAogICAgICAgICAgICAiY2F0ZWdv
+          cnlJZCI6ICIyIiwgICMgQXV0b3MgJiBWZWhpY2xlcwogICAgICAgICAgICAiZGVmYXVsdExhbmd1
+          YWdlIjogImFyIiwKICAgICAgICAgICAgImRlZmF1bHRBdWRpb0xhbmd1YWdlIjogImFyIiwKICAg
+          ICAgICB9LAogICAgICAgICJzdGF0dXMiOiB7InByaXZhY3lTdGF0dXMiOiBwcml2YWN5LCAic2Vs
+          ZkRlY2xhcmVkTWFkZUZvcktpZHMiOiBGYWxzZX0sCiAgICB9CiAgICBtZWRpYSA9IE1lZGlhRmls
+          ZVVwbG9hZChzdHIodmlkZW9fcGF0aCksIG1pbWV0eXBlPSJ2aWRlby9tcDQiLAogICAgICAgICAg
+          ICAgICAgICAgICAgICAgICAgY2h1bmtzaXplPTggKiAxMDI0ICogMTAyNCwgcmVzdW1hYmxlPVRy
+          dWUpCiAgICByZXF1ZXN0ID0geW91dHViZS52aWRlb3MoKS5pbnNlcnQocGFydD0ic25pcHBldCxz
+          dGF0dXMiLCBib2R5PWJvZHksIG1lZGlhX2JvZHk9bWVkaWEpCgogICAgcmVzcG9uc2UsIGZhaWx1
+          cmVzID0gTm9uZSwgMAogICAgd2hpbGUgcmVzcG9uc2UgaXMgTm9uZToKICAgICAgICB0cnk6CiAg
+          ICAgICAgICAgIHN0YXR1cywgcmVzcG9uc2UgPSByZXF1ZXN0Lm5leHRfY2h1bmsoKQogICAgICAg
+          ICAgICBpZiBzdGF0dXM6CiAgICAgICAgICAgICAgICBwcmludChmIlVwbG9hZCBwcm9ncmVzczog
+          e2ludChzdGF0dXMucHJvZ3Jlc3MoKSAqIDEwMCl9JSIpCiAgICAgICAgZXhjZXB0IEh0dHBFcnJv
+          ciBhcyBleGM6CiAgICAgICAgICAgIGlmIGV4Yy5yZXNwLnN0YXR1cyBpbiAoNTAwLCA1MDIsIDUw
+          MywgNTA0KSBhbmQgZmFpbHVyZXMgPCA1OgogICAgICAgICAgICAgICAgZmFpbHVyZXMgKz0gMQog
+          ICAgICAgICAgICAgICAgdGltZS5zbGVlcCgyICoqIGZhaWx1cmVzKQogICAgICAgICAgICAgICAg
+          Y29udGludWUKICAgICAgICAgICAgcmFpc2UgUnVudGltZUVycm9yKGYiWW91VHViZSB1cGxvYWQg
+          ZmFpbGVkOiBIVFRQIHtleGMucmVzcC5zdGF0dXN9OiB7c3RyKGV4YylbOjIwMF19IikKCiAgICB2
+          aWRlb19pZCA9IHJlc3BvbnNlLmdldCgiaWQiKQogICAgcmV0dXJuZWQgPSAocmVzcG9uc2UuZ2V0
+          KCJzdGF0dXMiKSBvciB7fSkuZ2V0KCJwcml2YWN5U3RhdHVzIikKICAgIGlmIG5vdCB2aWRlb19p
+          ZDoKICAgICAgICByYWlzZSBSdW50aW1lRXJyb3IoInVwbG9hZCBmaW5pc2hlZCBidXQgbm8gdmlk
+          ZW8gaWQgd2FzIHJldHVybmVkIikKICAgIHByaW50KGYiVVBMT0FEIE9LOiBodHRwczovL3lvdXR1
+          LmJlL3t2aWRlb19pZH0gIHByaXZhY3k9e3JldHVybmVkfSIpCiAgICBpZiByZXR1cm5lZCAhPSBw
+          cml2YWN5OgogICAgICAgIHByaW50KGYiV0FSTklORzogcmVxdWVzdGVkIHByaXZhY3kgJ3twcml2
+          YWN5fScgYnV0IFlvdVR1YmUgcmVwb3J0cyAne3JldHVybmVkfSciKQogICAgcmV0dXJuIHZpZGVv
+          X2lkCgoKIyAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+          LS0tLS0tLS0tLS0tLS0tLS0tIG1lbW9yeQpkZWYgcmVtZW1iZXIodG9waWMsIHZpZGVvX2lkLCBh
+          c3NldF9pZHMpOgogICAgdXNlZCA9IGxvYWRfbGlzdChVU0VEX0NPTlRFTlQpCiAgICB1c2VkLmFw
+          cGVuZCh7CiAgICAgICAgInRpdGxlIjogdG9waWNbInRpdGxlIl0sCiAgICAgICAgInRleHQiOiB0
+          b3BpY1sic2NyaXB0Il0sCiAgICAgICAgInNlYXJjaCI6ICIsICIuam9pbih0b3BpY1sidGVybXMi
+          XSksCiAgICAgICAgImZpbmdlcnByaW50IjogW25vcm0odG9waWNbInRpdGxlIl0pLCBub3JtKHRv
+          cGljWyJzY3JpcHQiXSksIG5vcm0oIiAiLmpvaW4odG9waWNbInRlcm1zIl0pKV0sCiAgICAgICAg
+          InZpZGVvX2lkIjogdmlkZW9faWQsCiAgICAgICAgInNhdmVkX2F0IjogaW50KHRpbWUudGltZSgp
+          KSwKICAgICAgICAibXB0X2lkIjogdG9waWNbImlkIl0sCiAgICAgICAgInNvdXJjZSI6ICJtcHQi
+          LAogICAgfSkKICAgIHdyaXRlX2pzb25fYXRvbWljKFVTRURfQ09OVEVOVCwgdXNlZCkKCiAgICBw
+          ZXhlbHMgPSBsb2FkX2xpc3QoVVNFRF9QRVhFTFMpCiAgICBrbm93biA9IHtzdHIoeCkgZm9yIHgg
+          aW4gcGV4ZWxzfQogICAgZnJlc2ggPSBbYSBmb3IgYSBpbiBhc3NldF9pZHMgaWYgYSBub3QgaW4g
+          a25vd25dCiAgICBvdmVybGFwID0gbGVuKGFzc2V0X2lkcykgLSBsZW4oZnJlc2gpCiAgICBwZXhl
+          bHMuZXh0ZW5kKGZyZXNoKQogICAgd3JpdGVfanNvbl9hdG9taWMoVVNFRF9QRVhFTFMsIHBleGVs
+          cykKICAgIHByaW50KGYiTWVtb3J5IHNhdmVkOiB7bGVuKHVzZWQpfSBjb250ZW50IHJlY29yZHM7
+          ICIKICAgICAgICAgIGYie2xlbihmcmVzaCl9IG5ldyBQZXhlbHMgaWRzICh7b3ZlcmxhcH0gaGFk
+          IGJlZW4gdXNlZCBiZWZvcmUpIikKCgojIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+          LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSBtYWluCmRlZiBtYWluKCk6CiAg
+          ICBwcml2YWN5ID0gb3MuZW52aXJvbi5nZXQoIlBSSVZBQ1kiLCAicHJpdmF0ZSIpLnN0cmlwKCku
+          bG93ZXIoKQogICAgaWYgcHJpdmFjeSBub3QgaW4gVkFMSURfUFJJVkFDWToKICAgICAgICBwcmlu
+          dChmIkVSUk9SOiBQUklWQUNZIG11c3QgYmUgb25lIG9mIHtWQUxJRF9QUklWQUNZfSwgZ290ICd7
+          cHJpdmFjeX0nIikKICAgICAgICByZXR1cm4gMgoKICAgIHRvcGljcyA9IGpzb24ubG9hZHMoVE9Q
+          SUNTX0ZJTEUucmVhZF90ZXh0KGVuY29kaW5nPSJ1dGYtOCIpKQogICAgdmFsaWRhdGVfdG9waWNz
+          KHRvcGljcykKICAgIHVzZWQgPSBsb2FkX2xpc3QoVVNFRF9DT05URU5UKQogICAgdG9waWMgPSBw
+          aWNrX3RvcGljKHRvcGljcywgdXNlZCwgb3MuZW52aXJvbi5nZXQoIkZPUkNFX1RPUElDX0lEIiwg
+          IiIpLnN0cmlwKCkgb3IgTm9uZSkKICAgIGlmIHRvcGljIGlzIE5vbmU6CiAgICAgICAgcHJpbnQo
+          IkVSUk9SOiBldmVyeSB0b3BpYyBpbiB0b3BpY3MuanNvbiBoYXMgYmVlbiB1c2VkLiBBZGQgbmV3
+          IHRvcGljcy4iKQogICAgICAgIHJldHVybiAzCiAgICBwcmludChmIlRvcGljOiB7dG9waWNbJ2lk
+          J119IC0ge3RvcGljWyd0aXRsZSddfSIpCiAgICBwcmludChmIlByaXZhY3kgbW9kZToge3ByaXZh
+          Y3l9IikKCiAgICBjaGVja19jbGlfc3VwcG9ydHNfZmxhZ3MoKQoKICAgIHZpZGVvLCBhc3NldF9p
+          ZHMsIHBhc3NlZCA9IE5vbmUsIFtdLCBGYWxzZQogICAgZm9yIGF0dGVtcHQgaW4gcmFuZ2UoMSwg
+          TUFYX0FUVEVNUFRTICsgMSk6CiAgICAgICAgcHJpbnQoZiJcbj09PT09IEF0dGVtcHQge2F0dGVt
+          cHR9L3tNQVhfQVRURU1QVFN9ID09PT09IikKICAgICAgICB0cnk6CiAgICAgICAgICAgIHZpZGVv
+          LCBsb2dfdGV4dCA9IGdlbmVyYXRlX3ZpZGVvKHRvcGljKQogICAgICAgIGV4Y2VwdCBFeGNlcHRp
+          b24gYXMgZXhjOgogICAgICAgICAgICBwcmludChmIkdlbmVyYXRpb24gZmFpbGVkOiB7ZXhjfSIp
+          CiAgICAgICAgICAgIGNvbnRpbnVlCiAgICAgICAgYXNzZXRfaWRzID0gcGFyc2VfYXNzZXRfaWRz
+          KGxvZ190ZXh0KQogICAgICAgIHBhc3NlZCwgcmVwb3J0ID0gY2hlY2tfdmlkZW8uY2hlY2sodmlk
+          ZW8sIFJFVklFV19ESVIgLyBmImF0dGVtcHR7YXR0ZW1wdH0iKQogICAgICAgIHByaW50KCJcbiIu
+          am9pbihyZXBvcnQpKQogICAgICAgIHByaW50KCJRVUFMSVRZIENIRUNLOiIsICJQQVNTIiBpZiBw
+          YXNzZWQgZWxzZSAiRkFJTCIpCiAgICAgICAgaWYgcGFzc2VkOgogICAgICAgICAgICBicmVhawoK
+          ICAgIGlmIG5vdCBwYXNzZWQ6CiAgICAgICAgcHJpbnQoIlxuRVJST1I6IG5vIGF0dGVtcHQgcGFz
+          c2VkIHRoZSBxdWFsaXR5IGNoZWNrLiBOb3RoaW5nIHdhcyB1cGxvYWRlZCAiCiAgICAgICAgICAg
+          ICAgImFuZCBubyBtZW1vcnkgd2FzIHdyaXR0ZW4uIikKICAgICAgICByZXR1cm4gMQoKICAgIE9V
+          VFBVVF9ESVIubWtkaXIoZXhpc3Rfb2s9VHJ1ZSkKICAgIGZpbmFsX2NvcHkgPSBPVVRQVVRfRElS
+          IC8gInNob3J0Lm1wNCIKICAgIHNodXRpbC5jb3B5Mih2aWRlbywgZmluYWxfY29weSkKCiAgICBp
+          ZiBwcml2YWN5ID09ICJub25lIjoKICAgICAgICBwcmludCgiXG5EcnkgcnVuIChQUklWQUNZPW5v
+          bmUpOiBza2lwcGluZyB1cGxvYWQgYW5kIG1lbW9yeS4iKQogICAgICAgIHJldHVybiAwCgogICAg
+          Zm9yIG5hbWUgaW4gKCJZT1VUVUJFX0NMSUVOVF9JRCIsICJZT1VUVUJFX0NMSUVOVF9TRUNSRVQi
+          LCAiWU9VVFVCRV9SRUZSRVNIX1RPS0VOIik6CiAgICAgICAgaWYgbm90IG9zLmVudmlyb24uZ2V0
+          KG5hbWUpOgogICAgICAgICAgICBwcmludChmIkVSUk9SOiBzZWNyZXQge25hbWV9IGlzIG1pc3Np
+          bmciKQogICAgICAgICAgICByZXR1cm4gNAoKICAgIHZpZGVvX2lkID0gdXBsb2FkX3ZpZGVvKGZp
+          bmFsX2NvcHksIHRvcGljLCBwcml2YWN5KQogICAgcmVtZW1iZXIodG9waWMsIHZpZGVvX2lkLCBh
+          c3NldF9pZHMpCiAgICByZXR1cm4gMAoKCmlmIF9fbmFtZV9fID09ICJfX21haW5fXyI6CiAgICB0
+          cnk6CiAgICAgICAgc3lzLmV4aXQobWFpbigpKQogICAgZXhjZXB0IFN5c3RlbUV4aXQ6CiAgICAg
+          ICAgcmFpc2UKICAgIGV4Y2VwdCBFeGNlcHRpb24gYXMgZXhjOiAgIyBub3FhOiBCTEUwMDEKICAg
+          ICAgICBwcmludChmIkVSUk9SOiB7dHlwZShleGMpLl9fbmFtZV9ffToge2V4Y30iKQogICAgICAg
+          IHN5cy5leGl0KDEpCg==
+          B64_RUN_DAILY
+          decode mpt_daily/check_video.py 0a9fdb8c02f2fea41574f4b5ac1847bd03d6e57ec40d96b7d1232e8921e62660 <<'B64_CHECK_VIDEO'
+          IyEvdXNyL2Jpbi9lbnYgcHl0aG9uMwoiIiLZgdit2LUg2KzZiNiv2Kkg2KfZhNmB2YrYr9mK2Ygg
+          2YLYqNmEINin2YTZhti02LEuCgrYp9mE2KfYs9iq2LnZhdin2YQ6ICBweXRob24gY2hlY2tfdmlk
+          ZW8ucHkgVklERU8ubXA0IFtSRVZJRVdfRElSXQoK2YrYt9io2Lkg2KrZgtix2YrYsdmL2KfYjCDZ
+          iNmK2K7YsdisINio2LHZhdiyIDAg2LnZhtivINin2YTZhtis2KfYrSDZiDEg2LnZhtivINmB2LTZ
+          hCDYo9mKINmB2K3YtSDYo9iz2KfYs9mKLgrZitit2YHYuCDZgdmKIFJFVklFV19ESVIg2LXZiNix
+          2Kkg2YXYrNmF2ZHYudipIChjb250YWN0X3NoZWV0LmpwZykg2YTZhdix2KfYrNi52KrZgyDYqNin
+          2YTYudmK2YYuCgrZhdinINmK2YHYrdi12Ycg2KLZhNmK2YvYpzoKICAtINin2YTZhdmE2YEg2YLY
+          p9io2YQg2YTZhNmC2LHYp9ih2Kkg2YjZhdmD2KrZhdmECiAgLSDYp9mE2YXYr9ipICgxNSDYpdmE
+          2YkgNTkg2KvYp9mG2YrYqSkKICAtINin2YTYr9mC2KkgMTA4MHgxOTIwINmI2YXYudiv2YQg2KfZ
+          hNil2LfYp9ix2KfYqgogIC0g2YjYrNmI2K8g2YXYs9in2LEg2LXZiNiq2Iwg2YjYudiv2YUg2YPZ
+          iNmG2Ycg2LXYp9mF2KrZi9inCiAgLSDYudiv2YUg2YjYrNmI2K8g2LXZhdiqINi32YjZitmE2Iwg
+          2YjYudiv2YUg2YjYrNmI2K8g2LTYp9i02Kkg2LPZiNiv2KfYoSDYt9mI2YrZhNipCiAgLSDYqtmI
+          2KfZgdmCINmF2K/YqSDYp9mE2LXZiNiqINmF2Lkg2YXYr9ipINin2YTZgdmK2K/ZitmICiAgLSDY
+          uNmH2YjYsSDZiNis2YjZhyDYqNi02LHZitipICjZg9i02YEg2KrZgtix2YrYqNmK2Iwg2YrYrdis
+          2Kgg2KfZhNmG2LTYsSDYpdiw2Kcg2KrZg9ix2LEpCgrZhdinINmE2Kcg2YrZgdit2LXZhyDYotmE
+          2YrZi9inICjYsdin2KzYudmHINio2KfZhNi52YrZhiDZhdmGINin2YTYtdmI2LHYqSDYp9mE2YXY
+          rNmF2ZHYudipKToKICAtINi12K3YqSDYp9mE2KrYsdis2YXYqSDYp9mE2LnYsdio2YrYqSDZiNiq
+          2LHYqtmK2KjZh9inCiAgLSDYtdmE2Kkg2KfZhNmE2YLYt9in2Kog2KjYp9mE2YXZiNi22YjYuQoi
+          IiIKaW1wb3J0IGpzb24KaW1wb3J0IHJlCmltcG9ydCBzdWJwcm9jZXNzCmltcG9ydCBzeXMKZnJv
+          bSBwYXRobGliIGltcG9ydCBQYXRoCgpNSU5fRFVSQVRJT04gPSAxNS4wCk1BWF9EVVJBVElPTiA9
+          IDU5LjUKRVhQRUNURURfU0laRSA9ICgxMDgwLCAxOTIwKQpNSU5fTUVBTl9WT0xVTUVfREIgPSAt
+          MzUuMApNQVhfU0lMRU5DRV9TRUNPTkRTID0gMi41Ck1BWF9CTEFDS19TRUNPTkRTID0gMS4wCk1B
+          WF9BVl9ESUZGX1NFQ09ORFMgPSAxLjUKRkFDRV9GUkFNRVNfVE9fQkxPQ0sgPSAyCgoKZGVmIHJ1
+          bihjbWQpOgogICAgcmV0dXJuIHN1YnByb2Nlc3MucnVuKGNtZCwgY2FwdHVyZV9vdXRwdXQ9VHJ1
+          ZSwgdGV4dD1UcnVlLCBlcnJvcnM9InJlcGxhY2UiKQoKCmRlZiBwcm9iZShwYXRoKToKICAgIHAg
+          PSBydW4oWyJmZnByb2JlIiwgIi12IiwgImVycm9yIiwgIi1wcmludF9mb3JtYXQiLCAianNvbiIs
+          CiAgICAgICAgICAgICAiLXNob3dfZm9ybWF0IiwgIi1zaG93X3N0cmVhbXMiLCBzdHIocGF0aCld
+          KQogICAgaWYgcC5yZXR1cm5jb2RlICE9IDA6CiAgICAgICAgcmFpc2UgUnVudGltZUVycm9yKCJm
+          ZnByb2JlIGZhaWxlZDogIiArIHAuc3RkZXJyLnN0cmlwKClbOjMwMF0pCiAgICByZXR1cm4ganNv
+          bi5sb2FkcyhwLnN0ZG91dCkKCgpkZWYgZGVjb2RlX3dob2xlX2ZpbGUocGF0aCk6CiAgICAiIiLZ
+          itmC2LHYoyDYp9mE2YXZhNmBINmD2KfZhdmE2YvYpyDZhNmE2KrYo9mD2K8g2KPZhtmHINi62YrY
+          sSDYqtin2YTZgS4iIiIKICAgIHAgPSBydW4oWyJmZm1wZWciLCAiLXYiLCAiZXJyb3IiLCAiLWki
+          LCBzdHIocGF0aCksICItZiIsICJudWxsIiwgIi0iXSkKICAgIHJldHVybiBwLnJldHVybmNvZGUg
+          PT0gMCBhbmQgbm90IHAuc3RkZXJyLnN0cmlwKCksIHAuc3RkZXJyLnN0cmlwKClbOjMwMF0KCgpk
+          ZWYgdm9sdW1lX3N0YXRzKHBhdGgpOgogICAgcCA9IHJ1bihbImZmbXBlZyIsICItaGlkZV9iYW5u
+          ZXIiLCAiLWkiLCBzdHIocGF0aCksICItdm4iLAogICAgICAgICAgICAgIi1hZiIsICJ2b2x1bWVk
+          ZXRlY3QiLCAiLWYiLCAibnVsbCIsICItIl0pCiAgICBtID0gcmUuc2VhcmNoKHIibWVhbl92b2x1
+          bWU6XHMqKC0/W1xkLl0rfC1pbmYpIGRCIiwgcC5zdGRlcnIpCiAgICBpZiBub3QgbToKICAgICAg
+          ICByZXR1cm4gTm9uZQogICAgcmV0dXJuIGZsb2F0KCItaW5mIikgaWYgbS5ncm91cCgxKSA9PSAi
+          LWluZiIgZWxzZSBmbG9hdChtLmdyb3VwKDEpKQoKCmRlZiBsb25nZXN0X3NpbGVuY2UocGF0aCk6
+          CiAgICBwID0gcnVuKFsiZmZtcGVnIiwgIi1oaWRlX2Jhbm5lciIsICItaSIsIHN0cihwYXRoKSwg
+          Ii12biIsCiAgICAgICAgICAgICAiLWFmIiwgInNpbGVuY2VkZXRlY3Q9bm9pc2U9LTQwZEI6ZD0w
+          LjgiLCAiLWYiLCAibnVsbCIsICItIl0pCiAgICBkdXJhdGlvbnMgPSBbZmxvYXQoeCkgZm9yIHgg
+          aW4gcmUuZmluZGFsbChyInNpbGVuY2VfZHVyYXRpb246XHMqKFtcZC5dKykiLCBwLnN0ZGVycild
+          CiAgICAjINi12YXYqiDZitmG2KrZh9mKINmF2Lkg2YbZh9in2YrYqSDYp9mE2YXZhNmBINmE2Kcg
+          2YrYuNmH2LEg2YTZhyBzaWxlbmNlX2R1cmF0aW9u2Iwg2YHZhtmB2K3YtdmHINij2YrYttmL2KcK
+          ICAgIHN0YXJ0cyA9IHJlLmZpbmRhbGwociJzaWxlbmNlX3N0YXJ0OlxzKihbXGQuXSspIiwgcC5z
+          dGRlcnIpCiAgICBlbmRzID0gcmUuZmluZGFsbChyInNpbGVuY2VfZW5kOiIsIHAuc3RkZXJyKQog
+          ICAgb3Blbl9zdGFydCA9IGZsb2F0KHN0YXJ0c1stMV0pIGlmIGxlbihzdGFydHMpID4gbGVuKGVu
+          ZHMpIGVsc2UgTm9uZQogICAgcmV0dXJuIChtYXgoZHVyYXRpb25zKSBpZiBkdXJhdGlvbnMgZWxz
+          ZSAwLjApLCBvcGVuX3N0YXJ0CgoKZGVmIGJsYWNrX3RvdGFsKHBhdGgpOgogICAgcCA9IHJ1bihb
+          ImZmbXBlZyIsICItaGlkZV9iYW5uZXIiLCAiLWkiLCBzdHIocGF0aCksICItYW4iLAogICAgICAg
+          ICAgICAgIi12ZiIsICJibGFja2RldGVjdD1kPTAuNDpwaXhfdGg9MC4xMCIsICItZiIsICJudWxs
+          IiwgIi0iXSkKICAgIHJldHVybiBzdW0oZmxvYXQoeCkgZm9yIHggaW4gcmUuZmluZGFsbChyImJs
+          YWNrX2R1cmF0aW9uOihbXGQuXSspIiwgcC5zdGRlcnIpKQoKCmRlZiBjb3VudF9mYWNlX2ZyYW1l
+          cyhwYXRoLCBkdXJhdGlvbik6CiAgICAiIiLZitij2K7YsCDZhNmC2LfYqSDZg9mEINir2KfZhtmK
+          2KrZitmGINiq2YLYsdmK2KjZi9in2Iwg2YjZiti52K/ZkSDYp9mE2YTZgti32KfYqiDYp9mE2KrZ
+          iiDYuNmH2LEg2YHZitmH2Kcg2YjYrNmHLiIiIgogICAgdHJ5OgogICAgICAgIGltcG9ydCBjdjIK
+          ICAgIGV4Y2VwdCBFeGNlcHRpb24gYXMgZXhjOiAgIyBvcGVuY3Yg2LrZitixINmF2KvYqNiqCiAg
+          ICAgICAgcmV0dXJuIE5vbmUsIGYib3BlbmN2IG5vdCBhdmFpbGFibGUgKHtleGN9KSIKCiAgICB0
+          cnk6CiAgICAgICAgY2FzY2FkZSA9IGN2Mi5DYXNjYWRlQ2xhc3NpZmllcigKICAgICAgICAgICAg
+          Y3YyLmRhdGEuaGFhcmNhc2NhZGVzICsgImhhYXJjYXNjYWRlX2Zyb250YWxmYWNlX2RlZmF1bHQu
+          eG1sIikKICAgICAgICBpZiBjYXNjYWRlLmVtcHR5KCk6CiAgICAgICAgICAgIHJldHVybiBOb25l
+          LCAiZmFjZSBjYXNjYWRlIGZpbGUgY291bGQgbm90IGJlIGxvYWRlZCIKICAgIGV4Y2VwdCBFeGNl
+          cHRpb24gYXMgZXhjOgogICAgICAgIHJldHVybiBOb25lLCBmImZhY2UgZGV0ZWN0b3IgdW5hdmFp
+          bGFibGUgKHtleGN9KSIKICAgIGNhcCA9IGN2Mi5WaWRlb0NhcHR1cmUoc3RyKHBhdGgpKQogICAg
+          aWYgbm90IGNhcC5pc09wZW5lZCgpOgogICAgICAgIHJldHVybiBOb25lLCAiY2Fubm90IG9wZW4g
+          dmlkZW8gZm9yIHNhbXBsaW5nIgoKICAgIGZhY2VfZnJhbWVzID0gMAogICAgdCA9IDEuMAogICAg
+          d2hpbGUgdCA8IGR1cmF0aW9uIC0gMC41OgogICAgICAgIGNhcC5zZXQoY3YyLkNBUF9QUk9QX1BP
+          U19NU0VDLCB0ICogMTAwMCkKICAgICAgICBvaywgZnJhbWUgPSBjYXAucmVhZCgpCiAgICAgICAg
+          aWYgbm90IG9rOgogICAgICAgICAgICBicmVhawogICAgICAgIGdyYXkgPSBjdjIuY3Z0Q29sb3Io
+          ZnJhbWUsIGN2Mi5DT0xPUl9CR1IyR1JBWSkKICAgICAgICBmYWNlcyA9IGNhc2NhZGUuZGV0ZWN0
+          TXVsdGlTY2FsZSgKICAgICAgICAgICAgZ3JheSwgc2NhbGVGYWN0b3I9MS4xLCBtaW5OZWlnaGJv
+          cnM9NiwgbWluU2l6ZT0oOTAsIDkwKSkKICAgICAgICBpZiBsZW4oZmFjZXMpID4gMDoKICAgICAg
+          ICAgICAgZmFjZV9mcmFtZXMgKz0gMQogICAgICAgIHQgKz0gMi4wCiAgICBjYXAucmVsZWFzZSgp
+          CgogICAgcmV0dXJuIGZhY2VfZnJhbWVzLCBOb25lCgoKZGVmIG1ha2VfY29udGFjdF9zaGVldChw
+          YXRoLCBkdXJhdGlvbiwgcmV2aWV3X2Rpcik6CiAgICAiIiLYtdmI2LHYqSDZhdis2YXZkdi52Kkg
+          2YXZhiA4INmE2YLYt9in2Kog2YTZhdix2KfYrNi52KrZgyDYqNin2YTYudmK2YYgKNi52KjYsSBm
+          Zm1wZWcpLiIiIgogICAgaWYgbm90IHJldmlld19kaXI6CiAgICAgICAgcmV0dXJuCiAgICB0cnk6
+          CiAgICAgICAgb3V0ID0gUGF0aChyZXZpZXdfZGlyKQogICAgICAgIG91dC5ta2RpcihwYXJlbnRz
+          PVRydWUsIGV4aXN0X29rPVRydWUpCiAgICAgICAgaW50ZXJ2YWwgPSBtYXgoMS4wLCBkdXJhdGlv
+          biAvIDguMCkKICAgICAgICBydW4oWyJmZm1wZWciLCAiLXYiLCAiZXJyb3IiLCAiLXkiLCAiLWki
+          LCBzdHIocGF0aCksCiAgICAgICAgICAgICAiLXZmIiwgZiJmcHM9MS97aW50ZXJ2YWw6LjJmfSxz
+          Y2FsZT0yNzA6NDgwLHRpbGU9NHgyIiwKICAgICAgICAgICAgICItZnJhbWVzOnYiLCAiMSIsICIt
+          cTp2IiwgIjMiLCBzdHIob3V0IC8gImNvbnRhY3Rfc2hlZXQuanBnIildKQogICAgZXhjZXB0IEV4
+          Y2VwdGlvbiBhcyBleGM6CiAgICAgICAgcHJpbnQoZiIoY291bGQgbm90IHdyaXRlIGNvbnRhY3Qg
+          c2hlZXQ6IHtleGN9KSIpCgoKZGVmIGNoZWNrKHBhdGgsIHJldmlld19kaXI9Tm9uZSk6CiAgICAi
+          IiLZiti52YrYryAo2YbYrNit2J/YjCDZgtin2KbZhdipINij2LPYt9ixINin2YTYqtmC2LHZitix
+          KS4iIiIKICAgIHJlcG9ydCA9IFtdCiAgICBmYWlsZWQgPSBbXQoKICAgIGRlZiBvayhtc2cpOgog
+          ICAgICAgIHJlcG9ydC5hcHBlbmQoIlBBU1MgICIgKyBtc2cpCgogICAgZGVmIGJhZChtc2cpOgog
+          ICAgICAgIHJlcG9ydC5hcHBlbmQoIkZBSUwgICIgKyBtc2cpCiAgICAgICAgZmFpbGVkLmFwcGVu
+          ZChtc2cpCgogICAgZGVmIG5vdGUobXNnKToKICAgICAgICByZXBvcnQuYXBwZW5kKCJOT1RFICAi
+          ICsgbXNnKQoKICAgIHBhdGggPSBQYXRoKHBhdGgpCiAgICBpZiBub3QgcGF0aC5pc19maWxlKCkg
+          b3IgcGF0aC5zdGF0KCkuc3Rfc2l6ZSA9PSAwOgogICAgICAgIHJldHVybiBGYWxzZSwgWyJGQUlM
+          ICBmaWxlIG1pc3Npbmcgb3IgZW1wdHkiXQoKICAgIHRyeToKICAgICAgICBpbmZvID0gcHJvYmUo
+          cGF0aCkKICAgIGV4Y2VwdCBFeGNlcHRpb24gYXMgZXhjOgogICAgICAgIHJldHVybiBGYWxzZSwg
+          W2YiRkFJTCAgdW5yZWFkYWJsZSB2aWRlbzoge2V4Y30iXQoKICAgIHN0cmVhbXMgPSBpbmZvLmdl
+          dCgic3RyZWFtcyIsIFtdKQogICAgdmlkZW8gPSBuZXh0KChzIGZvciBzIGluIHN0cmVhbXMgaWYg
+          cy5nZXQoImNvZGVjX3R5cGUiKSA9PSAidmlkZW8iKSwgTm9uZSkKICAgIGF1ZGlvID0gbmV4dCgo
+          cyBmb3IgcyBpbiBzdHJlYW1zIGlmIHMuZ2V0KCJjb2RlY190eXBlIikgPT0gImF1ZGlvIiksIE5v
+          bmUpCiAgICBkdXJhdGlvbiA9IGZsb2F0KGluZm8uZ2V0KCJmb3JtYXQiLCB7fSkuZ2V0KCJkdXJh
+          dGlvbiIsIDApIG9yIDApCiAgICBzaXplX21iID0gcGF0aC5zdGF0KCkuc3Rfc2l6ZSAvIDFlNgog
+          ICAgbm90ZShmInNpemUge3NpemVfbWI6LjFmfSBNQiwgZHVyYXRpb24ge2R1cmF0aW9uOi4xZn1z
+          IikKCiAgICBpZiBub3QgdmlkZW86CiAgICAgICAgYmFkKCJubyB2aWRlbyBzdHJlYW0iKQogICAg
+          ICAgIHJldHVybiBGYWxzZSwgcmVwb3J0CgogICAgd2lkdGgsIGhlaWdodCA9IGludCh2aWRlby5n
+          ZXQoIndpZHRoIiwgMCkpLCBpbnQodmlkZW8uZ2V0KCJoZWlnaHQiLCAwKSkKICAgIGlmICh3aWR0
+          aCwgaGVpZ2h0KSA9PSBFWFBFQ1RFRF9TSVpFOgogICAgICAgIG9rKGYicmVzb2x1dGlvbiB7d2lk
+          dGh9eHtoZWlnaHR9IikKICAgIGVsc2U6CiAgICAgICAgYmFkKGYicmVzb2x1dGlvbiB7d2lkdGh9
+          eHtoZWlnaHR9LCBleHBlY3RlZCB7RVhQRUNURURfU0laRVswXX14e0VYUEVDVEVEX1NJWkVbMV19
+          IikKCiAgICB0cnk6CiAgICAgICAgbnVtLCBkZW4gPSB2aWRlby5nZXQoImF2Z19mcmFtZV9yYXRl
+          IiwgIjAvMSIpLnNwbGl0KCIvIikKICAgICAgICBmcHMgPSBmbG9hdChudW0pIC8gZmxvYXQoZGVu
+          KSBpZiBmbG9hdChkZW4pIGVsc2UgMC4wCiAgICBleGNlcHQgRXhjZXB0aW9uOgogICAgICAgIGZw
+          cyA9IDAuMAogICAgaWYgMjMuMCA8PSBmcHMgPD0gNjEuMDoKICAgICAgICBvayhmImZyYW1lIHJh
+          dGUge2ZwczouMWZ9IGZwcyIpCiAgICBlbHNlOgogICAgICAgIGJhZChmImZyYW1lIHJhdGUge2Zw
+          czouMWZ9IGZwcyBpcyBub3QgdmFsaWQiKQoKICAgIGlmIE1JTl9EVVJBVElPTiA8PSBkdXJhdGlv
+          biA8PSBNQVhfRFVSQVRJT046CiAgICAgICAgb2soZiJkdXJhdGlvbiB7ZHVyYXRpb246LjFmfXMg
+          d2l0aGluIHtNSU5fRFVSQVRJT046LjBmfS17TUFYX0RVUkFUSU9OOi4wZn1zIikKICAgIGVsc2U6
+          CiAgICAgICAgYmFkKGYiZHVyYXRpb24ge2R1cmF0aW9uOi4xZn1zIG91dHNpZGUge01JTl9EVVJB
+          VElPTjouMGZ9LXtNQVhfRFVSQVRJT046LjBmfXMiKQoKICAgIGNvbXBsZXRlLCBlcnIgPSBkZWNv
+          ZGVfd2hvbGVfZmlsZShwYXRoKQogICAgaWYgY29tcGxldGU6CiAgICAgICAgb2soImZpbGUgZGVj
+          b2RlcyBjb21wbGV0ZWx5IHdpdGhvdXQgZXJyb3JzIikKICAgIGVsc2U6CiAgICAgICAgYmFkKGYi
+          ZGVjb2RlIGVycm9yczoge2Vycn0iKQoKICAgIGlmIG5vdCBhdWRpbzoKICAgICAgICBiYWQoIm5v
+          IGF1ZGlvIHN0cmVhbSIpCiAgICBlbHNlOgogICAgICAgIGFfZHVyID0gZmxvYXQoYXVkaW8uZ2V0
+          KCJkdXJhdGlvbiIsIDApIG9yIDApIG9yIGR1cmF0aW9uCiAgICAgICAgaWYgYWJzKGFfZHVyIC0g
+          ZHVyYXRpb24pIDw9IE1BWF9BVl9ESUZGX1NFQ09ORFM6CiAgICAgICAgICAgIG9rKGYiYXVkaW8v
+          dmlkZW8gbGVuZ3RoIG1hdGNoICh7YV9kdXI6LjFmfXMgdnMge2R1cmF0aW9uOi4xZn1zKSIpCiAg
+          ICAgICAgZWxzZToKICAgICAgICAgICAgYmFkKGYiYXVkaW8ge2FfZHVyOi4xZn1zIHZzIHZpZGVv
+          IHtkdXJhdGlvbjouMWZ9cyBkaWZmZXIgdG9vIG11Y2giKQoKICAgICAgICBtZWFuX2RiID0gdm9s
+          dW1lX3N0YXRzKHBhdGgpCiAgICAgICAgaWYgbWVhbl9kYiBpcyBOb25lIG9yIG1lYW5fZGIgPCBN
+          SU5fTUVBTl9WT0xVTUVfREI6CiAgICAgICAgICAgIGJhZChmImF1ZGlvIHRvbyBxdWlldCBvciBz
+          aWxlbnQgKG1lYW4gdm9sdW1lIHttZWFuX2RifSBkQikiKQogICAgICAgIGVsc2U6CiAgICAgICAg
+          ICAgIG9rKGYiYXVkaW8gbGV2ZWwgZmluZSAobWVhbiB7bWVhbl9kYjouMWZ9IGRCKSIpCgogICAg
+          ICAgIGxvbmdlc3QsIG9wZW5fc3RhcnQgPSBsb25nZXN0X3NpbGVuY2UocGF0aCkKICAgICAgICBp
+          ZiBsb25nZXN0ID4gTUFYX1NJTEVOQ0VfU0VDT05EUzoKICAgICAgICAgICAgYmFkKGYic2lsZW5j
+          ZSBvZiB7bG9uZ2VzdDouMWZ9cyBpbnNpZGUgdGhlIHZpZGVvIikKICAgICAgICBlbGlmIG9wZW5f
+          c3RhcnQgaXMgbm90IE5vbmUgYW5kIGR1cmF0aW9uIC0gb3Blbl9zdGFydCA+IE1BWF9TSUxFTkNF
+          X1NFQ09ORFM6CiAgICAgICAgICAgIGJhZChmInNpbGVudCB0YWlsIG9mIHtkdXJhdGlvbiAtIG9w
+          ZW5fc3RhcnQ6LjFmfXMgYXQgdGhlIGVuZCIpCiAgICAgICAgZWxzZToKICAgICAgICAgICAgb2so
+          ZiJubyBsb25nIHNpbGVuY2UgKGxvbmdlc3Qge2xvbmdlc3Q6LjFmfXMpIikKCiAgICBibGFjayA9
+          IGJsYWNrX3RvdGFsKHBhdGgpCiAgICBpZiBibGFjayA+IE1BWF9CTEFDS19TRUNPTkRTOgogICAg
+          ICAgIGJhZChmImJsYWNrIHNjcmVlbiB0b3RhbHMge2JsYWNrOi4xZn1zIikKICAgIGVsc2U6CiAg
+          ICAgICAgb2soZiJubyBsb25nIGJsYWNrIHNjcmVlbiAoe2JsYWNrOi4xZn1zKSIpCgogICAgbWFr
+          ZV9jb250YWN0X3NoZWV0KHBhdGgsIGR1cmF0aW9uLCByZXZpZXdfZGlyKQogICAgZmFjZV9mcmFt
+          ZXMsIGZhY2VfZXJyID0gY291bnRfZmFjZV9mcmFtZXMocGF0aCwgZHVyYXRpb24pCiAgICBpZiBm
+          YWNlX2ZyYW1lcyBpcyBOb25lOgogICAgICAgIG5vdGUoZiJmYWNlIGNoZWNrIHNraXBwZWQ6IHtm
+          YWNlX2Vycn0iKQogICAgZWxpZiBmYWNlX2ZyYW1lcyA+PSBGQUNFX0ZSQU1FU19UT19CTE9DSzoK
+          ICAgICAgICBiYWQoZiJmYWNlcyBkZXRlY3RlZCBpbiB7ZmFjZV9mcmFtZXN9IHNhbXBsZWQgZnJh
+          bWVzIChwZW9wbGUgYXJlIG5vdCBhbGxvd2VkKSIpCiAgICBlbGlmIGZhY2VfZnJhbWVzID09IDE6
+          CiAgICAgICAgbm90ZSgiZmFjZSBkZXRlY3RlZCBpbiAxIHNhbXBsZWQgZnJhbWUgKGJlbG93IGJs
+          b2NrIHRocmVzaG9sZDsgY2hlY2sgdGhlIGNvbnRhY3Qgc2hlZXQpIikKICAgIGVsc2U6CiAgICAg
+          ICAgb2soIm5vIGZhY2VzIGRldGVjdGVkIGluIHNhbXBsZWQgZnJhbWVzIikKCiAgICBub3RlKCJz
+          dWJ0aXRsZSBjb3JyZWN0bmVzcyBhbmQgY2xpcCByZWxldmFuY2UgYXJlIE5PVCBjaGVja2VkIGF1
+          dG9tYXRpY2FsbHk7ICIKICAgICAgICAgImxvb2sgYXQgY29udGFjdF9zaGVldC5qcGciKQogICAg
+          cmV0dXJuIChub3QgZmFpbGVkKSwgcmVwb3J0CgoKZGVmIG1haW4oKToKICAgIGlmIGxlbihzeXMu
+          YXJndikgPCAyOgogICAgICAgIHByaW50KF9fZG9jX18pCiAgICAgICAgcmV0dXJuIDIKICAgIHJl
+          dmlld19kaXIgPSBzeXMuYXJndlsyXSBpZiBsZW4oc3lzLmFyZ3YpID4gMiBlbHNlIE5vbmUKICAg
+          IHBhc3NlZCwgcmVwb3J0ID0gY2hlY2soc3lzLmFyZ3ZbMV0sIHJldmlld19kaXIpCiAgICBwcmlu
+          dCgiXG4iLmpvaW4ocmVwb3J0KSkKICAgIHByaW50KCJSRVNVTFQ6IiwgIlBBU1MiIGlmIHBhc3Nl
+          ZCBlbHNlICJGQUlMIikKICAgIHJldHVybiAwIGlmIHBhc3NlZCBlbHNlIDEKCgppZiBfX25hbWVf
+          XyA9PSAiX19tYWluX18iOgogICAgc3lzLmV4aXQobWFpbigpKQo=
+          B64_CHECK_VIDEO
+          decode mpt_daily/merge_memory.py 11d9c2f3135b5035e84b8659bfc13ace58ac3df3f5c365432b6bc1fa535b29fb <<'B64_MERGE_MEMORY'
+          IyEvdXNyL2Jpbi9lbnYgcHl0aG9uMwoiIiLZitiv2YXYrCDYsNin2YPYsdipINmH2LDYpyDYp9mE
+          2KrYtNi62YrZhCDZhdi5INij2K3Yr9irINmG2LPYrtipINmF2YYgR2l0SHViINiv2YjZhiDYrdiw
+          2YEg2KPZiiDYs9is2YQuCgrYp9mE2KfYs9iq2LnZhdin2YQ6ICBweXRob24gbXB0X2RhaWx5L21l
+          cmdlX21lbW9yeS5weSBHRU5FUkFURURfRElSCijZitmP2YbZgdmO2ZHYsCDZhdmGINis2LDYsSDY
+          p9mE2YXYs9iq2YjYr9i5INio2LnYryBnaXQgcmVzZXQgLS1oYXJkIG9yaWdpbi9tYWluKQoiIiIK
+          aW1wb3J0IGpzb24KaW1wb3J0IHN5cwpmcm9tIHBhdGhsaWIgaW1wb3J0IFBhdGgKCkZJTEVTID0g
+          KCJ1c2VkX2NvbnRlbnQuanNvbiIsICJ1c2VkX3BleGVscy5qc29uIikKCgpkZWYgbG9hZF9saXN0
+          KHBhdGgpOgogICAgaWYgbm90IHBhdGguZXhpc3RzKCk6CiAgICAgICAgcmV0dXJuIFtdCiAgICB0
+          cnk6CiAgICAgICAgZGF0YSA9IGpzb24ubG9hZHMocGF0aC5yZWFkX3RleHQoZW5jb2Rpbmc9InV0
+          Zi04IikpCiAgICBleGNlcHQgRXhjZXB0aW9uOgogICAgICAgIHByaW50KGYiV0FSTklORzogY291
+          bGQgbm90IHJlYWQge3BhdGh9OyB0cmVhdGluZyBhcyBlbXB0eSIpCiAgICAgICAgcmV0dXJuIFtd
+          CiAgICByZXR1cm4gZGF0YSBpZiBpc2luc3RhbmNlKGRhdGEsIGxpc3QpIGVsc2UgW10KCgpkZWYg
+          a2V5KGl0ZW0pOgogICAgdHJ5OgogICAgICAgIHJldHVybiBqc29uLmR1bXBzKGl0ZW0sIGVuc3Vy
+          ZV9hc2NpaT1GYWxzZSwgc29ydF9rZXlzPVRydWUsIHNlcGFyYXRvcnM9KCIsIiwgIjoiKSkKICAg
+          IGV4Y2VwdCBFeGNlcHRpb246CiAgICAgICAgcmV0dXJuIHJlcHIoaXRlbSkKCgpkZWYgbWFpbigp
+          OgogICAgaWYgbGVuKHN5cy5hcmd2KSAhPSAyOgogICAgICAgIHByaW50KF9fZG9jX18pCiAgICAg
+          ICAgcmV0dXJuIDIKICAgIGdlbmVyYXRlZF9kaXIgPSBQYXRoKHN5cy5hcmd2WzFdKQogICAgZm9y
+          IG5hbWUgaW4gRklMRVM6CiAgICAgICAgZ2VuZXJhdGVkID0gZ2VuZXJhdGVkX2RpciAvIG5hbWUK
+          ICAgICAgICBpZiBub3QgZ2VuZXJhdGVkLmV4aXN0cygpOgogICAgICAgICAgICBwcmludChmIntu
+          YW1lfTogbm90aGluZyB0byBtZXJnZSIpCiAgICAgICAgICAgIGNvbnRpbnVlCiAgICAgICAgcmVt
+          b3RlID0gbG9hZF9saXN0KFBhdGgobmFtZSkpCiAgICAgICAgbWVyZ2VkLCBzZWVuID0gW10sIHNl
+          dCgpCiAgICAgICAgZm9yIGl0ZW0gaW4gcmVtb3RlICsgbG9hZF9saXN0KGdlbmVyYXRlZCk6CiAg
+          ICAgICAgICAgIGsgPSBrZXkoaXRlbSkKICAgICAgICAgICAgaWYgayBub3QgaW4gc2VlbjoKICAg
+          ICAgICAgICAgICAgIHNlZW4uYWRkKGspCiAgICAgICAgICAgICAgICBtZXJnZWQuYXBwZW5kKGl0
+          ZW0pCiAgICAgICAgUGF0aChuYW1lKS53cml0ZV90ZXh0KGpzb24uZHVtcHMobWVyZ2VkLCBlbnN1
+          cmVfYXNjaWk9RmFsc2UsIGluZGVudD0yKSArICJcbiIsCiAgICAgICAgICAgICAgICAgICAgICAg
+          ICAgICAgIGVuY29kaW5nPSJ1dGYtOCIpCiAgICAgICAgcHJpbnQoZiJ7bmFtZX06IHJlbW90ZSB7
+          bGVuKHJlbW90ZSl9ICsgZ2VuZXJhdGVkIC0+IHtsZW4obWVyZ2VkKX0gcmVjb3JkcyIpCiAgICBy
+          ZXR1cm4gMAoKCmlmIF9fbmFtZV9fID09ICJfX21haW5fXyI6CiAgICBzeXMuZXhpdChtYWluKCkp
+          Cg==
+          B64_MERGE_MEMORY
+          decode mpt_daily/requirements.txt 744324bcc1d73eb6a946bebf4ac3b26dcb5a637af8b051145423c66b8d3cd7f3 <<'B64_REQUIREMENTS'
+          Z29vZ2xlLWFwaS1weXRob24tY2xpZW50Cmdvb2dsZS1hdXRoCmdvb2dsZS1hdXRoLWh0dHBsaWIy
+          Cm9wZW5jdi1weXRob24taGVhZGxlc3MKbnVtcHkK
+          B64_REQUIREMENTS
+          decode "$RUNNER_TEMP/topics_embedded.json" 2dd0d748ac515ac60be2c47d3f4117916561d2be72f94e30381af42a77cffde9 <<'B64_TOPICS'
+          WwogewogICJpZCI6ICJocC12cy10b3JxdWUiLAogICJ0aXRsZSI6ICLZhdinINin2YTZgdix2YIg
+          2KjZitmGINin2YTZgtmI2Kkg2KfZhNit2LXYp9mG2YrYqSDZiNi52LLZhSDYp9mE2K/ZiNix2KfZ
+          htifIiwKICAic2NyaXB0IjogItmH2YQg2KrYs9in2KHZhNiqINmE2YXYp9iw2Kcg2KrZhti32YTZ
+          giDYqNi52LYg2KfZhNiz2YrYp9ix2KfYqiDYqNmC2YjYqdiMINio2YrZhtmF2Kcg2KrYqtiz2KfY
+          sdi5INij2K7YsdmJINi32YjZitmE2YvYp9ifINi52LLZhSDYp9mE2K/ZiNix2KfZhiDZh9mIINmC
+          2YjYqSDYp9mE2K/Zgdi5INin2YTYqtmKINiq2LTYudixINio2YfYpyDYudmG2K8g2KfZhNin2YbY
+          t9mE2KfZgi4g2KPZhdinINin2YTZgtmI2Kkg2KfZhNit2LXYp9mG2YrYqSDZgdiq2KzZhdi5INmH
+          2LDYpyDYp9mE2LnYstmFINmF2Lkg2LPYsdi52Kkg2K/ZiNix2KfZhiDYp9mE2YXYrdix2YMuINio
+          2LnYqNin2LHYqSDYqNiz2YrYt9ip2Iwg2KfZhNi52LLZhSDZiti52LfZitmDINin2YTYp9mG2K/Z
+          gdin2LnYjCDZiNin2YTZgtmI2Kkg2KfZhNit2LXYp9mG2YrYqSDYqti52LfZitmDINin2YTZgtiv
+          2LHYqSDYudmE2Ykg2YXZiNin2LXZhNipINin2YTYqtiz2KfYsdi5INi52YbYryDYp9mE2LPYsdi5
+          2KfYqiDYp9mE2LnYp9mE2YrYqS4iLAogICJ0ZXJtcyI6IFsKICAgImVuZ2luZSBjbG9zZSB1cCIs
+          CiAgICJzcG9ydHMgY2FyIGVuZ2luZSIsCiAgICJlbmdpbmUgcGlzdG9ucyIsCiAgICJjYXIgZW5n
+          aW5lIGJheSIKICBdCiB9LAogewogICJpZCI6ICJ0dXJiby12cy1zdXBlcmNoYXJnZXIiLAogICJ0
+          aXRsZSI6ICLYp9mE2KrZiNix2KjZiCDYo9mFINin2YTYs9mI2KjYsdiq2LTYp9ix2KzYsdifINij
+          2YrZh9mF2Kcg2KPZgtmI2YnYnyIsCiAgInNjcmlwdCI6ICLZg9mE2KfZh9mF2Kcg2YrYr9mB2Lkg
+          2YfZiNin2KHZiyDYo9mD2KvYsSDYpdmE2Ykg2KfZhNmF2K3YsdmDINmE2YrYstmK2K8g2YLZiNiq
+          2YfYjCDZhNmD2YYg2KjYt9ix2YrZgtiq2YrZhiDZhdiu2KrZhNmB2KrZitmGLiDYp9mE2KrZiNix
+          2KjZiCDZiti52YXZhCDYqNi62KfYstin2Kog2KfZhNi52KfYr9mF2Iwg2YHZhNinINmK2KPYrtiw
+          INmC2K/YsdipINin2YTZhdit2LHZgyDZhdio2KfYtNix2KnYjCDZhNmD2YbZhyDZgtivINmK2KrY
+          o9iu2LEg2YLZhNmK2YTZi9inINmB2Yog2KfZhNin2LPYqtis2KfYqNipLiDYo9mF2Kcg2KfZhNiz
+          2YjYqNix2KrYtNin2LHYrNixINmB2YrYr9mI2LEg2KjYs9mK2LEg2YXYqti12YQg2KjYp9mE2YXY
+          rdix2YPYjCDZgdiq2KPYqtmK2YMg2YLZiNiq2Ycg2YHZiNix2YvYpyDYudmG2K8g2KfZhNi22LrY
+          tyDYudmE2Ykg2KfZhNiv2YjYp9iz2KnYjCDZhNmD2YbZhyDZitiz2KrZh9mE2YMg2KzYstih2YvY
+          pyDZhdmGINmC2K/YsdipINin2YTZhdit2LHZgyDZhNmK2LnZhdmELiIsCiAgInRlcm1zIjogWwog
+          ICAidHVyYm9jaGFyZ2VyIiwKICAgInN1cGVyY2hhcmdlciBlbmdpbmUiLAogICAiY2FyIGVuZ2lu
+          ZSBiYXkiLAogICAiZW5naW5lIGNsb3NlIHVwIgogIF0KIH0sCiB7CiAgImlkIjogInY4LXNvdW5k
+          IiwKICAidGl0bGUiOiAi2YTZhdin2LDYpyDZhNmF2K3YsdmDINin2YTYq9mF2KfZhtmKINij2LPY
+          t9mI2KfZhtin2Kog2YfYsNinINin2YTYtdmI2Kog2KfZhNmF2YXZitiy2J8iLAogICJzY3JpcHQi
+          OiAi2LXZiNiqINin2YTZhdit2LHZgyDYsNmKINin2YTYq9mF2KfZhtmKINij2LPYt9mI2KfZhtin
+          2Kog2YTZitizINi12K/ZgdipLiDYpdmG2Ycg2YrYudiq2YXYryDYudmE2Ykg2KrYsdiq2YrYqCDY
+          p9i02KrYudin2YQg2KfZhNij2LPYt9mI2KfZhtin2Kog2YjYtNmD2YQg2LnZhdmI2K8g2KfZhNmF
+          2LHZgdmCLiDZgdmKINmD2KvZitixINmF2YYg2KfZhNmF2K3YsdmD2KfYqiDYp9mE2KPZhdix2YrZ
+          g9mK2Kkg2YrZj9iz2KrYrtiv2YUg2LnZhdmI2K8g2YXYsdmB2YIg2YXYqtmC2KfYt9i52Iwg2YHZ
+          iti12KjYrSDYrtix2YjYrCDYp9mE2LrYp9iy2KfYqiDYutmK2LEg2YXYqtiz2KfZiNmNINio2YrZ
+          hiDYrNmH2KrZiiDYp9mE2YXYrdix2YPYjCDZiNmK2YbYqtisINiw2YTZgyDYp9mE2YfYr9mK2LEg
+          2KfZhNi52YXZitmCINin2YTZhdiq2YLYt9i5LiDYo9mF2Kcg2KfZhNij2LnZhdiv2Kkg2KfZhNmF
+          2LPYt9it2Kkg2YHYqti52LfZiiDYtdmI2KrZi9inINij2LnZhNmJINmI2KPZg9ir2LEg2K3Yr9ip
+          LiIsCiAgInRlcm1zIjogWwogICAidjggZW5naW5lIiwKICAgImVuZ2luZSBleGhhdXN0IHBpcGVz
+          IiwKICAgImNhciBlbmdpbmUgY2xvc2UgdXAiLAogICAiZW5naW5lIHBpc3RvbnMiCiAgXQogfSwK
+          IHsKICAiaWQiOiAicm90YXJ5LWVuZ2luZSIsCiAgInRpdGxlIjogItin2YTZhdit2LHZgyDYp9mE
+          2K/ZiNin2LE6INmF2K3YsdmDINiz2YrYp9ix2Kkg2KjZhNinINmF2YPYp9io2LMhIiwKICAic2Ny
+          aXB0IjogItmK2YjYrNivINmF2K3YsdmDINiz2YrYp9ix2KfYqiDZhNinINmK2K3YqtmI2Yog2LnZ
+          hNmJINmF2YPYp9io2LMg2KrYqtit2LHZgyDYtdi52YjYr9mL2Kcg2YjZh9io2YjYt9mL2KcuINil
+          2YbZhyDYp9mE2YXYrdix2YMg2KfZhNiv2YjYp9ix2Iwg2YjZgdmK2Ycg2YXYq9mE2Ksg2K/ZiNin
+          2LEg2YrYqtit2LHZgyDYr9in2K7ZhCDYutix2YHYqSDYqNmK2LbZiNmK2Kkg2YTZitmD2YXZhCDY
+          o9i02YjYp9i3INin2YTYp9it2KrYsdin2YIuINmK2KrZhdmK2LIg2KjYrdis2YXZhyDYp9mE2LXY
+          utmK2LEg2YjZgtiv2LHYqtmHINi52YTZiSDYp9mE2K/ZiNix2KfZhiDYqNiz2LHYudin2Kog2LnY
+          p9mE2YrYqSDZiNi12YjYqtmHINin2YTZgdix2YrYry4g2YTZg9mGINmF2YYg2LnZitmI2KjZhyDY
+          p9iz2KrZh9mE2KfZgyDYp9mE2YjZgtmI2K8g2KfZhNmF2LHYqtmB2Lkg2YjYqtii2YPZhCDYp9mE
+          2KPYrtiq2KfZhSDYp9mE2LfYsdmB2YrYqSDZhdi5INin2YTYstmF2YYuIiwKICAidGVybXMiOiBb
+          CiAgICJyb3RhcnkgZW5naW5lIiwKICAgImVuZ2luZSBwYXJ0cyIsCiAgICJjYXIgZW5naW5lIGNs
+          b3NlIHVwIiwKICAgImVuZ2luZSBtZWNoYW5pY2FsIHBhcnRzIgogIF0KIH0sCiB7CiAgImlkIjog
+          ImVjdS10dW5pbmciLAogICJ0aXRsZSI6ICLZg9mK2YEg2KrYstmK2K8g2KjYsdmF2KzYqSDYp9mE
+          2YXYrdix2YMg2YLZiNipINin2YTYs9mK2KfYsdip2J8iLAogICJzY3JpcHQiOiAi2YrZhdmD2YYg
+          2LLZitin2K/YqSDZgtmI2Kkg2KjYudi2INin2YTYs9mK2KfYsdin2Kog2K/ZiNmGINiq2LrZitmK
+          2LEg2KPZiiDZgti32LnYqSDYqtmC2LHZitio2YvYp9iMINio2KrYudiv2YrZhCDYqNix2YXYrNip
+          INmI2K3Yr9ipINin2YTYqtit2YPZhSDZgdmKINin2YTZhdit2LHZgy4g2KrYutmK2ZHYsSDYp9mE
+          2KjYsdmF2KzYqSDZg9mF2YrYqSDYp9mE2YjZgtmI2K8g2YjYqtmI2YLZitiqINin2YTYtNix2KfY
+          sdip2Iwg2YjZgdmKINin2YTZhdit2LHZg9in2Kog2KfZhNiq2YjYsdio2YrZhtmK2Kkg2LbYuti3
+          INin2YTZh9mI2KfYoSDYp9mE2YXYr9mB2YjYuS4g2YjYqtmD2YjZhiDYp9mE2YXZg9in2LPYqCDY
+          o9mD2KjYsSDYudin2K/YqSDZgdmKINin2YTZhdit2LHZg9in2Kog2LDYp9iqINin2YTYtNin2K3Z
+          hi4g2YTZg9mGINiy2YrYp9iv2Kkg2KfZhNmC2YjYqSDYqtix2YHYuSDYp9mE2K3ZhdmEINi52YTZ
+          iSDYp9mE2KPYrNiy2KfYodiMINmI2YLYryDYqtik2KvYsSDZgdmKINin2YTYttmF2KfZhiDZiNi5
+          2YXYsSDYp9mE2YXYrdix2YMuIiwKICAidGVybXMiOiBbCiAgICJjYXIgZW5naW5lIGNvbnRyb2wg
+          dW5pdCIsCiAgICJjYXIgZWN1IiwKICAgImVuZ2luZSBiYXkiLAogICAiZW5naW5lIGVsZWN0cm9u
+          aWNzIgogIF0KIH0sCiB7CiAgImlkIjogImNvbGQtYWlyLWludGFrZSIsCiAgInRpdGxlIjogItmH
+          2YQg2YXYr9iu2YQg2KfZhNmH2YjYp9ihINin2YTYsdmK2KfYttmKINmK2LLZitivINin2YTZgtmI
+          2Kkg2YHYudmE2YvYp9ifIiwKICAic2NyaXB0IjogItmK2LnYqtmC2K8g2YPYq9mK2LHZiNmGINij
+          2YYg2KrYsdmD2YrYqCDZhdiv2K7ZhCDZh9mI2KfYoSDYsdmK2KfYttmKINmK2LbZitmBINmC2YjY
+          qSDZg9io2YrYsdipLiDYp9mE2K3ZgtmK2YLYqSDYo9mGINin2YTZhdmD2LPYqCDYutin2YTYqNmL
+          2Kcg2LXYutmK2LHYjCDZhNij2YYg2YXYr9iu2YQg2KfZhNmH2YjYp9ihINin2YTYo9i12YTZiiDZ
+          hdi12YXZhSDZhNmK2YPZgdmKINmF2LnYuNmFINin2YTZhdit2LHZg9in2KouINin2YTZgdmD2LHY
+          qSDYo9mGINmK2K/YrtmEINmH2YjYp9ihINij2KjYsdivINmI2KPZg9ir2LEg2YHZitit2KrYsdmC
+          INmI2YLZiNivINij2YPYq9ixLiDZhNmD2YYg2KfZhNmB2LHZgiDZgdmKINin2YTYutin2YTYqCDY
+          qNiz2YrYt9iMINmI2YLYryDZitiq2KPYq9ixINin2YTYrdiz2KfYsyDYpdiw2Kcg2YPYp9mGINin
+          2YTYqtix2YPZitioINix2K/Zitim2YvYpy4iLAogICJ0ZXJtcyI6IFsKICAgImNhciBhaXIgZmls
+          dGVyIiwKICAgImVuZ2luZSBhaXIgaW50YWtlIiwKICAgImVuZ2luZSBiYXkiLAogICAic3BvcnRz
+          IGNhciBlbmdpbmUiCiAgXQogfSwKIHsKICAiaWQiOiAic3BvcnQtZXhoYXVzdCIsCiAgInRpdGxl
+          IjogItmF2KfYsNinINmK2LrZitmR2LEg2KfZhNi52KfYr9mFINin2YTYsdmK2KfYttmKINmB2Yog
+          2LPZitin2LHYqtmD2J8iLAogICJzY3JpcHQiOiAi2KfZhNi52KfYr9mFINin2YTYo9i12YTZiiDZ
+          hdi12YXZhSDZhNmK2YPZiNmGINmH2KfYr9im2YvYpyDZiNi12K/ZitmC2YvYpyDZhNmE2KjZitim
+          2KkuINij2YXYpyDYp9mE2LnYp9iv2YUg2KfZhNix2YrYp9i22Yog2YHZitmC2YTZhCDZhdmC2KfZ
+          iNmF2Kkg2K7YsdmI2Kwg2KfZhNi62KfYstin2KrYjCDZiNmK2LrZitmR2LEg2KfZhNi12YjYqiDZ
+          hNmK2LXYqNitINij2LnZhNmJINmI2KPYudmF2YIuINmC2K8g2YrYttmK2YEg2YXZg9iz2KjZi9in
+          INio2LPZiti32YvYpyDZgdmKINin2YTZgtmI2KnYjCDZhNmD2YYg2KPYq9ix2Ycg2KfZhNij2YjY
+          ttitINmH2Ygg2KfZhNi12YjYqi4g2YjYp9mG2KrYqNmHINil2YTZiSDYo9mGINio2LnYtiDYp9mE
+          2KPZhti42YXYqSDYp9mE2YXYudiv2YTYqSDZgtivINiq2K7Yp9mE2YEg2YLZiNin2YbZitmGINin
+          2YTYttis2YrYrCDZgdmKINio2YTYr9mDLiIsCiAgInRlcm1zIjogWwogICAiY2FyIGV4aGF1c3Qg
+          cGlwZSIsCiAgICJleGhhdXN0IHRpcHMiLAogICAiY2FyIG11ZmZsZXIiLAogICAiZXhoYXVzdCBz
+          eXN0ZW0iCiAgXQogfSwKIHsKICAiaWQiOiAiZHJpZnQtcndkIiwKICAidGl0bGUiOiAi2YTZhdin
+          2LDYpyDZitmB2LbZkdmEINin2YTYr9ix2YrZgdiqINiz2YrYp9ix2KfYqiDYp9mE2K/Zgdi5INin
+          2YTYrtmE2YHZitifIiwKICAic2NyaXB0IjogItmB2Yog2KfZhNiv2LHZitmB2Kog2KrZhtiy2YTZ
+          giDYp9mE2LPZitin2LHYqSDYrNin2YbYqNmK2YvYpyDYqNmK2YbZhdinINmK2LjZhCDYp9mE2LPY
+          p9im2YIg2YXYqtit2YPZhdmL2Kcg2KjZh9inLiDZiNiq2YbYp9iz2Kgg2LDZhNmDINiz2YrYp9ix
+          2KfYqiDYp9mE2K/Zgdi5INin2YTYrtmE2YHZitiMINmE2KPZhiDYp9mE2YLZiNipINiq2LDZh9io
+          INil2YTZiSDYp9mE2LnYrNmE2KrZitmGINin2YTYrtmE2YHZitiq2YrZhtiMINio2YrZhtmF2Kcg
+          2KrYqtmI2YTZiSDYp9mE2KPZhdin2YXZitiq2KfZhiDYp9mE2KrZiNis2YrZhy4g2YHYudmG2K/Z
+          hdinINiq2YHZgtivINin2YTYrtmE2YHZitiq2KfZhiDYrNiy2KHZi9inINmF2YYg2KfZhNiq2YXY
+          p9iz2YMg2KrZhtiy2YTZgiDYp9mE2YXYpNiu2LHYqdiMINmI2YrYttio2Lcg2KfZhNiz2KfYptmC
+          INin2YTYp9mG2LLZhNin2YIg2KjYp9mE2YXZgtmI2K8g2YjYp9mE2K/ZiNin2LPYqS4iLAogICJ0
+          ZXJtcyI6IFsKICAgImNhciByZWFyIHdoZWVsIiwKICAgImNhciB3aGVlbCB0aXJlIGNsb3NlIHVw
+          IiwKICAgImNhciBkcml2ZSBzaGFmdCIsCiAgICJzcG9ydHMgY2FyIHdoZWVsIgogIF0KIH0sCiB7
+          CiAgImlkIjogImR1YWwtY2x1dGNoIiwKICAidGl0bGUiOiAi2YTZhdin2LDYpyDZitio2K/ZkdmE
+          INin2YTZhtin2YLZhCDYp9mE2YXYstiv2YjYrCDYp9mE2LPYsdi52KfYqiDYqNiz2LHYudipINiu
+          2KfYt9mB2KnYnyIsCiAgInNjcmlwdCI6ICLZitit2KrZiNmKINin2YTZhtin2YLZhCDZhdiy2K/Z
+          iNisINin2YTZgtin2KjYtiDYudmE2Ykg2YLYp9io2LbZitmG2Iwg2KPYrdiv2YfZhdinINmE2YTY
+          s9ix2LnYp9iqINin2YTZgdix2K/ZitipINmI2KfZhNii2K7YsSDZhNmE2LLZiNis2YrYqS4g2YjY
+          qNmK2YbZhdinINiq2LnZhdmEINin2YTYs9ix2LnYqSDYp9mE2K3Yp9mE2YrYqdiMINiq2YPZiNmG
+          INin2YTYs9ix2LnYqSDYp9mE2KrYp9mE2YrYqSDYrNin2YfYstipINmI2YXYqti12YTYqSDYqNin
+          2YTZgtin2KjYtiDYp9mE2KLYrtixLiDZiNi52YbYryDYp9mE2KrYqNiv2YrZhCDZitmG2KrZgtmE
+          INin2YTYqtit2YPZhSDYqNmK2YYg2KfZhNmC2KfYqNi22YrZhiDZgdmKINij2KzYstin2KEg2YXZ
+          hiDYp9mE2KvYp9mG2YrYqdiMINmB2YTYpyDYqtmG2YLYt9i5INin2YTZgtmI2Kkg2KrZgtix2YrY
+          qNmL2KcuINmI2YTZh9iw2Kcg2YrZj9iz2KrYrtiv2YUg2YPYq9mK2LHZi9inINmB2Yog2KfZhNiz
+          2YrYp9ix2KfYqiDYp9mE2LHZitin2LbZitipLiIsCiAgInRlcm1zIjogWwogICAiY2FyIGdlYXJi
+          b3giLAogICAidHJhbnNtaXNzaW9uIGdlYXJzIiwKICAgImNhciBjbHV0Y2giLAogICAiZ2VhciBz
+          aGlmdCIKICBdCiB9LAogewogICJpZCI6ICJuaXRyb3VzIiwKICAidGl0bGUiOiAi2YPZitmBINmK
+          2LLZitivINin2YTZhtmK2KrYsdmI2LMg2YLZiNipINin2YTZhdit2LHZgyDZgdis2KPYqdifIiwK
+          ICAic2NyaXB0IjogItin2YTZhtmK2KrYsdmI2LMg2LrYp9iyINmK2Y/YrdmC2YYg2YHZiiDYp9mE
+          2YXYrdix2YMg2LnZhtivINin2YTYrdin2KzYqS4g2LnZhtivINit2LHYp9ix2Kkg2KfZhNin2K3Y
+          qtix2KfZgiDZitiq2K3ZhNmEINmI2YrYt9mE2YIg2KfZhNij2YPYs9is2YrZhtiMINmB2YrZhdmD
+          2YYg2K3YsdmCINmI2YLZiNivINij2YPYq9ixINmB2Yog2KfZhNij2LPYt9mI2KfZhtipINmG2YHY
+          s9mH2KfYjCDZiNiq2LLYr9in2K8g2KfZhNmC2YjYqSDYqNi12YjYsdipINmF2YHYp9is2KbYqS4g
+          2YTZg9mG2Ycg2YrYsdmB2Lkg2KfZhNi22LrYtyDZiNin2YTYrdix2KfYsdipINiv2KfYrtmEINin
+          2YTZhdit2LHZg9iMINmE2LDZhNmDINmK2Y/Ys9iq2K7Yr9mFINmE2YHYqtix2KfYqiDZgti12YrY
+          sdip2Iwg2YjYs9mI2KEg2LbYqNi32Ycg2YLYryDZitiq2YTZgSDYp9mE2YXZg9in2KjYsy4iLAog
+          ICJ0ZXJtcyI6IFsKICAgIm5pdHJvdXMgb3hpZGUgdGFuayIsCiAgICJjYXIgZW5naW5lIGJheSIs
+          CiAgICJlbmdpbmUgY2xvc2UgdXAiLAogICAic3BvcnRzIGNhciBlbmdpbmUiCiAgXQogfSwKIHsK
+          ICAiaWQiOiAiZXYtdG9ycXVlIiwKICAidGl0bGUiOiAi2YTZhdin2LDYpyDYqtmG2LfZhNmCINin
+          2YTYs9mK2KfYsdin2Kog2KfZhNmD2YfYsdio2KfYptmK2Kkg2KjZh9iw2Ycg2KfZhNmC2YjYqdif
+          IiwKICAic2NyaXB0IjogItin2YTYs9mK2KfYsdipINin2YTZg9mH2LHYqNin2KbZitipINiq2YbY
+          t9mE2YIg2KjZgtmI2Kkg2YTYo9mGINin2YTZhdit2LHZgyDYp9mE2YPZh9ix2KjYp9im2Yog2YrY
+          udi32Yog2LnYstmF2YvYpyDZg9io2YrYsdmL2Kcg2YXZhtiwINmE2K3YuNipINio2K/YoSDYp9mE
+          2K/ZiNix2KfZhiDYqtmC2LHZitio2YvYpy4g2KPZhdinINmF2K3YsdmDINin2YTYqNmG2LLZitmG
+          INmB2YrYrdiq2KfYrCDYpdmE2Ykg2KPZhiDZitix2KrZgdi5INiv2YjYsdin2YbZhyDZhNmK2LXZ
+          hCDYpdmE2Ykg2KPZgti12Ykg2LnYstmFLiDZg9mF2Kcg2KPZhiDYp9mE2LPZitin2LHYqSDYp9mE
+          2YPZh9ix2KjYp9im2YrYqSDZhNinINiq2K3Yqtin2Kwg2LrYp9mE2KjZi9inINil2YTZiSDYqtio
+          2K/ZitmEINiz2LHYudin2Kog2YXYqti52K/Yr9iMINmB2KrYtdmEINin2YTZgtmI2Kkg2KXZhNmJ
+          INin2YTYudis2YTYp9iqINio2LPZhNin2LPYqSDZiNiv2YjZhiDYp9mG2YLYt9in2LkuIiwKICAi
+          dGVybXMiOiBbCiAgICJlbGVjdHJpYyBjYXIgbW90b3IiLAogICAiZWxlY3RyaWMgY2FyIGJhdHRl
+          cnkiLAogICAiZWxlY3RyaWMgdmVoaWNsZSBjaGFyZ2luZyIsCiAgICJlbGVjdHJpYyBjYXIgZW5n
+          aW5lIgogIF0KIH0sCiB7CiAgImlkIjogImRpZXNlbC10b3dpbmciLAogICJ0aXRsZSI6ICLZhNmF
+          2KfYsNinINiq2LPYrdioINi02KfYrdmG2KfYqiDYp9mE2K/Zitiy2YQg2KPYrdmF2KfZhNmL2Kcg
+          2KvZgtmK2YTYqdifIiwKICAic2NyaXB0IjogItmF2K3YsdmDINin2YTYr9mK2LLZhCDZitiq2YXZ
+          itiyINio2LnYstmFINiv2YjYsdin2YYg2LnYp9mE2Y0g2LnZhtivINiv2YjYsdin2YbYp9iqINmF
+          2YbYrtmB2LbYqS4g2YjZitix2KzYuSDYsNmE2YMg2KXZhNmJINi22LrYtyDYp9mE2KfYrdiq2LHY
+          p9mCINin2YTZg9io2YrYsSDZiNi32YjZhCDYtNmI2Lcg2KfZhNmF2YPYqNizINi62KfZhNio2YvY
+          p9iMINmB2KrYqtmI2YTYryDZgtmI2Kkg2K/Zgdi5INmD2KjZitix2Kkg2K/ZiNmGINit2KfYrNip
+          INil2YTZiSDYr9mI2LHYp9mGINiz2LHZiti5LiDZiNmE2YfYsNinINmK2Y/Zgdi22Y7ZkdmEINmB
+          2Yog2KfZhNi02KfYrdmG2KfYqiDZiNiz2YrYp9ix2KfYqiDYp9mE2LPYrdio2Iwg2YHZh9mKINiq
+          2K3Yqtin2Kwg2KXZhNmJINmC2YjYqSDYtNivINij2YPYq9ixINmF2YYg2K3Yp9is2KrZh9inINil
+          2YTZiSDYs9ix2LnYqSDZgti12YjZiS4iLAogICJ0ZXJtcyI6IFsKICAgImRpZXNlbCBlbmdpbmUi
+          LAogICAidHJ1Y2sgZW5naW5lIiwKICAgImVuZ2luZSBwaXN0b25zIiwKICAgImRpZXNlbCBpbmpl
+          Y3RvciIKICBdCiB9LAogewogICJpZCI6ICJ3ZWlnaHQtcmVkdWN0aW9uIiwKICAidGl0bGUiOiAi
+          2YTZhdin2LDYpyDZitis2LnZhNmDINiq2K7ZgdmK2YEg2KfZhNmI2LLZhiDYo9iz2LHYuSDZhdmG
+          INiy2YrYp9iv2Kkg2KfZhNmC2YjYqSDYo9it2YrYp9mG2YvYp9ifIiwKICAic2NyaXB0IjogItin
+          2YTYs9ix2LnYqSDZhNinINiq2LnYqtmF2K8g2LnZhNmJINin2YTZgtmI2Kkg2YjYrdiv2YfYp9iM
+          INio2YQg2LnZhNmJINmG2LPYqNipINin2YTZgtmI2Kkg2KXZhNmJINin2YTZiNiy2YYuINmB2K7Z
+          gdi2INmI2LLZhiDYp9mE2LPZitin2LHYqSDZitit2LPZkdmGINin2YTYqtiz2KfYsdi52Iwg2YjZ
+          itmC2LXZkdixINmF2LPYp9mB2Kkg2KfZhNmB2LHZhdmE2KnYjCDZiNmK2KzYudmEINin2YTYp9mG
+          2LnYt9in2YEg2KPYs9mH2YQuINmI2YTZh9iw2Kcg2YrZhNis2KMg2LnYtNin2YIg2KfZhNiz2YrY
+          p9ix2KfYqiDYpdmE2Ykg2KXYstin2YTYqSDYp9mE2KPYtNmK2KfYoSDYutmK2LEg2KfZhNi22LHZ
+          iNix2YrYqSDZiNin2LPYqtiu2K/Yp9mFINmC2LfYuSDYo9iu2YHYjCDZiNmC2K8g2YrZg9mI2YYg
+          2LDZhNmDINij2LHYrti1INmF2YYg2LHZgdi5INmC2YjYqSDYp9mE2YXYrdix2YMuIiwKICAidGVy
+          bXMiOiBbCiAgICJjYXJib24gZmliZXIgY2FyIHBhcnRzIiwKICAgImNhciB3aGVlbCByaW0iLAog
+          ICAiY2FyIGJyYWtlIGRpc2MiLAogICAic3BvcnRzIGNhciBib2R5IgogIF0KIH0sCiB7CiAgImlk
+          IjogInRpcmVzLWZpcnN0IiwKICAidGl0bGUiOiAi2KPZiNmEINiq2LnYr9mK2YQg2YrYrNioINij
+          2YYg2KrZgdmD2LEg2YHZitmHOiDYp9mE2KXYt9in2LHYp9iqIiwKICAic2NyaXB0IjogItmC2KjZ
+          hCDYo9mGINiq2LLZitivINmC2YjYqSDYs9mK2KfYsdiq2YPYjCDYqtiw2YPZkdixINij2YYg2KfZ
+          hNil2LfYp9ix2KfYqiDZh9mKINmG2YLYt9ipINin2YTYp9iq2LXYp9mEINin2YTZiNit2YrYr9ip
+          INio2KfZhNij2LHYti4g2YHZhdmH2YXYpyDZg9in2YYg2KfZhNmF2K3YsdmDINmC2YjZitmL2KfY
+          jCDZhNinINiq2YbYqtmC2YQg2YLZiNiq2Ycg2KXZhNinINio2YLYr9ixINin2YTYqtmF2KfYs9mD
+          INin2YTZhdiq2KfYrS4g2KXYt9in2LHYp9iqINin2YTYo9iv2KfYoSDYqtiz2KrYrtiv2YUg2YXY
+          sdmD2KjYp9iqINmF2LfYp9i32YrYqSDYo9mD2KvYsSDYp9mE2KrYtdin2YLZi9in2Iwg2YHYqtit
+          2LPZkdmGINin2YTYqtiz2KfYsdi5INmI2KfZhNmB2LHZhdmE2Kkg2YjYp9mE2KfZhti52LfYp9mB
+          LiDZiNmE2YfYsNinINmK2LnYr9mR2YfYpyDZg9ir2YrYsdmI2YYg2YXZhiDYo9mB2LbZhCDYp9mE
+          2KrYudiv2YrZhNin2Kog2YHYp9im2K/YqS4iLAogICJ0ZXJtcyI6IFsKICAgImNhciB0aXJlIGNs
+          b3NlIHVwIiwKICAgInRpcmUgdHJlYWQiLAogICAiY2FyIHdoZWVsIiwKICAgInRpcmUgcnViYmVy
+          IgogIF0KIH0sCiB7CiAgImlkIjogImJpZy1icmFrZXMiLAogICJ0aXRsZSI6ICLZhNmF2KfYsNin
+          INiq2LHZg9mR2Kgg2KfZhNiz2YrYp9ix2KfYqiDYp9mE2YLZiNmK2Kkg2YHYsdin2YXZhCDYo9mD
+          2KjYsdifIiwKICAic2NyaXB0IjogItmD2YTZhdinINiy2KfYr9iqINmC2YjYqSDYp9mE2LPZitin
+          2LHYqSDZiNiz2LHYudiq2YfYpyDYstin2K/YqiDYp9mE2LfYp9mC2Kkg2KfZhNiq2Yog2YrYrNio
+          INij2YYg2KrZhdiq2LXZh9inINin2YTZgdix2KfZhdmEINi52YbYryDYp9mE2KrZiNmC2YEuINin
+          2YTYo9mC2LHYp9i1INin2YTYo9mD2KjYsSDZiNin2YTZhdmE2KfZgti3INin2YTYo9mC2YjZiSDY
+          qtio2K/ZkdivINin2YTYrdix2KfYsdipINio2LXZiNix2Kkg2KPZgdi22YTYjCDZgdiq2YLYp9mI
+          2YUg2LbYudmBINin2YTZgdix2YXZhNipINi52YbYryDYp9mE2KfYs9iq2LnZhdin2YQg2KfZhNi0
+          2K/ZitivLiDZgdin2YTZgdix2KfZhdmEINin2YTYrNmK2K/YqSDZhNinINiq2YLZhCDYo9mH2YXZ
+          itipINi52YYg2KfZhNmF2K3YsdmDINin2YTZgtmI2YrYjCDZhNij2YYg2KfZhNmC2K/YsdipINi5
+          2YTZiSDYp9mE2KrZiNmC2YEg2YfZiiDZhdinINmK2KzYudmEINin2YTYs9ix2LnYqSDYotmF2YbY
+          qS4iLAogICJ0ZXJtcyI6IFsKICAgImJyYWtlIGRpc2MiLAogICAiY2FyIGJyYWtlIGNhbGlwZXIi
+          LAogICAiYmlnIGJyYWtlIGNhbGlwZXIiLAogICAid2hlZWwgYnJha2Ugcm90b3IiCiAgXQogfSwK
+          IHsKICAiaWQiOiAibG93ZXJlZC1zdXNwZW5zaW9uIiwKICAidGl0bGUiOiAi2YXYp9iw2Kcg2YrY
+          rdiv2Ksg2LnZhtivINiq2K7ZgdmK2LYg2KrYudmE2YrZgiDYp9mE2LPZitin2LHYqdifIiwKICAi
+          c2NyaXB0IjogItiq2K7ZgdmK2LYg2KfZhNiz2YrYp9ix2Kkg2YrZgtix2ZHYqCDZhdix2YPYsiDY
+          q9mC2YTZh9inINmF2YYg2KfZhNij2LHYttiMINmB2YrZgtmEINmF2YrZhNin2YYg2KfZhNmH2YrZ
+          g9mEINij2KvZhtin2KEg2KfZhNin2YbYudi32KfZgSDZiNmK2KrYrdiz2YYg2KfZhNir2KjYp9iq
+          LiDZhNmD2YYg2YTZh9iw2Kcg2KvZhdmG2YvYp9iMINmB2KfZhNiq2LnZhNmK2YIg2KfZhNij2YLY
+          s9mJINmK2KzYudmEINin2YTZgtmK2KfYr9ipINij2YLZhCDYsdin2K3YqdiMINmI2YLYryDZitit
+          2KrZgyDYp9mE2YfZitmD2YQg2KjYp9mE2YXYt9io2KfYqiDYpdiw2Kcg2KjZiNmE2Log2YHZiiDY
+          p9mE2KrYrtmB2YrYti4g2YjYp9mE2KrYudiv2YrZhCDYp9mE2KzZitivINmH2Ygg2KfZhNiw2Yog
+          2YrZiNin2LLZhiDYqNmK2YYg2KfZhNir2KjYp9iqINmI2KfZhNix2KfYrdipLiIsCiAgInRlcm1z
+          IjogWwogICAiY2FyIHN1c3BlbnNpb24iLAogICAiY29pbG92ZXIgc3VzcGVuc2lvbiIsCiAgICJj
+          YXIgc2hvY2sgYWJzb3JiZXIiLAogICAiY2FyIHdoZWVsIgogIF0KIH0sCiB7CiAgImlkIjogInR1
+          cmJvLWxhZyIsCiAgInRpdGxlIjogItmF2Kcg2YfZiCDYqtij2K7YsSDYp9mE2KrZiNix2KjZiCDZ
+          iNmE2YXYp9iw2Kcg2YrYrdiv2KvYnyIsCiAgInNjcmlwdCI6ICLZh9mEINi02LnYsdiqINio2KrY
+          o9iu2LEg2KjYs9mK2Lcg2YLYqNmEINij2YYg2KrZhtiv2YHYuSDYs9mK2KfYsdipINiq2YjYsdio
+          2YrZhtmK2KnYnyDZh9iw2Kcg2YfZiCDYqtij2K7YsSDYp9mE2KrZiNix2KjZiC4g2KfZhNiz2KjY
+          qCDYo9mGINin2YTYqtmI2LHYqNmK2YYg2YrYrdiq2KfYrCDYpdmE2Ykg2LrYp9iy2KfYqiDYudin
+          2K/ZhSDZg9in2YHZitipINmE2YrYr9mI2LEg2KjYs9ix2LnYqSDZiNmK2K/Zgdi5INin2YTZh9mI
+          2KfYoS4g2YjYudmG2K8g2KfZhNiv2YjYsdin2YbYp9iqINin2YTZhdmG2K7Zgdi22Kkg2KrZg9mI
+          2YYg2KfZhNi62KfYstin2Kog2YLZhNmK2YTYqS4g2YjYqtmC2YTZhCDYp9mE2LTYsdmD2KfYqiDZ
+          h9iw2Kcg2KfZhNiq2KPYrtixINio2KrZiNix2KjZitmG2KfYqiDYo9i12LrYsdiMINij2Ygg2KjY
+          qti12YXZitmF2KfYqiDYrtin2LXYqdiMINij2Ygg2KjYp9iz2KrYrtiv2KfZhSDYtNin2K3ZhtmK
+          2YYuIiwKICAidGVybXMiOiBbCiAgICJ0dXJib2NoYXJnZXIiLAogICAidHVyYm8gZW5naW5lIiwK
+          ICAgImVuZ2luZSBiYXkiLAogICAiZW5naW5lIGV4aGF1c3QgbWFuaWZvbGQiCiAgXQogfSwKIHsK
+          ICAiaWQiOiAiYXdkLWxhdW5jaCIsCiAgInRpdGxlIjogItmD2YrZgSDZitiz2KfYudivINin2YTY
+          r9mB2Lkg2KfZhNix2KjYp9i52Yog2LnZhNmJINin2YTYp9mG2LfZhNin2YIg2KfZhNiz2LHZiti5
+          2J8iLAogICJzY3JpcHQiOiAi2YHZiiDYs9mK2KfYsdin2Kog2KfZhNiv2YHYuSDYp9mE2LHYqNin
+          2LnZiiDYqti12YQg2KfZhNmC2YjYqSDYpdmE2Ykg2KfZhNi52KzZhNin2Kog2KfZhNij2LHYqNi5
+          2Iwg2YHZitiq2YjYsti5INin2YTYrNmH2K8g2LnZhNmJINij2LHYqNi5INmG2YLYp9i3INiq2YXY
+          p9iz2YMg2KjYr9mEINin2KvZhtiq2YrZhi4g2YjZh9iw2Kcg2YrZgtmE2YQg2KfZhtiy2YTYp9mC
+          INin2YTYudis2YTYp9iqINi52YbYryDYp9mE2KfZhti32YTYp9mCINin2YTZgtmI2YrYjCDZgdiq
+          2LPYqtmB2YrYryDYp9mE2LPZitin2LHYqSDZhdmGINmC2YjYqtmH2Kcg2KjYtdmI2LHYqSDYo9mB
+          2LbZhC4g2YjYqtmC2YjZhSDYo9mG2LjZhdipINil2YTZg9iq2LHZiNmG2YrYqSDYqNiq2YjYstmK
+          2Lkg2KfZhNmC2YjYqSDYqNmK2YYg2KfZhNmF2K3Yp9mI2LEg2KjYrdiz2Kgg2KfZhNiq2YXYp9iz
+          2YMg2KfZhNmF2KrYp9itLiIsCiAgInRlcm1zIjogWwogICAiY2FyIGRpZmZlcmVudGlhbCIsCiAg
+          ICJhbGwgd2hlZWwgZHJpdmUiLAogICAiY2FyIGRyaXZlIHNoYWZ0IiwKICAgImNhciBheGxlIgog
+          IF0KIH0sCiB7CiAgImlkIjogIm9jdGFuZS1teXRoIiwKICAidGl0bGUiOiAi2YfZhCDYp9mE2KjZ
+          htiy2YrZhiDYp9mE2YXZhdiq2KfYsiDZitiy2YrYryDZgtmI2Kkg2LPZitin2LHYqtmD2J8iLAog
+          ICJzY3JpcHQiOiAi2KfZhNis2YjYp9ioINin2YTZhdmB2KfYrNimOiDYutin2YTYqNmL2Kcg2YTY
+          py4g2KfZhNij2YjZg9iq2KfZhiDZhNinINmK2LnZhtmKINi32KfZgtipINij2YPYq9ix2Iwg2KjZ
+          hCDZhdmC2KfZiNmF2Kkg2KPZg9io2LEg2YTZhNmB2LHZgti52KkuINmB2KXYsNinINmD2KfZhiDZ
+          hdit2LHZg9mDINmF2LXZhdmF2YvYpyDZhNmE2YjZgtmI2K8g2KfZhNi52KfYr9mK2Iwg2YHZhNmG
+          INmK2LnYt9mK2YMg2KfZhNmI2YLZiNivINin2YTYo9i52YTZiSDZgtmI2Kkg2KXYttin2YHZitip
+          INiq2Y/YsNmD2LEuINij2YXYpyDYp9mE2YXYrdix2YPYp9iqINi52KfZhNmK2Kkg2KfZhNi22LrY
+          tyDYo9mIINin2YTYqtmI2LHYqNmK2YbZitipINmB2YLYryDYqtit2KrYp9isINil2YTZiSDYo9mI
+          2YPYqtin2YYg2KPYudmE2Ykg2YTYqti52YXZhCDYqNij2YHYttmEINij2K/Yp9ih2Iwg2YHYp9iq
+          2KjYuSDYqtmI2LXZitipINin2YTYtNix2YPYqSDYp9mE2YXYtdmG2LnYqS4iLAogICJ0ZXJtcyI6
+          IFsKICAgImNhciBmdWVsIGluamVjdG9yIiwKICAgImVuZ2luZSBmdWVsIHJhaWwiLAogICAiZW5n
+          aW5lIGNsb3NlIHVwIiwKICAgImNhciBlbmdpbmUgcGlzdG9ucyIKICBdCiB9LAogewogICJpZCI6
+          ICJmdWVsLWFkZGl0aXZlcyIsCiAgInRpdGxlIjogItmH2YQg2KXYttin2YHYp9iqINin2YTZiNmC
+          2YjYryDYqtiy2YrYryDZgtmI2Kkg2KfZhNmF2K3YsdmD2J8iLAogICJzY3JpcHQiOiAi2KrYudiv
+          INio2LnYtiDYp9mE2KXYttin2YHYp9iqINio2YLZiNipINij2YPYqNixINmI2LPYsdi52Kkg2KPY
+          udmE2YkuINmE2YPZhiDYo9i62YTYqNmH2Kcg2YrZgtiq2LXYsSDZgdmKINij2YHYttmEINin2YTY
+          o9it2YjYp9mEINi52YTZiSDYqtmG2LjZitmBINix2YjYp9iz2Kgg2KjYs9mK2LfYqdiMINmI2YTY
+          pyDZiti22YrZgSDZgtmI2Kkg2YXZhNit2YjYuNipINmE2YXYrdix2YMg2LPZhNmK2YUuINmB2KfZ
+          hNmC2YjYqSDYqtij2KrZiiDZhdmGINmD2YXZitipINin2YTZh9mI2KfYoSDZiNin2YTZiNmC2YjY
+          ryDYp9mE2YXYrdiq2LHZgtmK2YYuINmE2LDZhNmDINmE2Kcg2KrYqtmI2YLYuSDZhdmGINiy2KzY
+          p9is2Kkg2KXYttin2YHYp9iqINij2YYg2KrYrdmI2ZHZhCDYs9mK2KfYsdiq2YMg2KfZhNi52KfY
+          r9mK2Kkg2KXZhNmJINiz2YrYp9ix2Kkg2LPYqNin2YIuIiwKICAidGVybXMiOiBbCiAgICJjYXIg
+          ZW5naW5lIGNsb3NlIHVwIiwKICAgImVuZ2luZSBiYXkiLAogICAiZnVlbCBpbmplY3RvciIsCiAg
+          ICJlbmdpbmUgcGlzdG9ucyIKICBdCiB9LAogewogICJpZCI6ICJiaWctdnMtdHVyYm8iLAogICJ0
+          aXRsZSI6ICLZh9mEINin2YTYo9mB2LbZhCDZhdit2LHZgyDZg9io2YrYsSDYo9mFINmF2K3YsdmD
+          INi12LrZitixINio2KrZiNix2KjZiNifIiwKICAic2NyaXB0IjogItin2YTZhdit2LHZgyDYp9mE
+          2YPYqNmK2LEg2YrYudi32Yog2YLZiNipINi32KjZiti52YrYqSDZiNin2LPYqtis2KfYqNipINmF
+          2KjYp9i02LHYqSDZiNi12YjYqtmL2Kcg2YXZhdmK2LLZi9inLiDYo9mF2Kcg2KfZhNmF2K3YsdmD
+          INin2YTYtdi62YrYsSDZhdi5INin2YTYqtmI2LHYqNmIINmB2YrYudi32Yog2YLZiNipINmF2YXY
+          p9ir2YTYqdiMINmI2YrYs9iq2YfZhNmDINmI2YLZiNiv2YvYpyDYo9mC2YQg2LnZhtivINin2YTZ
+          gtmK2KfYr9ipINin2YTZh9in2K/YptipLiDZhNmD2YbZhyDYo9mD2KvYsSDYqti52YLZitiv2YvY
+          p9iMINmI2YLYryDYqtmD2YjZhiDYp9iz2KrYrNin2KjYqtmHINij2YLZhCDZhdio2KfYtNix2Kku
+          INmI2KfYrtiq2YrYp9ix2YMg2YrYudiq2YXYryDYudmE2Ykg2YXYpyDYqtix2YrYr9mHOiDZhdiq
+          2LnYqSDYp9mE2YLZitin2K/YqSDYo9mFINin2YTYp9mC2KrYtdin2K8uIiwKICAidGVybXMiOiBb
+          CiAgICJjYXIgZW5naW5lIiwKICAgImVuZ2luZSBjeWxpbmRlciBibG9jayIsCiAgICJ0dXJibyBl
+          bmdpbmUiLAogICAiZW5naW5lIHBpc3RvbnMiCiAgXQogfSwKIHsKICAiaWQiOiAibGF1bmNoLWNv
+          bnRyb2wiLAogICJ0aXRsZSI6ICLZhdinINmH2Ygg2YbYuNin2YUg2KfZhNin2YbYt9mE2KfZgiDY
+          p9mE2LPYsdmK2Lkg2YHZiiDYp9mE2LPZitin2LHYp9iqINin2YTYsdmK2KfYttmK2KnYnyIsCiAg
+          InNjcmlwdCI6ICLZitiq2K3Zg9mFINmH2LDYpyDYp9mE2YbYuNin2YUg2YHZiiDYr9mI2LHYp9mG
+          INin2YTZhdit2LHZgyDZiNin2YbYstmE2KfZgiDYp9mE2LnYrNmE2KfYqiDZhNmK2K3ZgtmCINij
+          2LPYsdi5INin2YbYt9mE2KfZgtipINmF2YXZg9mG2KkuINmB2YrYq9io2ZHYqiDYr9mI2LHYp9mG
+          INin2YTZhdit2LHZgyDYudmG2K8g2LHZgtmFINmF2YbYp9iz2KjYjCDYq9mFINmK2LfZhNmCINin
+          2YTZgtmI2Kkg2LnZhtivINix2YHYuSDYp9mE2YLYr9mFINi52YYg2KfZhNmB2LHYp9mF2YTYjCDZ
+          iNiq2LbYqNi3INin2YTYpdmE2YPYqtix2YjZhtmK2KfYqiDYp9mE2YLZiNipINin2YTZhdmG2YLZ
+          iNmE2Kkg2YPZiiDZhNinINiq2YbYstmE2YIg2KfZhNi52KzZhNin2KouINmI2YTYpyDZitmP2YbY
+          tditINio2YPYq9ix2Kkg2KfYs9iq2LnZhdin2YTZhyDZhNij2YbZhyDZitis2YfYryDYp9mE2YLY
+          p9io2LYg2YjZhtin2YLZhCDYp9mE2K3YsdmD2KkuIiwKICAidGVybXMiOiBbCiAgICJzcG9ydHMg
+          Y2FyIGVuZ2luZSIsCiAgICJjYXIgZGFzaGJvYXJkIHRhY2hvbWV0ZXIiLAogICAiY2FyIGdlYXJi
+          b3giLAogICAiZW5naW5lIGJheSIKICBdCiB9LAogewogICJpZCI6ICJtYW51YWwtdnMtYXV0byIs
+          CiAgInRpdGxlIjogItmH2YQg2KfZhNmG2KfZgtmEINin2YTZitiv2YjZiiDZhdinINiy2KfZhCDY
+          o9iz2LHYuSDZhdmGINin2YTYo9mI2KrZiNmF2KfYqtmK2YPZitifIiwKICAic2NyaXB0IjogItmB
+          2Yog2KfZhNmF2KfYttmKINmD2KfZhiDYp9mE2LPYp9im2YIg2KfZhNmF2KfZh9ixINmK2KrZgdmI
+          2YIg2LnZhNmJINin2YTZhtin2YLZhCDYp9mE2KPZiNiq2YjZhdin2KrZitmD2YouINij2YXYpyDY
+          p9mE2YrZiNmFINmB2YPYq9mK2LEg2YXZhiDYp9mE2YbZiNin2YLZhCDYp9mE2K3Yr9mK2KvYqdiM
+          INiu2KfYtdipINin2YTZhdiy2K/ZiNis2Kkg2KfZhNmC2KfYqNi22Iwg2KrYqNiv2ZHZhCDYp9mE
+          2LPYsdi52KfYqiDYo9iz2LHYuSDYqNmD2KvZitixINmF2YXYpyDZitmB2LnZhNmHINin2YTYpdmG
+          2LPYp9mGLiDZiNmE2YfYsNinINiq2K3ZgtmCINin2YTYs9mK2KfYsdin2Kog2KfZhNij2YjYqtmI
+          2YXYp9iq2YrZg9mK2Kkg2LLZhdmGINiq2LPYp9ix2Lkg2KPZgtmEINmB2Yog2YPYq9mK2LEg2YXZ
+          hiDYp9mE2KPYrdmK2KfZhi4g2YTZg9mGINmK2KjZgtmJINmE2YTZhtin2YLZhCDYp9mE2YrYr9mI
+          2Yog2LPYrdix2Ycg2LnZhtivINi52LTYp9mC2YcuIiwKICAidGVybXMiOiBbCiAgICJtYW51YWwg
+          dHJhbnNtaXNzaW9uIiwKICAgImdlYXIgc2hpZnQiLAogICAiYXV0b21hdGljIHRyYW5zbWlzc2lv
+          biIsCiAgICJjYXIgZ2VhcmJveCIKICBdCiB9LAogewogICJpZCI6ICJzcGVlZC1saW1pdGVyIiwK
+          ICAidGl0bGUiOiAi2YTZhdin2LDYpyDYqtit2K/YryDYp9mE2LTYsdmD2KfYqiDYp9mE2LPYsdi5
+          2Kkg2KfZhNmC2LXZiNmJINmE2YTYs9mK2KfYsdin2KrYnyIsCiAgInNjcmlwdCI6ICLZh9mEINiq
+          2LnZhNmFINij2YYg2YPYq9mK2LHZi9inINmF2YYg2KfZhNiz2YrYp9ix2KfYqiDYp9mE2YLYp9iv
+          2LHYqSDYudmE2Ykg2LPYsdi52Kkg2KPYudmE2Ykg2YXZgtmK2Y7Zkdiv2Kkg2KXZhNmD2KrYsdmI
+          2YbZitmL2Kcg2LnZhtivINmF2KbYqtmK2YYg2YjYrtmF2LPZitmGINmD2YrZhNmI2YXYqtix2YvY
+          pyDZgdmKINin2YTYs9in2LnYqdifINiq2YHYudmEINin2YTYtNix2YPYp9iqINiw2YTZgyDZhNij
+          2LPYqNin2Kgg2KrYqti52YTZgiDYqNin2YTYo9mF2KfZhiDZiNiq2K3ZhdmEINin2YTYpdi32KfY
+          sdin2Kog2YjYp9mE2KvYqNin2KrYjCDZiNmE2KPZhtmHINi12KfYsSDYqtmC2YTZitiv2YvYpyDZ
+          hNiv2Ykg2KjYudi2INin2YTZhdi12YbYudmK2YbYjCDYrti12YjYtdmL2Kcg2KfZhNij2YTZhdin
+          2YYuINmI2YrZhdmD2YYg2LHZgdi5INmH2LDYpyDYp9mE2K3YryDZgdmKINio2LnYtiDYp9mE2KXY
+          tdiv2KfYsdin2Kog2KfZhNiu2KfYtdipLiIsCiAgInRlcm1zIjogWwogICAiY2FyIHNwZWVkb21l
+          dGVyIiwKICAgImNhciBkYXNoYm9hcmQiLAogICAiY2FyIHRpcmUiLAogICAic3BvcnRzIGNhciB3
+          aGVlbCIKICBdCiB9LAogewogICJpZCI6ICJyZXYtbGltaXRlciIsCiAgInRpdGxlIjogItmE2YXY
+          p9iw2Kcg2YrZgti32Lkg2KfZhNmF2K3YsdmDINin2YTZgtmI2Kkg2LnZhtivINij2LnZhNmJINiv
+          2YjYsdin2YbYnyIsCiAgInNjcmlwdCI6ICLYudmG2K/ZhdinINiq2LXZhCDYpdmE2Ykg2KPZgti1
+          2Ykg2K/ZiNix2KfZhiDZhNmE2YXYrdix2YMg2KrYtNi52LEg2KjYo9mGINin2YTYs9mK2KfYsdip
+          INiq2KrZiNmC2YEg2LnZhiDYp9mE2KrYs9in2LHYuSDZgdis2KPYqS4g2YfYsNinINmH2Ygg2YXY
+          rdiv2K8g2KfZhNiv2YjYsdin2YYuINiq2YLYt9i5INmI2K3Yr9ipINin2YTYqtit2YPZhSDYp9mE
+          2YjZgtmI2K8g2KPZiCDYp9mE2LTYsdin2LHYqSDZhNit2YXYp9mK2Kkg2KfZhNmF2K3YsdmD2Iwg
+          2YTYo9mGINin2YTYr9mI2LHYp9mGINin2YTYstin2KbYryDZiti52LHZkdi2INin2YTYtdmF2KfZ
+          hdin2Kog2YjYp9mE2YXZg9in2KjYsyDZiNin2YTZhdit2KfZhdmEINmE2KPYrdmF2KfZhCDYqtmB
+          2YjZgiDYqtit2YXZhNmH2KcuINmB2KfZhNmF2K3Yr9ivINmE2Kcg2YrYudi32ZHZhCDYp9mE2YXY
+          rdix2YPYjCDYqNmEINmK2K3ZhdmK2YcuIiwKICAidGVybXMiOiBbCiAgICJjYXIgdGFjaG9tZXRl
+          ciIsCiAgICJlbmdpbmUgcGlzdG9ucyIsCiAgICJlbmdpbmUgdmFsdmUiLAogICAiZW5naW5lIGNs
+          b3NlIHVwIgogIF0KIH0sCiB7CiAgImlkIjogImhpZ2gtcmV2LWVuZ2luZXMiLAogICJ0aXRsZSI6
+          ICLZg9mK2YEg2KrYr9mI2LEg2KjYudi2INin2YTZhdit2LHZg9in2Kog2KXZhNmJINiq2LPYudip
+          INii2YTYp9mBINiv2YjYsdip2J8iLAogICJzY3JpcHQiOiAi2KjYudi2INmF2K3YsdmD2KfYqiDY
+          p9mE2LPZitin2LHYp9iqINin2YTYsdmK2KfYttmK2Kkg2YjYp9mE2K/Ysdin2KzYp9iqINiq2K/Z
+          iNixINij2LPYsdi5INio2YPYq9mK2LEg2YXZhiDYp9mE2YXYudiq2KfYry4g2YjYqtit2YLZgiDY
+          sNmE2YMg2KjYo9is2LLYp9ihINiu2YHZitmB2Kkg2YjZhdiq2YrZhtip2Iwg2YjZhdmD2KfYqNiz
+          INmC2LXZitix2Kkg2KfZhNi02YjYt9iMINmI2LXZhdin2YXYp9iqINmI2LLZhtio2LHZg9in2Kog
+          2YXYtdmF2YXYqSDZhNiq2KrYrdmF2YQg2KfZhNit2LHZg9ipINin2YTYs9ix2YrYudipLiDZiNmD
+          2YTZhdinINiy2KfYryDYp9mE2K/ZiNix2KfZhiDYstin2K/YqiDYp9mE2YLZiNip2Iwg2YTZg9mG
+          INin2YTYq9mF2YYg2KfYsdiq2YHYp9i5INin2YTYrdmF2YQg2YjYp9iz2KrZh9mE2KfZgyDYp9mE
+          2YjZgtmI2K8g2YjYtdi52YjYqNipINin2YTYtdmK2KfZhtipLiIsCiAgInRlcm1zIjogWwogICAi
+          ZW5naW5lIHBpc3RvbnMiLAogICAiZW5naW5lIGNyYW5rc2hhZnQiLAogICAiZW5naW5lIHZhbHZl
+          IiwKICAgInNwb3J0cyBjYXIgZW5naW5lIgogIF0KIH0sCiB7CiAgImlkIjogInR3aW4tdHVyYm8i
+          LAogICJ0aXRsZSI6ICLZhdinINin2YTZgdin2KbYr9ipINmF2YYg2KrZiNix2KjZitmG2YrZhiDZ
+          gdmKINmF2K3YsdmDINmI2KfYrdiv2J8iLAogICJzY3JpcHQiOiAi2KjYudi2INin2YTZhdit2LHZ
+          g9in2Kog2KrYrdmF2YQg2KrZiNix2KjZitmG2YrZhiDYqNiv2YQg2YjYp9it2K8uINij2K3Zitin
+          2YbZi9inINmK2K7Yr9mFINmD2YQg2KrZiNix2KjZitmGINmG2LXZgSDYp9mE2KPYs9i32YjYp9mG
+          2KfYqtiMINmB2YrYtdio2K0g2KPYtdi62LEg2YjYo9iz2LHYuSDYp9iz2KrYrNin2KjYqS4g2YjY
+          o9it2YrYp9mG2YvYpyDZiti52YXZhCDYo9it2K/Zh9mF2Kcg2LnZhtivINin2YTYr9mI2LHYp9mG
+          2KfYqiDYp9mE2YXZhtiu2YHYttipINmI2KfZhNii2K7YsSDYudmG2K8g2KfZhNi52KfZhNmK2KnY
+          jCDZhNmK2LnYt9mKINmC2YjYqSDZgdmKINmG2LfYp9mCINij2YjYs9i5LiDZiNin2YTZh9iv2YEg
+          2K/Yp9im2YXZi9inINiq2YLZhNmK2YQg2KfZhNiq2KPYrtixINmI2KrYrdiz2YrZhiDYp9mE2YLZ
+          iNipINmB2Yog2KzZhdmK2Lkg2KfZhNiz2LHYudin2KouIiwKICAidGVybXMiOiBbCiAgICJ0d2lu
+          IHR1cmJvIGVuZ2luZSIsCiAgICJ0dXJib2NoYXJnZXIiLAogICAiZW5naW5lIGJheSIsCiAgICJl
+          bmdpbmUgZXhoYXVzdCBtYW5pZm9sZCIKICBdCiB9LAogewogICJpZCI6ICJib3hlci1lbmdpbmUi
+          LAogICJ0aXRsZSI6ICLZhdinINiz2LEg2KfZhNmF2K3YsdmDINin2YTZhdiz2LfYrSDYp9mE2YXY
+          s9mF2Ykg2KfZhNmF2YTYp9mD2YXYnyIsCiAgInNjcmlwdCI6ICLZgdmKINin2YTZhdit2LHZgyDY
+          p9mE2YXYs9i32K0g2KrYqtit2LHZgyDYp9mE2YXZg9in2KjYsyDYo9mB2YLZitmL2KfYjCDYqtmC
+          2KrYsdioINmF2YYg2KjYudi22YfYpyDYq9mFINiq2KjYqti52K/YjCDZg9ij2YbZh9inINmF2YTY
+          p9mD2YXYp9mGINmK2KrYqNin2K/ZhNin2YYg2KfZhNmE2YPZhdin2KrYjCDZiNmE2YfYsNinINmK
+          2LPZhdmJINij2K3Zitin2YbZi9inINin2YTZhdit2LHZgyDYp9mE2YXZhNin2YPZhS4g2YXZitiy
+          2KrZhyDYo9mG2Ycg2YXZhtiu2YHYttiMINmB2YrZhtiy2YQg2YXYsdmD2LIg2KvZgtmEINin2YTY
+          s9mK2KfYsdipINmI2YrYqtit2LPZhiDYp9mE2KvYqNin2KouINmD2YXYpyDZitiq2YjYp9iy2YYg
+          2KfZhNin2YfYqtiy2KfYsiDZgdmK2Ycg2KjYtdmI2LHYqSDYrNmK2K/YqdiMINmI2YLYryDYqNmG
+          2Kog2KjYudi2INin2YTYtNix2YPYp9iqINiz2YXYudiq2YfYpyDYudmE2Ykg2YfYsNinINin2YTY
+          qti12YXZitmFLiIsCiAgInRlcm1zIjogWwogICAiYm94ZXIgZW5naW5lIiwKICAgImVuZ2luZSBj
+          eWxpbmRlciBibG9jayIsCiAgICJlbmdpbmUgcGlzdG9ucyIsCiAgICJjYXIgZW5naW5lIGNsb3Nl
+          IHVwIgogIF0KIH0sCiB7CiAgImlkIjogImxpZ2h0LXdoZWVscyIsCiAgInRpdGxlIjogItmE2YXY
+          p9iw2Kcg2KrYrdiz2ZHZhiDYp9mE2KzZhtmI2Lcg2KfZhNiu2YHZitmB2Kkg2KPYr9in2KEg2KfZ
+          hNiz2YrYp9ix2KnYnyIsCiAgInNjcmlwdCI6ICLYp9mE2KzZhtmI2Lcg2YTZitiz2Kog2YTZhNiy
+          2YrZhtipINmB2YLYty4g2YHYp9mE2KzZhtmI2Lcg2KfZhNiu2YHZitmB2Kkg2KrZgtmE2YQg2KfZ
+          hNmI2LLZhiDYutmK2LEg2KfZhNmF2LnZhNmC2Iwg2KPZiiDZiNiy2YYg2KfZhNij2KzYstin2KEg
+          2KfZhNiq2Yog2KrYqtit2LHZgyDZhdi5INin2YTYudis2YTYqdiMINmB2YrYtdio2K0g2KfZhNiq
+          2LnZhNmK2YIg2KPYs9ix2Lkg2KfYs9iq2KzYp9io2Kkg2YjZitmC2YQg2KfZhNis2YfYryDYp9mE
+          2YXYt9mE2YjYqCDZhNmE2KrYs9in2LHYuSDZiNin2YTZgdix2YXZhNipLiDZhNiw2YTZgyDZgtiv
+          INmK2LTYudixINin2YTYs9in2KbZgiDYqNmB2LHZgiDZgdmKINin2YTYqtit2YPZhSDZiNin2YTY
+          sdin2K3YqS4g2YTZg9mGINin2YTYrNmG2YjYtyDYp9mE2KPYrtmBINmC2K8g2KrZg9mI2YYg2KPY
+          utmE2Ykg2YjYo9mC2YQg2KrYrdmF2YTZi9inINmE2YTYtdiv2YXYp9iqINin2YTYtNiv2YrYr9ip
+          LiIsCiAgInRlcm1zIjogWwogICAiY2FyIGFsbG95IHdoZWVsIiwKICAgImNhciB3aGVlbCByaW0i
+          LAogICAic3BvcnRzIGNhciB3aGVlbCIsCiAgICJjYXIgYnJha2UgZGlzYyIKICBdCiB9LAogewog
+          ICJpZCI6ICJjb21wcmVzc2lvbi1yYXRpbyIsCiAgInRpdGxlIjogItmF2KfYsNinINiq2LnZhtmK
+          INmG2LPYqNipINin2YTYp9mG2LbYutin2Lcg2YjZhNmF2KfYsNinINiq2LHZgdi5INin2YTZg9mB
+          2KfYodip2J8iLAogICJzY3JpcHQiOiAi2YbYs9io2Kkg2KfZhNin2YbYtti62KfYtyDYqti52YbZ
+          iiDZhdmC2K/Yp9ixINi22LrYtyDYp9mE2K7ZhNmK2Lcg2YLYqNmEINil2LTYudin2YTZhy4g2YPZ
+          hNmF2Kcg2LLYp9iv2KrYjCDYp9iz2KrYrtix2Kwg2KfZhNmF2K3YsdmDINi32KfZgtipINij2YPY
+          qNixINmF2YYg2KfZhNmI2YLZiNivINmG2YHYs9mH2Iwg2YHYqtiq2K3Ys9mGINin2YTZg9mB2KfY
+          odipINmI2KfZhNmC2YjYqS4g2YTZg9mGINin2YTYtti62Lcg2KfZhNi52KfZhNmKINmK2LLZitiv
+          INiu2LfYsSDYp9mE2YHYsdmC2LnYqdiMINmI2YTYsNmE2YMg2YrYrdiq2KfYrCDYpdmE2Ykg2YjZ
+          gtmI2K8g2KjYo9mI2YPYqtin2YYg2KPYudmE2Ykg2YjYqtit2YPZhSDYr9mC2YrZgi4g2YjZh9mG
+          2Kcg2KrYuNmH2LEg2YXZh9in2LHYqSDZhdmH2YbYr9iz2Yog2KfZhNmF2K3YsdmD2KfYqiDYp9mE
+          2K3Yr9mK2KvYqS4iLAogICJ0ZXJtcyI6IFsKICAgImVuZ2luZSBwaXN0b24iLAogICAiZW5naW5l
+          IGN5bGluZGVyIGhlYWQiLAogICAiZW5naW5lIHNwYXJrIHBsdWciLAogICAiY2FyIGVuZ2luZSBj
+          bG9zZSB1cCIKICBdCiB9Cl0K
+          B64_TOPICS
+          # Use the repository topics.json only if it is valid; otherwise use the embedded one.
+          if [ -f mpt_daily/topics.json ] && python3 -c "import json; d=json.load(open('mpt_daily/topics.json',encoding='utf-8')); assert isinstance(d,list) and d and all(t.get('id') and t.get('title') and t.get('script') and t.get('terms') for t in d)"; then
+            echo "Using valid mpt_daily/topics.json from the repository"
           else
-            echo "Using mpt_daily/topics.json from the repository"
+            if [ -f mpt_daily/topics.json ]; then
+              echo "::warning::mpt_daily/topics.json in the repository is invalid; using the embedded topics instead"
+            fi
+            cp "$RUNNER_TEMP/topics_embedded.json" mpt_daily/topics.json
           fi
+          python3 -c "import json; d=json.load(open('mpt_daily/topics.json',encoding='utf-8')); print('topics loaded:', len(d))"
           ls -l mpt_daily
 
       - name: Check required secrets
@@ -916,7 +917,7 @@ jobs:
       - name: Clone official MoneyPrinterTurbo
         run: |
           set -euo pipefail
-          # نحاول النسخة v1.3.9، وإن لم توجد نستخدم الفرع الرئيسي.
+          # Try tag v1.3.9; if it does not exist use the default branch.
           if ! git clone --depth 1 --branch v1.3.9 https://github.com/harry0703/MoneyPrinterTurbo.git "$RUNNER_TEMP/mpt"; then
             echo "Tag v1.3.9 not found; using default branch."
             rm -rf "$RUNNER_TEMP/mpt"
@@ -1038,7 +1039,7 @@ jobs:
           font_path = Path("resource/fonts/NotoSansArabic-Regular.ttf")
           if not font_path.is_file():
               raise SystemExit("Arabic font file is missing")
-          sample = "كيف يعمل صمام المحرك وما دوره في دخول الهواء وخروج العادم؟"
+          sample = "\u0643\u064a\u0641 \u064a\u0639\u0645\u0644 \u0635\u0645\u0627\u0645 \u0627\u0644\u0645\u062d\u0631\u0643 \u0648\u0645\u0627 \u062f\u0648\u0631\u0647 \u0641\u064a \u062f\u062e\u0648\u0644 \u0627\u0644\u0647\u0648\u0627\u0621 \u0648\u062e\u0631\u0648\u062c \u0627\u0644\u0639\u0627\u062f\u0645\u061f"
           rendered = get_display(arabic_reshaper.reshape(sample))
           font = ImageFont.truetype(str(font_path), 64)
           missing = font.getmask("\U0010ffff")
@@ -1103,6 +1104,7 @@ jobs:
       - name: Produce, check and upload the Short
         env:
           FORCE_TOPIC_ID: ${{ github.event.inputs.topic_id }}
+          CTA_TEXT: ${{ vars.CTA_TEXT }}
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
